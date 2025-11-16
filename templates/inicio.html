@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inicio</title>
+</head>
+<body>
+    <h1>Bienvenido, {{ request.user.username }}</h1>
+
+    <p>Estás logueado en el sistema Manager de Repuestos.</p>
+
+    <form action="{% url 'logout' %}" method="post" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit">Cerrar sesión</button>
+</form>
+</body>
+</html>

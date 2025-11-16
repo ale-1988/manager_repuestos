@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # django-extensions
+    'django_extensions',
     # apps del sistema
     'core',
     'usuarios',
@@ -46,6 +48,7 @@ INSTALLED_APPS = [
     'facturacion',
     'logistica',
     'reportes',
+    'sesiones',
 ]
 
 MIDDLEWARE = [
@@ -63,7 +66,7 @@ ROOT_URLCONF = "manager_repuestos.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / 'templates'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -79,8 +82,6 @@ TEMPLATES = [
 WSGI_APPLICATION = "manager_repuestos.wsgi.application"
 
 AUTH_USER_MODEL = "usuarios.Usuario"
-
-DATABASE_ROUTERS = ['manager_repuestos.db_routers.LegacyRouter']
 
 
 # Database
@@ -194,3 +195,7 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
+# Direccionamiento automatico
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'        # a dónde va luego de loguearse
+LOGOUT_REDIRECT_URL = '/login/' # a dónde va luego de desloguearse

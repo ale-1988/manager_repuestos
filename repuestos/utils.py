@@ -14,7 +14,7 @@ def get_lista_materiales_por_equipo(id_equi):
     """
 
     # 1) obtener las entradas listamat del equipo
-    items = Listamat.objects.filter(id_equi=id_equi, imprimir=1)
+    items = Listamat.objects.using("remota").filter(id_equi=id_equi, imprimir=1)
 
     # 2) obtener los materiales involucrados
     materiales_ids = [item.id_mate for item in items]
@@ -22,6 +22,7 @@ def get_lista_materiales_por_equipo(id_equi):
     materiales = (
         Material.objects
         .select_related("id_grup")        # grupos
+        .using("remota")
         .filter(id_mate__in=materiales_ids)
         .order_by("valor")                # orden alfabético
     )
