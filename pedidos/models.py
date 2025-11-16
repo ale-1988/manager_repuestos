@@ -1,6 +1,6 @@
 from django.db import models
-from usuarios.models import Usuario,Transportista
-from repuestos.models import Repuesto
+from usuarios.models import Usuario
+from repuestos.models import Material
 
 class Pedido(models.Model):
     ESTADOS = [
@@ -14,21 +14,26 @@ class Pedido(models.Model):
         ('ENTREGADO', 'Entregado'),
         ('CANCELADO', 'Cancelado'),
     ]
-
-    cod_cliente = models.ForeignKey(Usuario, on_delete=models.CASCADE,related_name="pedidos")
+    id = models.BigAutoField(primary_key=True)
+    cod_cliente = models.ForeignKey(Usuario, on_delete=models.CASCADE,related_name="pedidos_cliente")
     fecha = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='CREADO')
-    cod_transportista = models.ForeignKey(Transportista, on_delete=models.PROTECT,related_name="pedidos")
+    cod_transportista = models.ForeignKey(Usuario, on_delete=models.PROTECT,related_name="pedidos_transportista",null=True,blank=True)
     observaciones = models.TextField(blank=True)
     
     def __str__(self):
-        return f"Pedido {self.id} - {self.cliente.username}"
+        return f"Pedido {self.id} - {self.cod_cliente.username}"
     
 
 class DetallePedido(models.Model):
     cod_pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name="detalles")
-    cod_repuesto = models.ForeignKey(Repuesto, on_delete=models.CASCADE)
+    cod_repuesto = models.IntegerField() #id_mate
     cantidad = models.IntegerField(default=1)
 
     def __str__(self):
-        return f"{self.repuesto} x {self.cantidad}"
+        return f"{self.cod_repuesto.valor} x {self.cantidad}"
+    
+    @property
+    def material(self):
+        from repuestos.models import Material
+        return Material.objects.using("remota").get(pk=self.cod_repuesto)

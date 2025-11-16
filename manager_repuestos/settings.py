@@ -78,22 +78,76 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "manager_repuestos.wsgi.application"
 
+AUTH_USER_MODEL = "usuarios.Usuario"
+
+DATABASE_ROUTERS = ['manager_repuestos.db_routers.LegacyRouter']
+
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
+    # ==============================
+    # Base principal del proyecto
+    # ==============================
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'manager_repuestos',
-        'USER': 'ale',
+        'USER': 'root',
         'PASSWORD': 'Tvq114-e112906',
         'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
             'charset': 'utf8mb4',
-        },
-    }
+        }
+    },
+
+    # ==============================
+    # BD legacy rpg2
+    # (Seguimiento)
+    # ==============================
+    'rpg2': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'rpg2',
+        'USER': 'root',
+        'PASSWORD': 'Tvq114-e112906',
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {
+            'charset': 'latin1',       # lo habitual en sistemas viejos
+        }
+    },
+
+    # ==============================
+    # BD legacy clientes
+    # (datos)
+    # ==============================
+    'clientes': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'clientes',
+        'USER': 'root',
+        'PASSWORD': 'Tvq114-e112906',
+        'PORT': '3306',
+        'OPTIONS': {
+            'charset': 'utf8mb3',
+        }
+    },
+
+    # ==============================
+    # BD remota (pero en el MISMO servidor, jaja)
+    # (material, material2, grupos, equipos, listamat, etc.)
+    # ==============================
+    'remota': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'remota',       # ESTA ES LA BASE REMOTA
+        'USER': 'root',
+        'PASSWORD': 'Tvq114-e112906',
+        'HOST': 'localhost',     # MISMO servidor
+        'PORT': '3306',
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        }
+    },
 }
 
 
@@ -138,3 +192,5 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+

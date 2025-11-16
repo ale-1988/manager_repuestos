@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+
 class Usuario(AbstractUser):
     ROLES = [
         ('cliente', 'Cliente'),
@@ -24,3 +25,18 @@ class Usuario(AbstractUser):
 
     def __str__(self):
         return self.username
+    
+# ==============================
+# Usuario especializado
+# ==============================
+class Transportista(Usuario):
+    """Usuario especializado como transportista."""
+    activo = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Transportista"
+        verbose_name_plural = "Transportistas"
+
+    def __str__(self):
+        return f"{self.username} (Transportista)"
+    
