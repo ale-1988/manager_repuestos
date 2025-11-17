@@ -1,17 +1,23 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+<h1>Bienvenido {{ request.user.username }}</h1>
+<p>Sesión iniciada correctamente.</p>
+{% endblock %}
+<!-- <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Inicio</title>
 </head>
 <body>
-    <h1>Bienvenido, {{ request.user.username }}</h1>
+    <h1>Bienvenido</h1>
+    <p>Usuario logueado: {{ request.user.username }}</p>
 
-    <p>Estás logueado en el sistema Manager de Repuestos.</p>
-
-    <form action="{% url 'logout' %}" method="post" style="display:inline;">
-    {% csrf_token %}
-    <button type="submit">Cerrar sesión</button>
-</form>
+    <p><a href="/logout/">Cerrar sesión</a></p>
 </body>
-</html>
+</html> -->
+
+

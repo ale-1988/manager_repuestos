@@ -3,15 +3,30 @@ from django.contrib.auth.models import AbstractUser
 
 
 class Usuario(AbstractUser):
+    TIPO_DOC = [
+        ('DNI', 'DNI'),
+        ('CUIT', 'CUIT'),
+        ('PAS', 'Pasaporte'),
+        ('LE', 'Libreta de Enrolamiento'),
+        ('LC', 'Libreta Cívica'),
+    ]
     ROLES = [
-        ('cliente', 'Cliente'),
         ('operador', 'Operador'),
         ('despachante', 'Despachante'),
         ('transportista', 'Transportista'),
         ('gerente', 'Gerente'),
         ('admin', 'Administrador'),
     ]
-    rol = models.CharField(max_length=20, choices=ROLES, default='cliente')
+    nombre = models.CharField(max_length=50, null=True, blank=True)
+    apellido = models.CharField(max_length=50, null=True, blank=True)
+
+    tipo_documento = models.CharField(
+        max_length=10,
+        choices=TIPO_DOC,
+        default='DNI'
+    )
+    documento = models.CharField(max_length=20, null=True, blank=True)
+    rol = models.CharField(max_length=20, choices=ROLES, default='operador')
     telefono = models.CharField(max_length=30, null=True, blank=True)
     email=models.EmailField()
     razon_social = models.CharField(max_length=120, null=True, blank=True)

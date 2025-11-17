@@ -17,10 +17,20 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from sesiones.views import inicio
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    
-    path('', include('pedidos.urls')),
-    path('', include('sesiones.urls')),
+
+    # Inicio del sistema (barra superior)
+    path("", inicio, name="inicio"),
+
+    # Login 
+    path("", include("sesiones.urls")),
+
+    # ABM usuarios
+    path("usuarios/", include("usuarios.urls")),
+
+    # Módulo pedidos
+    path("pedidos/", include("pedidos.urls")),
 ]
