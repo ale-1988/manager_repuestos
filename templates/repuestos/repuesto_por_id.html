@@ -1,0 +1,11 @@
+<h2>Repuesto {{ mat.id_mate }}</h2>
+
+<p><b>Valor:</b> {{ mat.valor }}</p>
+<p><b>Descripción:</b> {{ mat.descripcio }}</p>
+<p><b>Stock total:</b> {{ mat.stock }}</p>
+
+<form method="POST">
+    {% csrf_token %}
+    <input type="number" name="cantidad" min="1" step="1" value="1">
+    <button type="submit">Agregar al pedido</button>
+</form>

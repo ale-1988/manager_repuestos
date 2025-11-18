@@ -1,0 +1,12 @@
+<h2>Seleccione el equipo</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    <select name="id_equi" required>
+        {% for eq in equipos %}
+            <option value="{{ eq.id_equi }}">{{ eq.id_equi }} - {{ eq.equipo }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Continuar</button>
+</form>

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Usuarios{% endblock %}
+
+{% block contenido %}
+<h1>Usuarios</h1>
+
+<p>
+    <a href="{% url 'usuarios_nuevo' %}" 
+       style="padding:6px 12px;background:#2c7;color:white;text-decoration:none;border-radius:4px;">
+       + Crear usuario
+    </a>
+</p>
+
+<table border="1" cellspacing="0" cellpadding="6">
+    <thead>
+        <tr style="background:#eee;">
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for u in usuarios %}
+        <tr>
+            <td>{{ u.id }}</td>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.rol }}</td>
+            <td>
+                <a href="{% url 'usuarios_editar' u.id %}">Editar</a> |
+                <a href="{% url 'usuarios_eliminar' u.id %}">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

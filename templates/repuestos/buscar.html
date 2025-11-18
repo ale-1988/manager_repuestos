@@ -1,0 +1,19 @@
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} mt-2">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<h2>Buscar repuesto o número de serie</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    <input type="text" name="numero" placeholder="Ingrese ID o número de serie" required>
+    <button type="submit">Buscar</button>
+</form>
+
+<hr>
+
+<a href="{% url 'repuestos:buscar_manual' %}">Búsqueda manual por texto o grupos</a>

@@ -31,6 +31,9 @@ urlpatterns = [
     # ABM usuarios
     path("usuarios/", include("usuarios.urls")),
 
+    # Modulo repuestos
+    path('repuestos/', include('repuestos.urls')),
+
     # Módulo pedidos
     path("pedidos/", include("pedidos.urls")),
 ]

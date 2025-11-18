@@ -1,0 +1,158 @@
+<style>
+    .obsoleto td {
+        background-color: #f8d7da !important;
+    }
+
+    tr.fila:hover td {
+        background-color: #e9ecef !important;
+    }
+
+    th.sortable {
+        cursor: pointer;
+        color: #0d6efd;
+    }
+
+    /* centrado para celdas */
+    .center {
+        text-align: center;
+    }
+</style>
+
+
+<h2>Búsqueda manual de repuestos</h2>
+
+<form method="GET" id="frm" style="margin-bottom: 20px;">
+
+    <label>Texto:</label>
+    <input type="text" name="texto" value="{{ texto }}"
+           oninput="this.form.submit()">
+
+    <label style="margin-left: 20px;">Grupo:</label>
+    <select name="grupo" onchange="this.form.submit()">
+        <option value="---">--- Todos ---</option>
+        {% for g in grupos %}
+            <option value="{{ g.GRUPO }}"
+                {% if g.GRUPO == grupo %}selected{% endif %}>
+                {{ g.GRUPO }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <label style="margin-left: 20px;">
+        <input type="checkbox" name="mostrar_obsoletos"
+               onchange="this.form.submit()"
+               {% if mostrar_obsoletos %}checked{% endif %}>
+        Mostrar obsoletos
+    </label>
+
+    <!-- parámetros ocultos para ordenar -->
+    <input type="hidden" id="orden" name="orden" value="{{ orden }}">
+    <input type="hidden" id="dir" name="dir" value="{{ direccion }}">
+
+</form>
+
+<hr>
+
+{% if materiales|length == 0 %}
+    {% if texto or grupo != '---' or mostrar_obsoletos or orden %}
+        <div class="alert alert-warning mt-3">
+            No existen materiales que coincidan con los filtros seleccionados.
+        </div>
+    {% endif %}
+{% endif %}
+
+
+{% if materiales %}
+    <h3>Resultados ({{ materiales|length }})</h3>
+
+    <table border="1" cellpadding="4" width="100%">
+        <thead>
+            <tr>
+
+                <th class="sortable center" onclick="ordenar('id_mate')">
+                    ID
+                    {% if orden == 'id_mate' %}
+                        {% if direccion == 'asc' %} ▲ {% else %} ▼ {% endif %}
+                    {% endif %}
+                </th>
+
+                <th class="sortable" onclick="ordenar('valor')">
+                    Valor
+                    {% if orden == 'valor' %}
+                        {% if direccion == 'asc' %} ▲ {% else %} ▼ {% endif %}
+                    {% endif %}
+                </th>
+
+                {% if grupo == '---' %}
+                <th class="sortable" onclick="ordenar('id_grup__GRUPO')">
+                    Grupo
+                    {% if orden == 'id_grup__GRUPO' %}
+                        {% if direccion == 'asc' %} ▲ {% else %} ▼ {% endif %}
+                    {% endif %}
+                </th>
+                {% endif %}
+
+                <th class="sortable center" onclick="ordenar('stock')">
+                    Stock
+                    {% if orden == 'stock' %}
+                        {% if direccion == 'asc' %} ▲ {% else %} ▼ {% endif %}
+                    {% endif %}
+                </th>
+
+                <th>Acción</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for mat in materiales %}
+        <tr class="fila {% if mat.material2.obsoleto %}obsoleto{% endif %}">
+            <td>{{ mat.id_mate }}</td>
+            <td>{{ mat.valor }}</td>
+
+            {% if grupo == '---' %}
+                <td>{{ mat.id_grup.GRUPO }}</td>
+            {% endif %}
+
+            <td class="center">{{ mat.stock|floatformat:0 }}</td>
+
+            <td>
+                <a href="{% url 'repuestos:repuesto_por_id' mat.id_mate %}">
+                    Ver
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+
+<script>
+function ordenar(campo) {
+    let f = document.getElementById("frm");
+
+    let ordenActual = document.getElementById("orden").value;
+    let dirActual = document.getElementById("dir").value;
+
+    if (ordenActual === campo) {
+        // invertir ASC ↔ DESC
+        document.getElementById("dir").value = (dirActual === "asc") ? "desc" : "asc";
+    } else {
+        document.getElementById("orden").value = campo;
+        document.getElementById("dir").value = "asc";
+    }
+
+    f.submit();
+}
+</script>
+
+<script>
+window.onload = function() {
+    let t = document.getElementById("texto");
+    if (t) {
+        t.focus();
+        let val = t.value;
+        t.value = "";
+        t.value = val;
+    }
+};
+</script>

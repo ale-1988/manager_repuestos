@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+    <h2>Iniciar sesión</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        <label>Usuario:</label>
+        <input type="text" name="username"><br>
+
+        <label>Contraseña:</label>
+        <input type="password" name="password"><br>
+
+        <button type="submit">Ingresar</button>
+    </form>
+
+    {% if messages %}
+        <ul>
+        {% for m in messages %}
+            <li style="color:red;">{{ m }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
+

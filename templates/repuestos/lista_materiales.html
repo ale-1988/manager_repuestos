@@ -1,0 +1,35 @@
+<h2>Materiales del equipo: {{ equipo.equipo }} (ID {{ id_equi }})</h2>
+
+{% if error %}
+<div style="color:red; font-weight:bold;">
+    {{ error }}
+</div>
+{% endif %}
+
+{% if materiales %}
+<table border="1" cellpadding="4" width="100%">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Valor</th>
+            <th>Grupo</th>
+            <th>Cantidad</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for m in materiales %}
+        <tr>
+            <td>{{ m.id_mate }}</td>
+            <td>{{ m.valor }}</td>
+            <td>{{ m.grupo }}</td>
+            <td>{{ m.cantidad }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="alert alert-warning">
+    No se encontraron materiales para este equipo.
+</div>
+{% endif %}

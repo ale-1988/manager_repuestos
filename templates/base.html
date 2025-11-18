@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Manager de Repuestos{% endblock %}</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+        }
+
+        /* Barra superior */
+        .navbar {
+            background: #202932;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .navbar .right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Área de contenido */
+        .contenido {
+            padding: 20px;
+        }
+    </style>
+
+</head>
+<body>
+    {% if request.user.is_authenticated %}
+    <div class="navbar">
+
+        <div class="logo">
+            Manager de Repuestos
+        </div>
+
+        <div class="right">
+            <a href="/">Inicio</a>
+            <a href="#">Pedidos</a>
+            <a href="#">Logística</a>
+            <a href="#">Repuestos</a>
+            {% if request.user.rol == 'admin' or request.user.rol == 'gerente' %}
+                <a href="{% url 'usuarios_listar' %}">Usuarios</a>
+            {% endif %}
+
+            <!-- Usuario logueado -->
+            <span>Hola, {{ request.user.username }}</span>
+
+            <!-- Logout por POST -->
+            <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" 
+                        style="background:none;border:none;color:white;cursor:pointer;">
+                    Cerrar sesión
+                </button>
+            </form>
+        </div>
+
+    </div>
+    {% endif %}
+    <div class="contenido">
+        {% block contenido %}
+        {% endblock %}
+    </div>
+
+</body>
+</html>

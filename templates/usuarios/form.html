@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+
+<h1>{{ titulo }}</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <table>
+        {% for field in form %}
+            <tr class="
+                {% if field.name in 'telefono razon_social cuit calle numero localidad provincia pais' %}
+                    campo-transportista
+                {% endif %}
+            ">
+                <th>{{ field.label_tag }}</th>
+                <td>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div style="color:red;">{{ field.errors }}</div>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <br>
+
+    <button type="submit" 
+            style="padding:6px 12px;background:#247;color:white;border:none;border-radius:4px;">
+        {{ accion }}
+    </button>
+
+    <a href="{% url 'usuarios_listar' %}" 
+       style="margin-left:10px;">Cancelar</a>
+</form>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const campoRol = document.querySelector("#id_rol");
+    const camposTransportista = document.querySelectorAll(".campo-transportista");
+
+    function actualizarVisibilidadCampos() {
+        const esTransportista = campoRol.value === "transportista";
+
+        camposTransportista.forEach(function(tr) {
+            tr.style.display = esTransportista ? "" : "none";
+        });
+    }
+
+    campoRol.addEventListener("change", actualizarVisibilidadCampos);
+
+    actualizarVisibilidadCampos();
+});
+</script>
+
+{% endblock %}
