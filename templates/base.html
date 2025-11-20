@@ -39,7 +39,49 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            position: relative;
         }
+
+        /* ▼▼▼ MENU DESPLEGABLE ▼▼▼ */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-btn {
+            cursor: pointer;
+            color: white;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            background-color: #2d3947;
+            min-width: 150px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            padding: 5px 0;
+            border-radius: 3px;
+            top: 100%;
+            left: 0;
+            z-index: 9999;
+        }
+
+        .dropdown-menu a {
+            color: white;
+            padding: 8px 15px;
+            display: block;
+            text-decoration: none;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: #3c4a5a;
+        }
+
+        /* Clase que aplicamos desde JS */
+        .dropdown.open .dropdown-menu {
+            display: block;
+        }
+
+        /* ▲▲▲ FIN MENU DESPLEGABLE ▲▲▲ */
 
         /* Área de contenido */
         .contenido {
@@ -57,10 +99,23 @@
         </div>
 
         <div class="right">
+
             <a href="/">Inicio</a>
-            <a href="#">Pedidos</a>
+
+            <!-- ▼ MENU PEDIDOS ▼ -->
+            <div class="dropdown" id="menu-pedidos">
+                <span class="dropdown-btn">Pedidos ▾</span>
+                <div class="dropdown-menu">
+                    <a href="{% url 'pedidos:nuevo_pedido' %}">Nuevo</a>
+                    <a href="{% url 'pedidos:listar_pedidos' %}">Listar</a>
+                </div>
+            </div>
+            <!-- ▲ MENU PEDIDOS ▲ -->
+
             <a href="#">Logística</a>
+            
             <a href="#">Repuestos</a>
+
             {% if request.user.rol == 'admin' or request.user.rol == 'gerente' %}
                 <a href="{% url 'usuarios_listar' %}">Usuarios</a>
             {% endif %}
@@ -68,7 +123,7 @@
             <!-- Usuario logueado -->
             <span>Hola, {{ request.user.username }}</span>
 
-            <!-- Logout por POST -->
+            <!-- Logout -->
             <form action="{% url 'logout' %}" method="post" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" 
@@ -80,10 +135,37 @@
 
     </div>
     {% endif %}
+
     <div class="contenido">
         {% block contenido %}
         {% endblock %}
     </div>
+
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+        const dropdown = document.getElementById("menu-pedidos");
+        const btn = dropdown.querySelector(".dropdown-btn");
+
+        // Abrir/cerrar con clic
+        btn.addEventListener("click", function(event) {
+            event.stopPropagation();   // evita que el clic cierre instantáneamente
+            dropdown.classList.toggle("open");
+        });
+
+        // Cerrar si clickeamos fuera
+        document.addEventListener("click", function() {
+            dropdown.classList.remove("open");
+        });
+
+        // Evitar que clics internos cierren el menú
+        dropdown.querySelector(".dropdown-menu").addEventListener("click", function(event) {
+            event.stopPropagation();
+        });
+
+    });
+    </script>
 
 </body>
 </html>

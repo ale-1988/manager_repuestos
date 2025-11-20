@@ -35,5 +35,9 @@ urlpatterns = [
     path('repuestos/', include('repuestos.urls')),
 
     # Módulo pedidos
-    path("pedidos/", include("pedidos.urls")),
+    path("pedidos/", include(("pedidos.urls", 'pedidos'), namespace='pedidos')),
+    
+    #Modulo clientes
+    path("clientes/", include("clientes.urls")),
+
 ]

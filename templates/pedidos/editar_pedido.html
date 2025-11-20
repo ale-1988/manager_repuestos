@@ -1,0 +1,147 @@
+<h2>Editar Pedido #{{ pedido.id }}</h2>
+
+<p><strong>Estado:</strong> {{ pedido.estado }}</p>
+<p><strong>Fecha:</strong> {{ pedido.fecha }}</p>
+
+<hr>
+
+<!-- ================== CLIENTE ================== -->
+<h3>Cliente</h3>
+
+<div style="max-width: 500px;">
+
+    <!-- BUSCADOR -->
+    <label>Buscar cliente:</label>
+    <input type="text" id="buscar_cliente" class="form-control"
+           placeholder="Escriba nombre o parte del nombre..." autocomplete="off">
+
+    <!-- LISTA DE RESULTADOS -->
+    <ul id="lista_clientes"
+        style="border:1px solid #aaa; margin-top:5px; display:none;
+               list-style:none; padding:0; max-height:200px; overflow-y:auto;">
+    </ul>
+
+    <!-- FORM PARA ASIGNAR CLIENTE -->
+    <form method="POST" id="form_cliente">
+        {% csrf_token %}
+        <input type="hidden" name="id_cliente" id="id_cliente">
+        <button type="submit" name="asignar_cliente"
+                class="btn btn-primary" style="margin-top:10px;">
+            Asignar cliente
+        </button>
+    </form>
+
+    <!-- INFO DEL CLIENTE -->
+    {% if pedido.cliente %}
+        <p><strong>Nombre:</strong> {{ pedido.cliente.nombre }}</p>
+        <p><strong>Domicilio:</strong> {{ pedido.cliente.domicilio }}</p>
+        <p><strong>CUIT:</strong> {{ pedido.cliente.cuit }}</p>
+    {% else %}
+        <p style="color:red;">Cliente no asignado</p>
+    {% endif %}
+</div>
+
+<hr>
+
+<!-- ================== ÍTEMS ================== -->
+<h3>Ítems del pedido</h3>
+
+<table border="1" cellpadding="4">
+    <tr>
+        <th>ID</th>
+        <th>Material</th>
+        <th>Cantidad</th>
+        <th>Acción</th>
+    </tr>
+
+    {% for item in detalles %}
+    <tr>
+        <td>{{ item.cod_repuesto }}</td>
+        <td>{{ item.material.valor }}</td>
+        <td>{{ item.cantidad }}</td>
+        <td>
+            <form method="POST" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" name="eliminar_item" value="{{ item.id }}">
+                    Eliminar
+                </button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<br>
+
+<a href="#">+ Agregar otro ítem</a> <!-- luego conectamos a repuestos -->
+
+<hr>
+
+<!-- ================== BOTONES DEL PEDIDO ================== -->
+<form method="POST" style="margin-top: 20px;">
+    {% csrf_token %}
+    
+    <button type="submit" name="guardar_pedido">Guardar pedido</button>
+
+    {% if pedido.estado == "BORRADOR" %}
+        <button type="submit" name="cancelar_pedido"
+                onclick="return confirm('¿Seguro que desea cancelar este pedido?')">
+            Cancelar pedido
+        </button>
+    {% endif %}
+</form>
+
+<!-- ================== AUTOCOMPLETE JS ================== -->
+<script>
+const input = document.getElementById("buscar_cliente");
+const lista = document.getElementById("lista_clientes");
+const id_cliente = document.getElementById("id_cliente");
+
+// URL generada por Django (evita errores de ruta)
+const URL_BUSCAR_CLIENTES = "{% url 'clientes:buscar_ajax' %}";
+
+if (input) {
+    input.addEventListener("input", () => {
+        const q = input.value.trim();
+        if (!q) {
+            lista.style.display = "none";
+            lista.innerHTML = "";
+            return;
+        }
+
+        fetch(URL_BUSCAR_CLIENTES + "?q=" + encodeURIComponent(q))
+            .then(res => res.json())
+            .then(data => {
+                lista.innerHTML = "";
+                if (!Array.isArray(data) || data.length === 0) {
+                    lista.style.display = "none";
+                    return;
+                }
+
+                data.forEach(cli => {
+                    const li = document.createElement("li");
+                    li.style.padding = "6px";
+                    li.style.cursor = "pointer";
+                    li.style.borderBottom = "1px solid #ddd";
+
+                    li.innerHTML = `<strong>${cli.nombre}</strong><br>
+                                    <small>${cli.cuit} — ${cli.ciudad}</small>`;
+
+                    li.onclick = () => {
+                        id_cliente.value = cli.id;
+                        input.value = cli.nombre;
+                        lista.style.display = "none";
+                    };
+
+                    lista.appendChild(li);
+                });
+
+                lista.style.display = "block";
+            })
+            .catch(err => {
+                console.error("Error en autocomplete de clientes:", err);
+                lista.style.display = "none";
+                lista.innerHTML = "";
+            });
+}
+</script>

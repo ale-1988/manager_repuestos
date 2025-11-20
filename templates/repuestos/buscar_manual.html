@@ -21,14 +21,15 @@
 
 <h2>Búsqueda manual de repuestos</h2>
 
-<form method="GET" id="frm" style="margin-bottom: 20px;">
+<!-- FORMULARIO (NO SE REEMPLAZA, NO PIERDE FOCO) -->
+<form method="GET" id="frm" style="margin-bottom: 20px;" onsubmit="return false;">
 
     <label>Texto:</label>
-    <input type="text" name="texto" value="{{ texto }}"
-           oninput="this.form.submit()">
+    <input type="text" name="texto" id="texto" value="{{ texto }}"
+           oninput="actualizarBusqueda()" autocomplete="off">
 
     <label style="margin-left: 20px;">Grupo:</label>
-    <select name="grupo" onchange="this.form.submit()">
+    <select name="grupo" id="grupo" onchange="actualizarBusqueda()">
         <option value="---">--- Todos ---</option>
         {% for g in grupos %}
             <option value="{{ g.GRUPO }}"
@@ -39,8 +40,8 @@
     </select>
 
     <label style="margin-left: 20px;">
-        <input type="checkbox" name="mostrar_obsoletos"
-               onchange="this.form.submit()"
+        <input type="checkbox" name="mostrar_obsoletos" id="mostrar_obsoletos"
+               onchange="actualizarBusqueda()"
                {% if mostrar_obsoletos %}checked{% endif %}>
         Mostrar obsoletos
     </label>
@@ -53,106 +54,130 @@
 
 <hr>
 
-{% if materiales|length == 0 %}
-    {% if texto or grupo != '---' or mostrar_obsoletos or orden %}
-        <div class="alert alert-warning mt-3">
-            No existen materiales que coincidan con los filtros seleccionados.
-        </div>
-    {% endif %}
-{% endif %}
+<!-- 🔥 SOLO ESTE BLOQUE SE REEMPLAZA DINÁMICAMENTE -->
+<div id="resultados">
+    {% if materiales|length == 0 %}
+        {% if texto or grupo != '---' or mostrar_obsoletos or orden %}
+            <div class="alert alert-warning mt-3">
+                No existen materiales que coincidan con los filtros seleccionados.
+            </div>
+        {% endif %}
+    {% else %}
+        <h3>Resultados ({{ materiales|length }})</h3>
 
+        <table border="1" cellpadding="4" width="100%">
+            <thead>
+                <tr>
 
-{% if materiales %}
-    <h3>Resultados ({{ materiales|length }})</h3>
+                    <th class="sortable center" onclick="ordenar('id_mate')">
+                        ID
+                        {% if orden == 'id_mate' %}
+                            {% if direccion == 'asc' %} ▲ {% else %} ▼ {% endif %}
+                        {% endif %}
+                    </th>
 
-    <table border="1" cellpadding="4" width="100%">
-        <thead>
-            <tr>
+                    <th class="sortable" onclick="ordenar('valor')">
+                        Valor
+                        {% if orden == 'valor' %}
+                            {% if direccion == 'asc' %} ▲ {% else %} ▼ {% endif %}
+                        {% endif %}
+                    </th>
 
-                <th class="sortable center" onclick="ordenar('id_mate')">
-                    ID
-                    {% if orden == 'id_mate' %}
-                        {% if direccion == 'asc' %} ▲ {% else %} ▼ {% endif %}
+                    {% if grupo == '---' %}
+                    <th class="sortable" onclick="ordenar('id_grup__GRUPO')">
+                        Grupo
+                        {% if orden == 'id_grup__GRUPO' %}
+                            {% if direccion == 'asc' %} ▲ {% else %} ▼ {% endif %}
+                        {% endif %}
+                    </th>
                     {% endif %}
-                </th>
 
-                <th class="sortable" onclick="ordenar('valor')">
-                    Valor
-                    {% if orden == 'valor' %}
-                        {% if direccion == 'asc' %} ▲ {% else %} ▼ {% endif %}
-                    {% endif %}
-                </th>
+                    <th class="sortable center" onclick="ordenar('stock')">
+                        Stock
+                        {% if orden == 'stock' %}
+                            {% if direccion == 'asc' %} ▲ {% else %} ▼ {% endif %}
+                        {% endif %}
+                    </th>
+
+                    <th>Acción</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for mat in materiales %}
+            <tr class="fila {% if mat.material2.obsoleto %}obsoleto{% endif %}">
+                <td>{{ mat.id_mate }}</td>
+                <td>{{ mat.valor }}</td>
 
                 {% if grupo == '---' %}
-                <th class="sortable" onclick="ordenar('id_grup__GRUPO')">
-                    Grupo
-                    {% if orden == 'id_grup__GRUPO' %}
-                        {% if direccion == 'asc' %} ▲ {% else %} ▼ {% endif %}
-                    {% endif %}
-                </th>
+                    <td>{{ mat.id_grup.GRUPO }}</td>
                 {% endif %}
 
-                <th class="sortable center" onclick="ordenar('stock')">
-                    Stock
-                    {% if orden == 'stock' %}
-                        {% if direccion == 'asc' %} ▲ {% else %} ▼ {% endif %}
-                    {% endif %}
-                </th>
+                <td class="center">{{ mat.stock|floatformat:0 }}</td>
 
-                <th>Acción</th>
+                <td>
+                    <a href="{% url 'repuestos:repuesto_por_id' mat.id_mate %}">
+                        Ver
+                    </a>
+                </td>
             </tr>
-        </thead>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
 
-        <tbody>
-        {% for mat in materiales %}
-        <tr class="fila {% if mat.material2.obsoleto %}obsoleto{% endif %}">
-            <td>{{ mat.id_mate }}</td>
-            <td>{{ mat.valor }}</td>
 
-            {% if grupo == '---' %}
-                <td>{{ mat.id_grup.GRUPO }}</td>
-            {% endif %}
-
-            <td class="center">{{ mat.stock|floatformat:0 }}</td>
-
-            <td>
-                <a href="{% url 'repuestos:repuesto_por_id' mat.id_mate %}">
-                    Ver
-                </a>
-            </td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-{% endif %}
-
+<!-- ========================= -->
+<!-- JS: ORDENAR COLUMNAS      -->
+<!-- ========================= -->
 <script>
 function ordenar(campo) {
-    let f = document.getElementById("frm");
+    document.getElementById("orden").value = campo;
 
-    let ordenActual = document.getElementById("orden").value;
     let dirActual = document.getElementById("dir").value;
+    let ordenActual = "{{ orden }}";
 
     if (ordenActual === campo) {
-        // invertir ASC ↔ DESC
-        document.getElementById("dir").value = (dirActual === "asc") ? "desc" : "asc";
+        document.getElementById("dir").value =
+            (dirActual === "asc") ? "desc" : "asc";
     } else {
-        document.getElementById("orden").value = campo;
         document.getElementById("dir").value = "asc";
     }
 
-    f.submit();
+    actualizarBusqueda();
 }
 </script>
 
+
+<!-- ========================= -->
+<!-- JS: ACTUALIZACIÓN AJAX    -->
+<!-- ========================= -->
 <script>
-window.onload = function() {
-    let t = document.getElementById("texto");
-    if (t) {
-        t.focus();
-        let val = t.value;
-        t.value = "";
-        t.value = val;
-    }
-};
+function actualizarBusqueda() {
+
+    const texto = document.getElementById("texto").value;
+    const grupo = document.getElementById("grupo").value;
+    const mostrar = document.getElementById("mostrar_obsoletos").checked ? "on" : "";
+    const orden = document.getElementById("orden").value;
+    const dir = document.getElementById("dir").value;
+
+    const params = `?texto=${encodeURIComponent(texto)}&grupo=${encodeURIComponent(grupo)}&mostrar_obsoletos=${mostrar}&orden=${orden}&dir=${dir}`;
+
+    fetch(params)
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, "text/html");
+
+            // EXTRAER SOLO #resultados de la respuesta
+            const nuevoContenido = doc.querySelector("#resultados").innerHTML;
+
+            document.querySelector("#resultados").innerHTML = nuevoContenido;
+
+            // 🔥 Mantener el foco siempre
+            const t = document.getElementById("texto");
+            if (t) t.focus();
+        });
+}
 </script>

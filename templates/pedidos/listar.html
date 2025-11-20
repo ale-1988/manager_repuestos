@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block contenido %}
+
+<h2>Listado de pedidos</h2>
+
+<table border="1" cellpadding="4">
+    <tr>
+        <th>ID</th>
+        <th>Cliente</th>
+        <th>Estado</th>
+        <th>Fecha</th>
+        <th>Acción</th>
+    </tr>
+
+    {% for p in pedidos %}
+    <tr>
+        <td>{{ p.id }}</td>
+        <td>
+            {% if p.cod_cliente %}
+                {{ p.cod_cliente.nombre }}
+            {% else %}
+                (sin cliente)
+            {% endif %}
+        </td>
+        <td>{{ p.estado }}</td>
+        <td>{{ p.fecha }}</td>
+        <td>
+            <a href="{% url 'pedidos:editar_pedido' p.id %}">Editar</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
