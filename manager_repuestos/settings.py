@@ -128,9 +128,9 @@ DATABASES = {
     # BD legacy clientes
     # (datos)
     # ==============================
-    'clientes': {
+    'cliente': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'clientes',
+        'NAME': 'cliente',
         'USER': 'root',
         'PASSWORD': 'Tvq114-e112906',
         'PORT': '3306',
@@ -182,11 +182,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "America/Argentina/Buenos_Aires"
+USE_TZ = True
 
 USE_I18N = True
 
-USE_TZ = True
+
 
 
 # Static files (CSS, JavaScript, Images)

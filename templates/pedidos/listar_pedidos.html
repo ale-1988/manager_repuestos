@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load tz %}
+{% block contenido %}
+
+
+
+<h2>Listado de Pedidos</h2>
+
+{% if pedidos %}
+<table border="1" cellpadding="6" cellspacing="0" width="100%"
+       style="border-collapse: collapse;">
+
+    <thead style="background:#f0f0f0; font-weight:bold;">
+        <tr>
+            <th style="text-align:center; width:60px;">ID</th>
+            <th style="text-align:left;">Cliente</th>
+            <th style="text-align:center; width:120px;">Estado</th>
+            <th style="text-align:center; width:150px;">Fecha</th>
+            <th style="text-align:center; width:100px;">Acción</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for p in pedidos %}
+        <tr>
+            <!-- ID centrado -->
+            <td style="text-align:center;">{{ p.id }}</td>
+
+            <!-- Cliente alineado a la izquierda -->
+            <td style="text-align:left;">
+                {% if p.cliente %}
+                    {{ p.cliente.nombre }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+
+            <!-- Estado centrado -->
+            <td style="text-align:center;">{{ p.estado }}</td>
+
+            <!-- Fecha centrada -->
+            <td style="text-align:center;">{{ p.fecha|date:"d/m/Y H:i" }}</td>
+
+            <!-- Acción centrada -->
+            <td style="text-align:center;">
+                <a href="{% url 'pedidos:editar_pedido' p.id %}">Editar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+
+</table>
+
+{% else %}
+<p>No existen pedidos registrados.</p>
+{% endif %}
+
+{% endblock %}
