@@ -20,5 +20,11 @@ urlpatterns = [
     #Listar pedidos
     path("listar/", views.listar_pedidos, name="listar_pedidos"),
 
+    #Agregr item
+    path("agregar-item/<int:pedido_id>/<int:id_mate>/",
+     views.agregar_item,
+     name="agregar_item"),
+
+    path("agregar-items-desde-modal/", views.agregar_items_desde_modal, name="agregar_items_desde_modal"),
 
 ]

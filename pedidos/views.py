@@ -169,3 +169,50 @@ def asignar_cliente_directo(request, id_pedido, id_cliente):
 def listar_pedidos(request):
     pedidos = Pedido.objects.all().order_by("-fecha")
     return render(request, "pedidos/listar_pedidos.html", {"pedidos": pedidos})
+
+
+def agregar_item(request, pedido_id, id_mate):
+    pedido = get_object_or_404(Pedido, pk=pedido_id)
+
+    # Cantidad fija por ahora
+    cantidad = 1
+
+    DetallePedido.objects.create(
+        cod_pedido=pedido,
+        cod_repuesto=id_mate,
+        cantidad=cantidad
+    )
+
+    messages.success(request, "Ítem agregado correctamente.")
+    return redirect("pedidos:editar_pedido", id_pedido=pedido_id)
+
+
+
+
+def agregar_items_desde_modal(request):
+    if request.method != "POST":
+        return redirect("/")
+
+    pedido_id = request.POST.get("pedido_id")
+    pedido = Pedido.objects.get(pk=pedido_id)
+
+    # Procesar cantidades enviadas por el formulario
+    for key, value in request.POST.items():
+        if key.startswith("cantidad_"):
+            id_mate = int(key.replace("cantidad_", ""))
+            try:
+                cantidad = float(value)
+            except:
+                cantidad = 0
+
+            if cantidad > 0:
+                DetallePedido.objects.create(
+                    cod_pedido=pedido,
+                    cod_repuesto=id_mate,
+                    cantidad=cantidad,
+                )
+
+    # Si enviaron número de serie, lo podés registrar en auditoría más adelante
+    # numero_serie = request.POST.get("numero_serie")
+
+    return redirect("pedidos:editar_pedido", pedido_id)

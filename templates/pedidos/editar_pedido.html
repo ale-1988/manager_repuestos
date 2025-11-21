@@ -52,13 +52,6 @@
 <!-- CLIENTE ACTUAL -->
 <hr>
 <div style="background:#f7f7f7; padding:10px; border:1px solid #ccc; width:380px;">
-    <!-- {% if pedido.cliente %}
-        <p><strong>Cliente asignado:</strong> {{ pedido.cliente.nombre }}</p>
-        <p><strong>Domicilio:</strong> {{ pedido.cliente.domicilio }}</p>
-        <p><strong>CUIT:</strong> {{ pedido.cliente.cuit }}</p>
-    {% else %}
-        <p style="color:red; font-weight:bold;">Cliente no asignado</p>
-    {% endif %} -->
 
     {% if datos_cliente %}
         <h4>Datos del cliente</h4>
@@ -115,8 +108,10 @@
 
 <br>
 
-<!-- (Más adelante conectamos esta opción) -->
-<a href="#">+ Agregar otro ítem</a>
+<!-- BOTÓN PARA ABRIR EL MODAL -->
+<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalRepuestos">
+    Agregar ítem
+</button>
 
 <hr>
 
@@ -133,5 +128,41 @@
     {% endif %}
 </form>
 
+<!-- ===================================================== -->
+<!-- MODAL (ÚNICO Y CORRECTO)                              -->
+<!-- ===================================================== -->
+
+<div class="modal fade" id="modalRepuestos" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Agregar ítem al pedido</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body" id="contenedorModalRepuestos">
+        Cargando buscador de repuestos...
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("modalRepuestos");
+
+    modal.addEventListener("show.bs.modal", () => {
+        fetch("/repuestos/buscar-modal/?pedido={{ pedido.id }}")
+            .then(r => r.text())
+            .then(html => {
+                document.getElementById("contenedorModalRepuestos").innerHTML = html;
+            });
+    });
+});
+</script>
+
 {% endblock %}
+
 

@@ -24,5 +24,8 @@ urlpatterns = [
 
     # Búsqueda manual por filtros (texto / grupos)
     path("buscar-manual/", views.buscar_manual, name="buscar_manual"),
+    
+    # Super busqueda modal
+    path("buscar-modal/", views.buscar_modal, name="buscar_modal"),
 
 ]

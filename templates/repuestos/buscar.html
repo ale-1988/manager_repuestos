@@ -1,19 +1,79 @@
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} mt-2">
-            {{ message }}
-        </div>
-    {% endfor %}
-{% endif %}
+{% load tz %}
 
 <h2>Buscar repuesto o número de serie</h2>
 
-<form method="POST">
+<!-- FORMULARIO -->
+<!-- <form method="POST" style="margin-bottom: 15px;">
     {% csrf_token %}
-    <input type="text" name="numero" placeholder="Ingrese ID o número de serie" required>
+    <input type="text" name="numero" placeholder="Ingrese ID o número de serie" value="{{ request.POST.numero }}">
+    <button type="submit">Buscar</button>
+</form> -->
+<form method="POST" action="?modal=1&pedido={{ request.GET.pedido }}">
+    {% csrf_token %}
+    <input type="text" name="numero" placeholder="Ingrese ID o número de serie" value="{{ request.POST.numero }}" required>
     <button type="submit">Buscar</button>
 </form>
 
+<!-- ENLACE AL BUSCADOR MANUAL (solo fuera del modal) -->
+{% if not request.GET.modal %}
+    <p>
+        <a href="{% url 'repuestos:buscar_manual' %}">
+            Búsqueda manual por texto o grupos
+        </a>
+    </p>
+{% endif %}
+
 <hr>
 
-<a href="{% url 'repuestos:buscar_manual' %}">Búsqueda manual por texto o grupos</a>
+{% if materiales %}
+<h3>Resultados</h3>
+
+<table border="1" cellpadding="6" cellspacing="0" width="100%" style="border-collapse: collapse;">
+    <thead style="background:#f0f0f0;">
+        <tr>
+            <th style="text-align:center; width:80px;">ID</th>
+            <th style="text-align:left;">Valor</th>
+            <th style="text-align:left;">Grupo</th>
+            <th style="text-align:center; width:120px;">Acción</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for mat in materiales %}
+        <tr>
+            <td style="text-align:center;">{{ mat.id_mate }}</td>
+            <td style="text-align:left;">{{ mat.valor }}</td>
+            <td style="text-align:left;">
+                {% if mat.id_grup and mat.id_grup.GRUPO %}
+                    {{ mat.id_grup.GRUPO }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+
+            <td style="text-align:center;">
+
+                {% if request.GET.modal %}
+                    <!-- MODO MODAL → AGREGAR ITEM AL PEDIDO -->
+                    <a class="btn btn-success btn-sm"
+                       href="{% url 'pedidos:agregar_item' pedido_id=request.GET.pedido id_mate=mat.id_mate %}">
+                        Agregar
+                    </a>
+
+                {% else %}
+                    <!-- MODO NORMAL → VER REPUESTO -->
+                    <a class="btn btn-primary btn-sm"
+                       href="{% url 'repuestos:repuesto_por_id' mat.id_mate %}">
+                        Ver
+                    </a>
+                {% endif %}
+
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% elif request.method == "POST" %}
+    <p style="color:red;">No se encontraron repuestos para ese criterio.</p>
+{% endif %}

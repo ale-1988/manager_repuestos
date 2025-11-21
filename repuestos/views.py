@@ -4,8 +4,7 @@ from .models import Material, Material2, Equipos, Listamat, Seguimiento, Grupos
 from repuestos.utils import get_materiales_por_equipo
 from pedidos.models import Pedido, DetallePedido
 from django.contrib import messages
-from collections import defaultdict
-from collections import OrderedDict
+from collections import defaultdict, OrderedDict
 
 # ============================================================
 #   BUSCAR (entrada principal)
@@ -206,3 +205,88 @@ def buscar_manual(request):
         "orden": orden,
         "direccion": direccion,
     })
+
+
+def buscar_modal(request):
+    """
+    Vista del modal con tabs:
+    - modo id_ns: buscar ID (<30000) o NS (>30000)
+    - modo materiales: buscar en la tabla material
+    - modo equipos: buscar equipos por texto
+    """
+    modo = request.POST.get("modo")
+    pedido_id = request.GET.get("pedido")
+
+    materiales = None
+    equipos = None
+    lista_equipo = None
+    numero_serie = None
+    equipo_codigo = None
+
+    # TAB 1 — ID o Número de Serie
+    if modo == "id_ns":
+        numero = request.POST.get("numero", "").strip()
+
+        if numero.isdigit():  
+            num = int(numero)
+
+            # ID de material
+            if num < 30000:
+                materiales = Material.objects.using("remota").filter(id_mate=num)
+
+            # NS → buscar en seguimiento
+            else:
+                seg = Seguimiento.objects.using("rpg2").filter(seg_numero_serie=numero).first()
+                if seg:
+                    equipo_codigo = seg.equi_codigo
+                    numero_serie = numero
+                    lista_equipo = get_lista_materiales_por_equipo(equipo_codigo)
+                else:
+                    materiales = []  # NS no encontrado
+
+        else:
+            materiales = []
+
+    # TAB 2 — Buscar materiales por texto
+    elif modo == "materiales":
+        texto = request.POST.get("texto_mat", "")
+        mostrar_obsoletos = request.POST.get("mostrar_obsoletos") == "on"
+
+        if texto:
+            qs = Material.objects.using("remota").select_related("id_grup")
+            qs = qs.filter(
+                Q(valor__icontains=texto) |
+                Q(descripcio__icontains=texto)
+            )
+
+            if not mostrar_obsoletos:
+                qs = qs.filter(material2__obsoleto=0)
+
+            materiales = qs.order_by("valor")[:20]
+
+    # TAB 3 — Buscar equipos
+    elif modo == "equipos":
+        texto = request.POST.get("texto_eq", "")
+        if texto:
+            equipos = (
+                Equipos.objects.using("remota")
+                .filter(equipo__icontains=texto)
+                .order_by("equipo")[:20]
+            )
+
+    return render(
+        request,
+        "repuestos/modal_buscar_repuesto.html",
+        {
+            "modo": modo,
+            "pedido_id": pedido_id,
+            "materiales": materiales,
+            "equipos": equipos,
+            "lista_equipo": lista_equipo,
+            "numero_serie": numero_serie,
+            "equipo_codigo": equipo_codigo,
+        },
+    )
+
+
+    
