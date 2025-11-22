@@ -1,23 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Inicio{% endblock %}
+{% block contenido %}
+<h1>Bienvenido</h1>
 
-{% block content %}
-<h1>Bienvenido {{ request.user.username }}</h1>
-<p>Sesión iniciada correctamente.</p>
+<p>Usuario logueado: {{ request.user.username }}</p>
+
+<p><a href="{% url 'sesiones:logout' %}">Cerrar sesión</a></p>
 {% endblock %}
-<!-- <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Inicio</title>
-</head>
-<body>
-    <h1>Bienvenido</h1>
-    <p>Usuario logueado: {{ request.user.username }}</p>
-
-    <p><a href="/logout/">Cerrar sesión</a></p>
-</body>
-</html> -->
-
-

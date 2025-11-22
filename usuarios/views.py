@@ -89,4 +89,17 @@ def eliminar_usuario(request, id):
     })
 
 
+def login_view(request):
+    if request.method == "POST":
+        user = authenticate(
+            request,
+            username=request.POST['username'],
+            password=request.POST['password']
+        )
+        if user:
+            login(request, user)
+        else:
+            messages.error(request, "Usuario o contraseña incorrectos")
+
+    return redirect('inicio')
 

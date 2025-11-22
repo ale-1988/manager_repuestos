@@ -1,34 +1,85 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Iniciar sesión</title>
+    <style>
+        body {
+            background: #f5f5f5;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-card {
+            background: white;
+            padding: 30px;
+            width: 320px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input[type=text], input[type=password] {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0 12px;
+            border: 1px solid #bbb;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #0069d9;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0053b3;
+        }
+
+        .messages {
+            color: red;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
 
-<h2>Ingresar al sistema</h2>
+    <div class="login-card">
+        <h2>Iniciar sesión</h2>
 
-{% if form.errors %}
-    <p style="color:red;">Usuario o contraseña incorrectos.</p>
-{% endif %}
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
 
-<form method="post">
-    {% csrf_token %}
+        <form method="POST">
+            {% csrf_token %}
+            <label>Usuario</label>
+            <input type="text" name="username" required autofocus>
 
-    <div>
-        <label for="id_username">Usuario:</label><br>
-        {{ form.username }}
+            <label>Contraseña</label>
+            <input type="password" name="password" required>
+
+            <button type="submit">Ingresar</button>
+        </form>
     </div>
-
-    <div style="margin-top:10px;">
-        <label for="id_password">Contraseña:</label><br>
-        {{ form.password }}
-    </div>
-
-    <div style="margin-top:15px;">
-        <button type="submit">Ingresar</button>
-    </div>
-</form>
 
 </body>
-</html> -->
+</html>

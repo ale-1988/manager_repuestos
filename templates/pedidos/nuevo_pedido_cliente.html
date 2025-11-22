@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block contenido %}
+
+<h2>Nuevo Pedido</h2>
+<p class="text-muted">Buscá un cliente por nombre o CUIT y hacé clic para seleccionarlo.</p>
+
+<div class="card p-3 shadow-sm" style="max-width: 700px;">
+    <label class="form-label">Buscar cliente</label>
+    <input type="text"
+           id="buscar_cliente"
+           class="form-control"
+           placeholder="Ej: Rodriguez, Perez, 20-123..."
+           autocomplete="off"
+           data-url-base="{% url 'pedidos:nuevo_cliente' %}"
+           data-url-api="{% url 'pedidos:api_buscar_clientes' %}"
+    >
+</div>
+
+<div id="resultados_clientes" class="list-group mt-3" style="max-width: 700px;"></div>
+
+<script>
+(function(){
+    const input = document.getElementById("buscar_cliente");
+    const resultados = document.getElementById("resultados_clientes");
+
+    const urlBase = input.dataset.urlBase;  // /pedidos/nuevo/
+    const urlApi  = input.dataset.urlApi;   // /pedidos/api/buscar_clientes/
+
+    let timer = null;
+
+    function limpiarResultados(){
+        resultados.innerHTML = "";
+    }
+
+    function renderClientes(clientes){
+        limpiarResultados();
+
+        if (!clientes.length){
+            resultados.innerHTML = '<div class="list-group-item">Sin resultados</div>';
+            return;
+        }
+
+        for (const c of clientes){
+            const a = document.createElement("a");
+            a.className = "list-group-item list-group-item-action";
+            a.href = `${urlBase}?cliente_id=${encodeURIComponent(c.id)}`;
+            a.innerHTML = `<strong>${c.nombre}</strong>` + (c.cuit ? ` <span class="text-muted">(${c.cuit})</span>` : "");
+            resultados.appendChild(a);
+        }
+    }
+
+    async function buscar(){
+        const q = input.value.trim();
+
+        if (q.length < 2){
+            limpiarResultados();
+            return;
+        }
+
+        try{
+            const r = await fetch(`${urlApi}?q=${encodeURIComponent(q)}`);
+            const data = await r.json();
+            renderClientes(data);
+        }catch(e){
+            limpiarResultados();
+            resultados.innerHTML = '<div class="list-group-item text-danger">Error buscando clientes</div>';
+        }
+    }
+
+    input.addEventListener("input", () => {
+        clearTimeout(timer);
+        timer = setTimeout(buscar, 250); // debounce suave
+    });
+})();
+</script>
+
+{% endblock %}

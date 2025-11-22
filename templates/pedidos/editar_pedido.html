@@ -3,166 +3,155 @@
 {% block contenido %}
 
 <h2>Editar Pedido #{{ pedido.id }}</h2>
-<p><strong>Estado:</strong> {{ pedido.estado }}</p>
-<p><strong>Fecha:</strong> {{ pedido.fecha|localtime|date:"d/m/Y H:i" }}</p>
-
 <hr>
 
 <!-- ===================================================== -->
-<!-- CLIENTE                                               -->
+<!--     DATOS DEL CLIENTE — DISEÑO EN DOS COLUMNAS        -->
 <!-- ===================================================== -->
-<h3>Cliente</h3>
 
-<!-- FORMULARIO DE BÚSQUEDA -->
-<form method="POST" style="margin-bottom: 10px;">
-    {% csrf_token %}
-    
-    <label>Buscar cliente (ID, nombre o CUIT):</label>
-    <input type="text" name="buscar_cliente"
-           value="{{ request.POST.buscar_cliente }}"
-           placeholder="Ej: 123, PEREZ, 20-123..."
-           style="width:300px;">
+{% if pedido.cliente %}
+<h4>Cliente</h4>
 
-    <button type="submit" name="buscar_cliente_btn">Buscar</button>
-</form>
+<div class="card mb-4 shadow-sm">
+    <div class="card-body">
 
-<!-- RESULTADOS -->
-{% if resultado_busqueda is not None %}
-    <div style="margin-top: 10px;">
+        <h5 class="mb-3">{{ pedido.cliente.nombre }}</h5>
 
-        {% if resultado_busqueda %}
-            <h4>Resultados ({{ resultado_busqueda|length }}):</h4>
-            <ul>
-                {% for cli in resultado_busqueda %}
-                    <li style="margin-bottom:4px;">
-                        <a href="{% url 'pedidos:asignar_cliente_directo' pedido.id cli.id %}">
-                            <strong>{{ cli.nombre }}</strong>
-                        </a>
-                        — {{ cli.cuit }} — {{ cli.ciudad }}
-                    </li>
-                {% endfor %}
-            </ul>
+        <div class="row">
+            <!-- ==================== COLUMNA IZQUIERDA ==================== -->
+            <div class="col-md-6">
+                <ul class="list-unstyled">
 
-        {% else %}
-            <p style="color:red;">No se encontraron clientes con ese criterio.</p>
-        {% endif %}
+                    {% if pedido.cliente.cuit %}
+                    <li><strong>CUIT:</strong> {{ pedido.cliente.cuit }}</li>
+                    {% endif %}
+
+                    {% if pedido.cliente.domicilio %}
+                    <li><strong>Domicilio:</strong> {{ pedido.cliente.domicilio }}</li>
+                    {% endif %}
+
+                    {% if pedido.cliente.cod_postal %}
+                    <li><strong>Código Postal:</strong> {{ pedido.cliente.cod_postal }}</li>
+                    {% endif %}
+
+                </ul>
+            </div>
+
+            <!-- ==================== COLUMNA DERECHA ==================== -->
+            <div class="col-md-6">
+                <ul class="list-unstyled">
+
+                    {% if pedido.cliente.ciudad %}
+                    <li><strong>Ciudad:</strong> {{ pedido.cliente.ciudad }}</li>
+                    {% endif %}
+
+                    {% if pedido.cliente.provincia %}
+                    <li><strong>Provincia:</strong> {{ pedido.cliente.provincia }}</li>
+                    {% endif %}
+
+                    {% if pedido.cliente.pais %}
+                    <li><strong>País:</strong> {{ pedido.cliente.pais }}</li>
+                    {% endif %}
+
+                    {% if pedido.cliente.telefono %}
+                    <li><strong>Teléfono:</strong> {{ pedido.cliente.telefono }}</li>
+                    {% endif %}
+
+                    {% if pedido.cliente.email %}
+                    <li><strong>Email:</strong> {{ pedido.cliente.email }}</li>
+                    {% endif %}
+
+                </ul>
+            </div>
+        </div>
+
     </div>
+</div>
+{% else %}
+<p class="text-danger">Este pedido no tiene un cliente asignado.</p>
 {% endif %}
 
-<!-- CLIENTE ACTUAL -->
-<hr>
-<div style="background:#f7f7f7; padding:10px; border:1px solid #ccc; width:380px;">
-
-    {% if datos_cliente %}
-        <h4>Datos del cliente</h4>
-        <ul style="padding-left:15px;">
-            {% for nombre, valor in datos_cliente.items %}
-                <li><strong>{{ nombre }}:</strong> {{ valor }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p style="color:red; font-weight:bold;">Cliente no asignado</p>
-    {% endif %}
-</div>
-
-<hr>
-
 <!-- ===================================================== -->
-<!-- ÍTEMS DEL PEDIDO                                      -->
+<!-- DATOS DEL PEDIDO                                      -->
 <!-- ===================================================== -->
-<h3>Ítems del pedido</h3>
 
-{% if detalles %}
-<table border="1" cellpadding="4" cellspacing="0" width="100%" style="border-collapse: collapse;">
-    <thead style="background:#f0f0f0;">
-        <tr>
-            <th style="text-align:center; width:60px;">ID</th>
-            <th style="text-align:left;">Material</th>
-            <th style="text-align:center; width:80px;">Cantidad</th>
-            <th style="text-align:center; width:100px;">Acción</th>
-        </tr>
-    </thead>
+<h4>Datos del Pedido</h4>
 
-    <tbody>
-        {% for item in detalles %}
-        <tr>
-            <td style="text-align:center;">{{ item.cod_repuesto }}</td>
-            <td style="text-align:left;">{{ item.material.valor }}</td>
-            <td style="text-align:center;">{{ item.cantidad }}</td>
+<div class="card mb-4">
+    <div class="card-body">
 
-            <td style="text-align:center;">
-                <form method="POST" style="display:inline;">
+        <div class="row">
+
+            <!-- ==================== COLUMNA IZQUIERDA ==================== -->
+            <div class="col-md-6">
+                {% if request.user.rol == "admin" or request.user.rol == "gerente" or request.user.rol == "operador" %}
+                <form action="{% url 'pedidos:actualizar_estado' pedido.id %}" method="POST" class="mb-3">
                     {% csrf_token %}
-                    <button type="submit" name="eliminar_item" value="{{ item.id }}">
-                        Eliminar
+                    <label><strong>Estado:</strong></label>
+                    <select name="estado" class="form-select" style="max-width: 250px; display: inline-block;">
+                        {% for valor, texto in pedido.ESTADOS %}
+                            <option value="{{ valor }}" {% if pedido.estado == valor %}selected{% endif %}>
+                                {{ texto }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button class="btn btn-primary btn-sm ms-2">Actualizar</button>
+                </form>
+                {% else %}
+                <p><strong>Estado:</strong> {{ pedido.estado }}</p>
+                {% endif %}
+                <p><strong>Fecha:</strong> {{ pedido.fecha|localtime|date:"d/m/Y H:i" }}</p>
+            </div>
+
+            <!-- ==================== COLUMNA DERECHA ==================== -->
+            <div class="col-md-6 text-md-end">
+
+                {% if request.user.rol == "admin" or request.user.rol == "gerente" %}
+                <form action="{% url 'pedidos:cancelar' pedido.id %}" method="POST">
+                    {% csrf_token %}
+                    <button class="btn btn-danger mt-2"
+                            onclick="return confirm('¿Seguro desea cancelar este pedido?');">
+                        Cancelar este pedido
                     </button>
                 </form>
-            </td>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- ===================================================== -->
+<!-- ITEMS DEL PEDIDO                                      -->
+<!-- ===================================================== -->
+
+<h4>Items del Pedido</h4>
+
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>ID Repuesto</th>
+            <th>Nombre</th>
+            <th>Cantidad</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.cod_repuesto }}</td>
+            <td>{{ item.material.nombre }}</td>
+            <td>{{ item.cantidad }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3" class="text-center">No hay ítems.</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
-{% else %}
-<p>No hay ítems cargados.</p>
-{% endif %}
 
-<br>
-
-<!-- BOTÓN PARA ABRIR EL MODAL -->
-<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalRepuestos">
-    Agregar ítem
-</button>
-
-<hr>
-
-<!-- ===================================================== -->
-<!-- BOTONES DE ACCIÓN                                     -->
-<!-- ===================================================== -->
-<form method="POST" style="margin-top: 20px;">
-    {% csrf_token %}
-    
-    <button type="submit" name="guardar_pedido">Guardar pedido</button>
-
-    {% if pedido.estado == "BORRADOR" %}
-        <button type="submit" name="cancelar_pedido">Cancelar pedido</button>
-    {% endif %}
-</form>
-
-<!-- ===================================================== -->
-<!-- MODAL (ÚNICO Y CORRECTO)                              -->
-<!-- ===================================================== -->
-
-<div class="modal fade" id="modalRepuestos" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-xl">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title">Agregar ítem al pedido</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
-      <div class="modal-body" id="contenedorModalRepuestos">
-        Cargando buscador de repuestos...
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const modal = document.getElementById("modalRepuestos");
-
-    modal.addEventListener("show.bs.modal", () => {
-        fetch("/repuestos/buscar-modal/?pedido={{ pedido.id }}")
-            .then(r => r.text())
-            .then(html => {
-                document.getElementById("contenedorModalRepuestos").innerHTML = html;
-            });
-    });
-});
-</script>
+<a href="{% url 'pedidos:listar' %}" class="btn btn-secondary mt-3">Volver al listado</a>
 
 {% endblock %}
-
-

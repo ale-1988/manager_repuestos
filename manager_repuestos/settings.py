@@ -29,6 +29,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '192.168.100.20',   # IP LAN de tu servidor
+    '192.168.1.50',
     '*'                # (opcional durante desarrollo)]
 ]
 
@@ -133,6 +134,7 @@ DATABASES = {
         'NAME': 'cliente',
         'USER': 'root',
         'PASSWORD': 'Tvq114-e112906',
+        'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
             'charset': 'utf8mb3',
@@ -195,6 +197,10 @@ USE_I18N = True
 
 STATIC_URL = "static/"
 
+STATICFILES_DIRS = [
+    BASE_DIR / "static"
+]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -202,6 +208,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # Direccionamiento automatico
-LOGIN_URL = '/login/'
+LOGIN_URL = '/session/login/'
 LOGIN_REDIRECT_URL = '/'        # a dónde va luego de loguearse
-LOGOUT_REDIRECT_URL = '/login/' # a dónde va luego de desloguearse
+LOGOUT_REDIRECT_URL = '/sesion/login/' # a dónde va luego de desloguearse

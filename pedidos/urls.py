@@ -4,27 +4,21 @@ from . import views
 app_name = "pedidos"
 
 urlpatterns = [
+    path("", views.buscar_pedido, name="inicio"),
+    path("listar/", views.buscar_pedido, name="listar"),
+    path("buscar/", views.buscar_pedido, name="buscar"),
 
-    # Crear pedido en estado BORRADOR
-    path("nuevo/", views.nuevo_pedido, name="nuevo_pedido"),
+    # Nuevo flujo correcto
+    path("nuevo/", views.nuevo_pedido_cliente, name="nuevo_cliente"),
 
-    # Editar pedido por ID
-    path("editar/<int:id_pedido>/", views.editar_pedido, name="editar_pedido"),
+    # API AJAX para clientes
+    path("api/buscar_clientes/", views.api_buscar_clientes, name="api_buscar_clientes"),
 
-    # Asignar cliente directamente desde la lista
-    path(
-        "asignar-cliente/<int:id_pedido>/<int:id_cliente>/",
-        views.asignar_cliente_directo,
-        name="asignar_cliente_directo"
-    ),
-    #Listar pedidos
-    path("listar/", views.listar_pedidos, name="listar_pedidos"),
+    path("editar/<int:id>/", views.editar_pedido, name="editar"),
+    path("cancelar/<int:id>/", views.cancelar_pedido, name="cancelar"),
+    path("actualizar_estado/<int:id>/", views.actualizar_estado, name="actualizar_estado"),
+    
+    path("detalle/<int:id>/", views.detalle_pedido, name="detalle"),
 
-    #Agregr item
-    path("agregar-item/<int:pedido_id>/<int:id_mate>/",
-     views.agregar_item,
-     name="agregar_item"),
-
-    path("agregar-items-desde-modal/", views.agregar_items_desde_modal, name="agregar_items_desde_modal"),
-
+    path("agregar_items_desde_modal/", views.agregar_items_desde_modal, name="agregar_items_desde_modal"),
 ]
