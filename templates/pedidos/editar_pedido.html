@@ -2,7 +2,15 @@
 {% load tz %}
 {% block contenido %}
 
-<h2>Editar Pedido #{{ pedido.id }}</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Editar Pedido #{{ pedido.id }}</h2>
+
+    {% if pedido.estado in "BORRADOR CREADO CONFIRMADO" %}
+        <a href="{% url 'pedidos:agregar_items' pedido.id %}" class="btn btn-primary">
+            Agregar ítems
+        </a>
+    {% endif %}
+</div>
 <hr>
 
 <!-- ===================================================== -->
@@ -132,17 +140,17 @@
 <table class="table table-striped table-bordered">
     <thead>
         <tr>
-            <th>ID Repuesto</th>
+            <th class="text-center">ID Repuesto</th>
             <th>Nombre</th>
-            <th>Cantidad</th>
+            <th class="text-center">Cantidad</th>
         </tr>
     </thead>
     <tbody>
         {% for item in items %}
         <tr>
-            <td>{{ item.cod_repuesto }}</td>
-            <td>{{ item.material.nombre }}</td>
-            <td>{{ item.cantidad }}</td>
+            <td class="text-center">{{ item.cod_repuesto }}</td>
+            <td>{{ item.material.valor }}</td>
+            <td class="text-center align-middle">{{ item.cantidad|floatformat:"-2" }}</td>
         </tr>
         {% empty %}
         <tr>

@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+{% block contenido %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h3>Agregar ítems al Pedido #{{ pedido.id }}</h3>
+        <small class="text-muted">
+            Cliente: {{ cliente.nombre }} {% if cliente.cuit %} ({{ cliente.cuit }}){% endif %}
+            — Estado: {{ pedido.estado }}
+        </small>
+    </div>
+
+    <a href="{% url 'pedidos:editar' pedido.id %}" class="btn btn-secondary">
+        Volver al pedido
+    </a>
+</div>
+
+<hr>
+
+<!-- ===================================================== -->
+<!-- Selector de modo (RADIOS)                             -->
+<!-- ===================================================== -->
+<div class="mb-3">
+    <label class="form-label"><strong>Modo de ingreso:</strong></label>
+    <div class="form-check">
+        <input class="form-check-input modo-radio" type="radio" name="modo" id="modo_ns" value="ns">
+        <label class="form-check-label" for="modo_ns">Ingresar NS</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input modo-radio" type="radio" name="modo" id="modo_equipo" value="equipo">
+        <label class="form-check-label" for="modo_equipo">Ingresar Equipo</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input modo-radio" type="radio" name="modo" id="modo_desc" value="desc">
+        <label class="form-check-label" for="modo_desc">Ingresar Descripción</label>
+    </div>
+</div>
+
+<!-- ===================================================== -->
+<!-- ZONA DINÁMICA: MODO NS                                -->
+<!-- ===================================================== -->
+<div id="zona_ns" class="card p-3 mb-3 d-none">
+    <div class="row g-2 align-items-center">
+        <div class="col-md-4">
+            <input id="ns_input" class="form-control" placeholder="Número de serie">
+        </div>
+        <div class="col-md-2">
+            <button id="btn_consultar_ns" class="btn btn-primary w-100">Consultar</button>
+        </div>
+        <div class="col-md-6">
+            <span id="ns_resultado" class="fw-bold"></span>
+            <div id="ns_garantia_info" class="small text-muted"></div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <button id="btn_bom_ns" class="btn btn-outline-primary d-none">
+            Seleccionar de la lista de materiales
+        </button>
+    </div>
+</div>
+
+<!-- ===================================================== -->
+<!-- ZONA DINÁMICA: MODO EQUIPO                            -->
+<!-- ===================================================== -->
+<div id="zona_equipo" class="card p-3 mb-3 d-none">
+    <div class="row g-2 align-items-center">
+        <div class="col-md-6">
+            <input id="equipo_input" class="form-control" placeholder="Buscar equipo por nombre o descripción">
+        </div>
+        <div class="col-md-3 form-check">
+            <input id="chk_equipo_obsoletos" class="form-check-input" type="checkbox">
+            <label class="form-check-label">Ver obsoletos</label>
+        </div>
+    </div>
+
+    <div id="equipo_resultados" class="mt-3"></div>
+</div>
+
+<!-- ===================================================== -->
+<!-- ZONA DINÁMICA: MODO DESCRIPCIÓN                       -->
+<!-- ===================================================== -->
+<div id="zona_desc" class="card p-3 mb-3 d-none">
+    <div class="row g-2 align-items-center">
+        <div class="col-md-3">
+            <select id="grupo_select" class="form-select">
+                <option value="---">Todos</option>
+            </select>
+        </div>
+        <div class="col-md-5">
+            <input id="desc_input" class="form-control" placeholder="Buscar material por nombre o descripción">
+        </div>
+        <div class="col-md-3 form-check">
+            <input id="chk_desc_obsoletos" class="form-check-input" type="checkbox">
+            <label class="form-check-label">Ver obsoletos</label>
+        </div>
+    </div>
+
+    <div id="desc_resultados" class="mt-3"></div>
+</div>
+
+<!-- ===================================================== -->
+<!-- Lista de materiales (común)                           -->
+<!-- ===================================================== -->
+<div id="zona_lista_materiales" class="mt-4 d-none">
+    <h5 id="lista_titulo"></h5>
+    <div id="lista_materiales"></div>
+</div>
+
+
+<script>
+const pedidoId = {{ pedido.id }};
+
+// util
+function qs(id){ return document.getElementById(id); }
+function show(id){ qs(id).classList.remove("d-none"); }
+function hide(id){ qs(id).classList.add("d-none"); }
+function setHTML(id, html){ qs(id).innerHTML = html; }
+
+// --------------------- selector modo ----------------------
+document.querySelectorAll(".modo-radio").forEach(radio=>{
+  radio.addEventListener("change", ()=>{
+    hide("zona_ns"); hide("zona_equipo"); hide("zona_desc");
+    hide("zona_lista_materiales");
+    if(radio.value==="ns") show("zona_ns");
+    if(radio.value==="equipo") show("zona_equipo");
+    if(radio.value==="desc") show("zona_desc");
+  });
+});
+
+// --------------------- modo NS ----------------------------
+let equipoIdMateNS = null;
+
+qs("btn_consultar_ns").addEventListener("click", async ()=>{
+  equipoIdMateNS = null;
+  hide("btn_bom_ns");
+  setHTML("ns_resultado","Consultando...");
+
+  const ns = qs("ns_input").value.trim();
+  const r = await fetch("{% url 'pedidos:api_consultar_ns' %}?ns="+encodeURIComponent(ns));
+  const data = await r.json();
+
+  if(!data.ok){ setHTML("ns_resultado", data.error); return; }
+
+  if(!data.existe){
+    setHTML("ns_resultado", "Inexistente");
+    setHTML("ns_garantia_info", "");
+    return;
+  }
+
+  equipoIdMateNS = data.equipo_id_mate;
+
+  if(data.garantia==="EN_GARANTIA"){
+    setHTML("ns_resultado", "En garantía");
+  } else {
+    setHTML("ns_resultado", "Fuera de garantía");
+  }
+
+  setHTML("ns_garantia_info",
+    "Liberación: "+data.fecha_liberacion+" — Fin garantía: "+data.fin_garantia
+  );
+
+  show("btn_bom_ns");
+});
+
+qs("btn_bom_ns").addEventListener("click", ()=>{
+  if(equipoIdMateNS) cargarListaMateriales(equipoIdMateNS, true);
+});
+
+// --------------------- modo EQUIPO ------------------------
+let equipoTimer=null;
+
+qs("equipo_input").addEventListener("input", ()=>{
+  clearTimeout(equipoTimer);
+  equipoTimer=setTimeout(buscarEquipos, 300);
+});
+qs("chk_equipo_obsoletos").addEventListener("change", buscarEquipos);
+
+async function buscarEquipos(){
+  const q = qs("equipo_input").value.trim();
+  const verObs = qs("chk_equipo_obsoletos").checked ? "1":"0";
+  if(!q){ setHTML("equipo_resultados",""); return; }
+
+  const r = await fetch("{% url 'pedidos:buscar_equipo' %}?q="+encodeURIComponent(q)+"&ver_obsoletos="+verObs);
+  const data = await r.json();
+  if(!data.ok){ setHTML("equipo_resultados", data.error); return; }
+
+  if(data.equipos.length===0){
+    setHTML("equipo_resultados","<div class='text-muted'>Sin resultados</div>");
+    return;
+  }
+
+  let html="<ul class='list-group'>";
+  data.equipos.forEach(e=>{
+    html+=`
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <a href="#" data-id="${e.id_mate}" class="link-equipo">${e.valor}</a>
+        ${e.obsoleto==1 ? "<span class='badge bg-warning text-dark'>Obsoleto</span>":""}
+      </li>`;
+  });
+  html+="</ul>";
+  setHTML("equipo_resultados", html);
+
+  document.querySelectorAll(".link-equipo").forEach(a=>{
+    a.addEventListener("click",(ev)=>{
+      ev.preventDefault();
+      cargarListaMateriales(a.dataset.id, false);
+    });
+  });
+}
+
+// --------------------- modo DESCRIPCIÓN --------------------
+let descTimer=null;
+qs("desc_input").addEventListener("input", ()=>{
+  clearTimeout(descTimer);
+  descTimer=setTimeout(buscarMaterialesLibres, 300);
+});
+qs("grupo_select").addEventListener("change", buscarMaterialesLibres);
+qs("chk_desc_obsoletos").addEventListener("change", buscarMaterialesLibres);
+
+// cargar grupos al abrir
+(async function cargarGrupos(){
+  const r = await fetch("{% url 'repuestos:api_grupos' %}", {cache:"no-store"}).catch(()=>null);
+  if(!r) return;
+  const data = await r.json();
+  if(!data.ok) return;
+
+  data.grupos.forEach(g=>{
+    const opt=document.createElement("option");
+    opt.value=g;
+    opt.textContent=g;
+    qs("grupo_select").appendChild(opt);
+  });
+})();
+
+async function buscarMaterialesLibres(){
+  const texto = qs("desc_input").value.trim();
+  const grupo = qs("grupo_select").value;
+  const verObs = qs("chk_desc_obsoletos").checked ? "1":"0";
+
+  if(!texto && grupo==="---"){ setHTML("desc_resultados",""); return; }
+
+  const url = "{% url 'pedidos:api_buscar_materiales' %}?texto="+encodeURIComponent(texto)+"&grupo="+encodeURIComponent(grupo)+"&ver_obsoletos="+verObs;
+  const r = await fetch(url);
+  const data = await r.json();
+
+  if(!data.ok){ setHTML("desc_resultados", data.error); return; }
+
+  if(data.materiales.length===0){
+    setHTML("desc_resultados","<div class='text-muted'>Sin resultados</div>");
+    return;
+  }
+
+  let html="<ul class='list-group'>";
+  data.materiales.forEach(m=>{
+    html+=`
+      <li class="list-group-item">
+        <a href="#" data-id="${m.id_mate}" class="link-mat">${m.id_mate} - ${m.valor}</a>
+        <span class="text-muted small">(${m.grupo})</span>
+      </li>`;
+  });
+  html+="</ul>";
+  setHTML("desc_resultados", html);
+
+  document.querySelectorAll(".link-mat").forEach(a=>{
+    a.addEventListener("click",(ev)=>{
+      ev.preventDefault();
+      // en modo C no es BOM, pero usamos misma tabla común
+      renderListaMateriales([{
+        id_mate: a.dataset.id,
+        valor: a.textContent,
+        grupo: ""
+      }], "Materiales encontrados");
+    });
+  });
+}
+
+// --------------------- lista materiales común --------------
+async function cargarListaMateriales(equipoIdMate, desdeNS){
+  const r = await fetch("{% url 'pedidos:api_lista_materiales_equipo' %}?equipo_id_mate="+equipoIdMate);
+  const data = await r.json();
+  if(!data.ok){ alert(data.error); return; }
+
+  const titulo = desdeNS ? "Lista de materiales (por NS)" : "Lista de materiales del equipo";
+  renderListaMateriales(data.materiales, titulo);
+}
+
+function renderListaMateriales(materiales, titulo){
+  show("zona_lista_materiales");
+  setHTML("lista_titulo", titulo);
+
+  let html = `
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>ID</th><th>Descripción</th><th>Grupo</th><th style="width:120px">Cantidad</th><th></th>
+      </tr>
+    </thead><tbody>`;
+
+  materiales.forEach(m=>{
+    html+=`
+      <tr>
+        <td>${m.id_mate}</td>
+        <td>${m.valor}</td>
+        <td>${m.grupo || ""}</td>
+        <td>
+          <input type="number" step="0.001" value="1" min="0.001"
+                 class="form-control form-control-sm qty"
+                 data-id="${m.id_mate}">
+        </td>
+        <td>
+          <a href="#" class="agregar-link" data-id="${m.id_mate}">Agregar</a>
+        </td>
+      </tr>`;
+  });
+
+  html+="</tbody></table>";
+  setHTML("lista_materiales", html);
+
+  document.querySelectorAll(".agregar-link").forEach(a=>{
+    a.addEventListener("click", agregarItem);
+  });
+}
+
+async function agregarItem(ev){
+  ev.preventDefault();
+  const idMate = ev.target.dataset.id;
+  const qtyInput = document.querySelector(`.qty[data-id="${idMate}"]`);
+  const cantidad = qtyInput.value;
+
+  const formData = new FormData();
+  formData.append("pedido_id", pedidoId);
+  formData.append("id_mate", idMate);
+  formData.append("cantidad", cantidad);
+  formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+
+  const r = await fetch("{% url 'pedidos:api_agregar_item' %}", {
+    method:"POST",
+    body: formData
+  });
+
+  const data = await r.json();
+  if(!data.ok){ alert(data.error); return; }
+
+  alert(`ID ${data.id_mate} agregado. Cantidad total ahora: ${data.cantidad_total}`);
+}
+</script>
+
+{% endblock %}

@@ -1,3 +1,4 @@
+from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Q
@@ -6,7 +7,11 @@ from django.http import JsonResponse
 
 from pedidos.models import Pedido, DetallePedido
 from clientes.models import Clientes
+from repuestos.models import Material, Material2, Grupos, Seguimiento
+from repuestos.utils import get_materiales_por_equipo
 
+from django.conf import settings
+from django.utils import timezone
 
 # ==========================================================
 # NUEVO PEDIDO — BUSCADOR DE CLIENTE (AJAX + LINKS)
@@ -174,35 +179,210 @@ def actualizar_estado(request, id):
 
     return redirect("pedidos:editar", id)
 
+# ============================================================
+#   AGREGAR ITEMS A PEDIDO (pantalla única)
+# ============================================================
+
+def _pedido_editable(pedido: Pedido) -> bool:
+    return pedido.estado in ("BORRADOR", "CREADO", "CONFIRMADO")
 
 
-
-
-# ==========================================================
-# AGREGAR ITEMS (DEPRECATED)
-# ==========================================================
 @login_required
-def agregar_items_desde_modal(request):
-    if request.method == "POST":
-        pedido_id = request.POST.get("pedido_id")
-        pedido = get_object_or_404(Pedido, id=pedido_id)
+def agregar_items(request, pedido_id):
+    pedido = get_object_or_404(Pedido, id=pedido_id)
 
-        for key, value in request.POST.items():
-            if key.startswith("cant_"):
-                try:
-                    repuesto_id = int(key.replace("cant_", ""))
-                    cantidad = float(value)
-                except:
-                    cantidad = 0
+    if not _pedido_editable(pedido):
+        messages.error(request, "Este pedido no permite agregar ítems en su estado actual.")
+        return redirect("pedidos:editar", pedido_id)
 
-                if cantidad > 0:
-                    DetallePedido.objects.create(
-                        cod_pedido=pedido,
-                        cod_repuesto=repuesto_id,
-                        cantidad=cantidad,
-                    )
+    return render(request, "pedidos/agregar_items.html", {
+        "pedido": pedido,
+        "cliente": pedido.cliente,
+        "editable": True,
+    })
 
-        return redirect("pedidos:editar", pedido.id)
 
-    messages.error(request, "Método no permitido.")
-    return redirect("pedidos:listar")
+# ============================================================
+#   API: CONSULTAR NS  (modo A)
+# ============================================================
+
+@login_required
+def api_consultar_ns(request):
+    ns = request.GET.get("ns", "").strip()
+
+    if not ns:
+        return JsonResponse({"ok": False, "error": "NS vacío."})
+
+    seg = (
+        Seguimiento.objects
+        .using("rpg2")
+        .filter(seg_numero_serie=ns)
+        .order_by("-seg_fecha_liberacion")
+        .first()
+    )
+
+    if not seg or not seg.equi_codigo:
+        return JsonResponse({
+            "ok": True,
+            "existe": False,
+            "garantia": "INEXISTENTE",
+        })
+
+    # En tu código legacy, equi_codigo funciona como id_mate_equipo
+    equipo_id_mate = int(seg.equi_codigo)
+    fecha_liberacion = seg.seg_fecha_liberacion
+
+    # Plazo garantía configurable (meses). Fallback a 36.
+    meses = getattr(settings, "GARANTIA_MESES", 36)
+
+    try:
+        from dateutil.relativedelta import relativedelta
+        fin_garantia = fecha_liberacion + relativedelta(months=meses)
+    except Exception:
+        fin_garantia = fecha_liberacion + timezone.timedelta(days=meses * 30)
+
+    hoy = timezone.now()
+    en_garantia = hoy <= fin_garantia
+
+    return JsonResponse({
+        "ok": True,
+        "existe": True,
+        "equipo_id_mate": equipo_id_mate,
+        "fecha_liberacion": fecha_liberacion.strftime("%Y-%m-%d"),
+        "fin_garantia": fin_garantia.strftime("%Y-%m-%d"),
+        "garantia": "EN_GARANTIA" if en_garantia else "FUERA_DE_GARANTIA"
+    })
+
+
+# ============================================================
+#   API: BUSCAR EQUIPOS (modo B)
+#   Equipo = Material grupo 55 (con checkbox Ver obsoletos)
+# ============================================================
+
+@login_required
+def buscar_equipo(request):
+    texto = request.GET.get("texto", "").strip()
+
+    print(">>> buscar_equipo EJECUTADA, texto =", texto)
+
+    equipos = (
+        Material.objects.using("remota")
+        .filter(id_grup__id_grup=55)    # *** ESTA ES LA CORRECCIÓN IMPORTANTE ***
+        .filter(valor__icontains=texto)
+        .order_by("valor")
+    )
+
+    return render(request, "pedidos/buscar_equipo.html", {
+        "equipos": equipos,
+        "texto": texto,
+    })
+
+
+# ============================================================
+#   API: LISTA MATERIALES DE EQUIPO (BOM)
+#   Reutiliza tu get_materiales_por_equipo()
+# ============================================================
+
+@login_required
+def api_lista_materiales_equipo(request):
+    equipo_id_mate = request.GET.get("equipo_id_mate")
+    if not equipo_id_mate:
+        return JsonResponse({"ok": False, "error": "Falta equipo_id_mate"})
+
+    materiales = get_materiales_por_equipo(int(equipo_id_mate))
+    return JsonResponse({"ok": True, "materiales": materiales})
+
+
+# ============================================================
+#   API: BUSCAR MATERIALES LIBRES (modo C)
+#   Igual que buscar_manual, pero JSON
+# ============================================================
+
+@login_required
+def api_buscar_materiales(request):
+    texto = request.GET.get("texto", "").strip()
+    grupo = request.GET.get("grupo", "---")
+    ver_obsoletos = request.GET.get("ver_obsoletos", "0") == "1"
+
+    if not texto and grupo == "---":
+        return JsonResponse({"ok": True, "materiales": []})
+
+    qs = (
+        Material.objects.using("remota")
+        .select_related("id_grup", "material2")
+    )
+
+    if texto:
+        qs = qs.filter(Q(valor__icontains=texto) | Q(descripcio__icontains=texto))
+
+    if grupo != "---":
+        qs = qs.filter(id_grup__GRUPO=grupo)
+
+    if not ver_obsoletos:
+        qs = qs.filter(material2__obsoleto=0)
+
+    materiales = [{
+        "id_mate": m.id_mate,
+        "valor": m.valor,
+        "grupo": m.id_grup.GRUPO if m.id_grup else "",
+    } for m in qs[:300]]
+
+    return JsonResponse({"ok": True, "materiales": materiales})
+
+
+# ============================================================
+#   API: AGREGAR ITEM AL PEDIDO
+# ============================================================
+
+@require_POST
+@login_required
+def api_agregar_item(request):
+    pedido_id = request.POST.get("pedido_id")
+    id_mate = request.POST.get("id_mate")
+    cantidad = request.POST.get("cantidad", "1")
+
+    pedido = get_object_or_404(Pedido, id=int(pedido_id))
+
+    if not _pedido_editable(pedido):
+        return JsonResponse({"ok": False, "error": "Pedido no editable."})
+
+    try:
+        cantidad = float(cantidad)
+        if cantidad <= 0:
+            raise ValueError()
+    except Exception:
+        return JsonResponse({"ok": False, "error": "Cantidad inválida."})
+
+    detalle, created = DetallePedido.objects.get_or_create(
+        cod_pedido=pedido,
+        cod_repuesto=int(id_mate),
+        defaults={"cantidad": cantidad}
+    )
+
+    if not created:
+        detalle.cantidad = float(detalle.cantidad) + cantidad
+        detalle.save()
+
+    return JsonResponse({
+        "ok": True,
+        "created": created,
+        "id_mate": int(id_mate),
+        "cantidad_total": float(detalle.cantidad)
+    })
+
+
+@login_required
+def equipo_materiales(request, id_mate):
+    """
+    Recibe id_mate del equipo seleccionado y obtiene su BOM real.
+    """
+    from repuestos.utils import get_materiales_por_equipo
+
+    materiales = get_materiales_por_equipo(id_mate)
+
+    return render(request, "pedidos/equipo_materiales.html", {
+        "materiales": materiales,
+        "id_mate": id_mate,
+    })
+
+

@@ -2,26 +2,19 @@
 
 <h2>Buscar repuesto o número de serie</h2>
 
-<!-- FORMULARIO -->
-<!-- <form method="POST" style="margin-bottom: 15px;">
-    {% csrf_token %}
-    <input type="text" name="numero" placeholder="Ingrese ID o número de serie" value="{{ request.POST.numero }}">
-    <button type="submit">Buscar</button>
-</form> -->
 <form method="POST" action="?modal=1&pedido={{ request.GET.pedido }}">
     {% csrf_token %}
     <input type="text" name="numero" placeholder="Ingrese ID o número de serie" value="{{ request.POST.numero }}" required>
     <button type="submit">Buscar</button>
 </form>
 
-<!-- ENLACE AL BUSCADOR MANUAL (solo fuera del modal) -->
+<!-- ENLACE AL BUSCADOR MANUAL (ELIMINADO: ya no existe la URL buscar_manual)
 {% if not request.GET.modal %}
     <p>
-        <a href="{% url 'repuestos:buscar_manual' %}">
-            Búsqueda manual por texto o grupos
-        </a>
+        <span style="color: #777;">(Búsqueda manual deshabilitada en esta versión)</span>
     </p>
 {% endif %}
+-->
 
 <hr>
 
@@ -54,14 +47,12 @@
             <td style="text-align:center;">
 
                 {% if request.GET.modal %}
-                    <!-- MODO MODAL → AGREGAR ITEM AL PEDIDO -->
                     <a class="btn btn-success btn-sm"
                        href="{% url 'pedidos:agregar_item' pedido_id=request.GET.pedido id_mate=mat.id_mate %}">
                         Agregar
                     </a>
 
                 {% else %}
-                    <!-- MODO NORMAL → VER REPUESTO -->
                     <a class="btn btn-primary btn-sm"
                        href="{% url 'repuestos:repuesto_por_id' mat.id_mate %}">
                         Ver
