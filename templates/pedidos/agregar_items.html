@@ -267,34 +267,44 @@ async function buscarMaterialesLibres(){
     return;
   }
 
-  let html="<ul class='list-group'>";
+  let html = `
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Descripción</th>
+          <th>Grupo</th>
+          <th style="width:120px">Cantidad</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
   data.materiales.forEach(m=>{
     html+=`
-      <li class="list-group-item">
-        <a href="#" data-id="${m.id_mate}" class="link-mat">${m.id_mate} - ${m.valor}</a>
-        <span class="text-muted small">(${m.grupo})</span>
-      </li>`;
-  });
-  html+="</ul>";
-  setHTML("desc_resultados", html);
+      <tr>
+        <td>${m.id_mate}</td>
+        <td>${m.valor}</td>
+        <td>${m.grupo}</td>
+        <td>
+            <input type="number" step="1" value="1" min="1"
+              class="form-control form-control-sm qty"
+              data-id="${m.id_mate}">
+        </td>
+        <td>
+            <a href="#" class="agregar-link" data-id="${m.id_mate}">Agregar</a>
+        </td>
+      </tr>
+    `;
+    });
+    html += "</tbody></table>";
 
-  document.querySelectorAll(".link-mat").forEach(a => {
-    a.addEventListener("click", (ev) => {
-      ev.preventDefault();
-      
-      const id = a.dataset.id;
+    setHTML("desc_resultados", html);
 
-      // Extraer descripción quitando el "123 - "
-      const texto = a.textContent.replace(/^\s*\d+\s*-\s*/, "");
-
-      // Enviar el material con el mismo formato que A/B
-      renderListaMateriales([{
-        id_mate: id,
-        valor: texto,
-        grupo: "",
-        cantidad: 1     
-        }], "Material encontrado");
-      });
+    // Activar los links de agregar
+    document.querySelectorAll(".agregar-link").forEach(a=>{
+      a.addEventListener("click", agregarItem);
     });
   }
 
@@ -327,7 +337,7 @@ function renderListaMateriales(materiales, titulo){
         <td>${m.valor}</td>
         <td>${m.grupo || ""}</td>
         <td>
-          <input type="number" step="0.001" value="1" min="0.001"
+          <input type="number" step="1" value="1" min="1"
             class="form-control form-control-sm qty"
             data-id="${m.id_mate}">
         </td>

@@ -85,6 +85,7 @@ def get_materiales_por_equipo(id_mate):
             "valor": mat.valor,
             "grupo": grupo,
             "cantidad": cant_fmt,
+            "unidad": mat.unidad,
             "is_conjunto": (m2_child.conjunto_id != 0),
         })
 

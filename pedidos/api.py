@@ -154,6 +154,7 @@ def api_buscar_materiales(request):
         "id_mate": m.id_mate,
         "valor": m.valor,
         "grupo": m.id_grup.GRUPO if m.id_grup else "",
+        "unidad": m.unidad,
         "cantidad": 1,
     } for m in qs[:300]]
 
