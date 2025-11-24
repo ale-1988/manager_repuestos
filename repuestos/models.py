@@ -111,32 +111,36 @@ class Material(models.Model):
     @property
     def extra(self):
         return getattr(self, "material2", None)
+    
+    @property
+    def grupo_nombre(self):
+        return self.id_grup.GRUPO if self.id_grup else None
 
-    # ========= MÉTODO PEDIDO =========
-    def get_equipo_asociado(self):
-        """
-        Reproduce el SELECT legacy que relaciona:
-        material → material2 → equipo → grupo
-        """
-        try:
-            m2 = self.material2
-            equipo = m2.conjunto
-            grupo = self.id_grup
+    # # ========= MÉTODO PEDIDO =========
+    # def get_equipo_asociado(self):
+    #     """
+    #     Reproduce el SELECT legacy que relaciona:
+    #     material → material2 → equipo → grupo
+    #     """
+    #     try:
+    #         m2 = self.material2
+    #         equipo = m2.conjunto
+    #         grupo = self.id_grup
 
-            return {
-                "valor": self.valor,
-                "material2_conjunto": m2.conjunto_id,
-                "grupo": grupo.GRUPO,
-                "grupo_notas": grupo.notas,
-                "id_equi": equipo.id_equi,
-                "equipo_nombre": equipo.equipo,
-                "equipo_notas": equipo.notas,
-                "equipo_id_grup": equipo.id_grup,
-                "equipo_obsoleto": equipo.obsoleto,
-            }
+    #         return {
+    #             "valor": self.valor,
+    #             "material2_conjunto": m2.conjunto_id,
+    #             "grupo": grupo.GRUPO,
+    #             "grupo_notas": grupo.notas,
+    #             "id_equi": equipo.id_equi,
+    #             "equipo_nombre": equipo.equipo,
+    #             "equipo_notas": equipo.notas,
+    #             "equipo_id_grup": equipo.id_grup,
+    #             "equipo_obsoleto": equipo.obsoleto,
+    #         }
 
-        except Exception as e:
-            return {"error": str(e)}
+    #     except Exception as e:
+    #         return {"error": str(e)}
 
 
 # ===============================

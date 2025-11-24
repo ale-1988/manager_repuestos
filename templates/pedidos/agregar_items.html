@@ -18,6 +18,19 @@
 <hr>
 
 <!-- ===================================================== -->
+<!-- FORM OCULTO PARA CSRF (NECESARIO PARA FETCH POST)     -->
+<!-- ===================================================== -->
+<form id="csrf-form" style="display:none;">
+    {% csrf_token %}
+</form>
+
+<script>
+function getCSRFToken() {
+    return document.querySelector("#csrf-form input[name=csrfmiddlewaretoken]").value;
+}
+</script>
+
+<!-- ===================================================== -->
 <!-- Selector de modo (RADIOS)                             -->
 <!-- ===================================================== -->
 <div class="mb-3">
@@ -48,6 +61,7 @@
             <button id="btn_consultar_ns" class="btn btn-primary w-100">Consultar</button>
         </div>
         <div class="col-md-6">
+            <div id="ns_equipo_nombre" class="fw-bold text-primary mb-1"></div>
             <span id="ns_resultado" class="fw-bold"></span>
             <div id="ns_garantia_info" class="small text-muted"></div>
         </div>
@@ -107,7 +121,6 @@
     <div id="lista_materiales"></div>
 </div>
 
-
 <script>
 const pedidoId = {{ pedido.id }};
 
@@ -149,7 +162,10 @@ qs("btn_consultar_ns").addEventListener("click", async ()=>{
   }
 
   equipoIdMateNS = data.equipo_id_mate;
-
+  
+  // Mostrar nombre del equipo
+  setHTML("ns_equipo_nombre", data.equipo_nombre);
+  
   if(data.garantia==="EN_GARANTIA"){
     setHTML("ns_resultado", "En garantía");
   } else {
@@ -181,7 +197,7 @@ async function buscarEquipos(){
   const verObs = qs("chk_equipo_obsoletos").checked ? "1":"0";
   if(!q){ setHTML("equipo_resultados",""); return; }
 
-  const r = await fetch("{% url 'pedidos:buscar_equipo' %}?q="+encodeURIComponent(q)+"&ver_obsoletos="+verObs);
+  const r = await fetch("{% url 'pedidos:api_buscar_equipos' %}?q="+encodeURIComponent(q)+"&ver_obsoletos="+verObs);
   const data = await r.json();
   if(!data.ok){ setHTML("equipo_resultados", data.error); return; }
 
@@ -190,7 +206,7 @@ async function buscarEquipos(){
     return;
   }
 
-  let html="<ul class='list-group'>";
+  let html = "<ul class='list-group'>";
   data.equipos.forEach(e=>{
     html+=`
       <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -262,18 +278,25 @@ async function buscarMaterialesLibres(){
   html+="</ul>";
   setHTML("desc_resultados", html);
 
-  document.querySelectorAll(".link-mat").forEach(a=>{
-    a.addEventListener("click",(ev)=>{
+  document.querySelectorAll(".link-mat").forEach(a => {
+    a.addEventListener("click", (ev) => {
       ev.preventDefault();
-      // en modo C no es BOM, pero usamos misma tabla común
+      
+      const id = a.dataset.id;
+
+      // Extraer descripción quitando el "123 - "
+      const texto = a.textContent.replace(/^\s*\d+\s*-\s*/, "");
+
+      // Enviar el material con el mismo formato que A/B
       renderListaMateriales([{
-        id_mate: a.dataset.id,
-        valor: a.textContent,
-        grupo: ""
-      }], "Materiales encontrados");
+        id_mate: id,
+        valor: texto,
+        grupo: "",
+        cantidad: 1     
+        }], "Material encontrado");
+      });
     });
-  });
-}
+  }
 
 // --------------------- lista materiales común --------------
 async function cargarListaMateriales(equipoIdMate, desdeNS){
@@ -305,8 +328,8 @@ function renderListaMateriales(materiales, titulo){
         <td>${m.grupo || ""}</td>
         <td>
           <input type="number" step="0.001" value="1" min="0.001"
-                 class="form-control form-control-sm qty"
-                 data-id="${m.id_mate}">
+            class="form-control form-control-sm qty"
+            data-id="${m.id_mate}">
         </td>
         <td>
           <a href="#" class="agregar-link" data-id="${m.id_mate}">Agregar</a>
@@ -328,11 +351,18 @@ async function agregarItem(ev){
   const qtyInput = document.querySelector(`.qty[data-id="${idMate}"]`);
   const cantidad = qtyInput.value;
 
+  // detectar número de serie SOLO si viene de modo NS
+  let numeroSerie = null;
+  if (equipoIdMateNS) {
+      numeroSerie = qs("ns_input").value.trim();
+  }
+
   const formData = new FormData();
   formData.append("pedido_id", pedidoId);
   formData.append("id_mate", idMate);
   formData.append("cantidad", cantidad);
-  formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+  if (numeroSerie) formData.append("numero_serie", numeroSerie);
+  formData.append("csrfmiddlewaretoken", getCSRFToken());
 
   const r = await fetch("{% url 'pedidos:api_agregar_item' %}", {
     method:"POST",
@@ -342,8 +372,13 @@ async function agregarItem(ev){
   const data = await r.json();
   if(!data.ok){ alert(data.error); return; }
 
-  alert(`ID ${data.id_mate} agregado. Cantidad total ahora: ${data.cantidad_total}`);
+  let msg = `ID ${data.id_mate} agregado. Total: ${data.cantidad_total}`;
+  if (data.numero_serie) {
+        msg += ` — NS: ${data.numero_serie}`;
+  }
+  alert(msg);
 }
+
 </script>
 
 {% endblock %}
