@@ -6,7 +6,7 @@
 <h1>Usuarios</h1>
 
 <p>
-    <a href="{% url 'usuarios_nuevo' %}" 
+    <a href="{% url 'usuarios:nuevo' %}" 
        style="padding:6px 12px;background:#2c7;color:white;text-decoration:none;border-radius:4px;">
        + Crear usuario
     </a>
@@ -31,8 +31,8 @@
             <td>{{ u.email }}</td>
             <td>{{ u.rol }}</td>
             <td>
-                <a href="{% url 'usuarios_editar' u.id %}">Editar</a> |
-                <a href="{% url 'usuarios_eliminar' u.id %}">Eliminar</a>
+                <a href="{% url 'usuarios:editar' u.id %}">Editar</a> |
+                <a href="{% url 'usuarios:eliminar' u.id %}">Eliminar</a>
             </td>
         </tr>
         {% endfor %}

@@ -226,6 +226,7 @@ async function buscarEquipos(){
 }
 
 // --------------------- modo DESCRIPCIÓN --------------------
+hide("zona_lista_materiales");
 let descTimer=null;
 qs("desc_input").addEventListener("input", ()=>{
   clearTimeout(descTimer);

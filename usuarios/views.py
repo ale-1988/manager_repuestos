@@ -38,7 +38,7 @@ def nuevo_usuario(request):
         form = UsuarioCreateForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('usuarios_listar')
+            return redirect('usuarios:listar')
     else:
         form = UsuarioCreateForm()
 
@@ -50,7 +50,7 @@ def nuevo_usuario(request):
 
 
 # ============================================
-# EEdita usuario
+# Edita usuario
 # ============================================
 @login_required
 @requiere_rol('admin', 'gerente')
@@ -61,7 +61,7 @@ def editar_usuario(request, id):
         form = UsuarioUpdateForm(request.POST, instance=usuario)
         if form.is_valid():
             form.save()
-            return redirect('usuarios_listar')
+            return redirect('usuarios:listar')
     else:
         form = UsuarioUpdateForm(instance=usuario)
 
@@ -82,24 +82,10 @@ def eliminar_usuario(request, id):
 
     if request.method == "POST":
         usuario.delete()
-        return redirect('usuarios_listar')
+        return redirect('usuarios:listar')
 
     return render(request, 'usuarios/eliminar.html', {
         'usuario': usuario
     })
 
-
-def login_view(request):
-    if request.method == "POST":
-        user = authenticate(
-            request,
-            username=request.POST['username'],
-            password=request.POST['password']
-        )
-        if user:
-            login(request, user)
-        else:
-            messages.error(request, "Usuario o contraseña incorrectos")
-
-    return redirect('inicio')
 

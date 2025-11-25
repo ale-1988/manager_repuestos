@@ -21,7 +21,8 @@ def login_view(request):
             if next_url:
                 return redirect(next_url)
             else:
-                return redirect("sesiones:inicio")
+                # return redirect("sesiones:inicio")
+                return redirect("/pedidos/listar/")
             return redirect(next_url)
         else:
             messages.error(request, "Usuario o contraseña incorrectos")

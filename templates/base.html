@@ -89,6 +89,9 @@
             <ul class="navbar-nav">
 
                 {% if request.user.is_authenticated %}
+                    <li class="navbar-text ms-auto">
+                        Usuario: {{ request.user.username }}
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'sesiones:logout' %}">Cerrar sesión</a>
                     </li>

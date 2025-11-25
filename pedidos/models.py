@@ -48,26 +48,56 @@ class DetallePedido(models.Model):
     def material(self):
         from repuestos.models import Material
         return Material.objects.using("remota").get(pk=self.cod_repuesto)
-    
+
     @property
-    def equipo_nombre(self):
-        #Evita import circulares
-        from repuestos.models import Seguimiento, Material
+    def info_equipo(self):
+        """
+        Devuelve un dict con:
+        - equipo_nombre
+        - numero_serie
+        - fecha_liberacion
+        - fin_garantia
+        - garantia_ok (bool)
+        
+        Si no hay NS o seguimiento, devuelve None.
+        """
         if not self.numero_serie:
             return None
 
-        # 1 — Buscar en Seguimiento
+        from repuestos.models import Seguimiento, Material
+        from dateutil.relativedelta import relativedelta
+        from django.conf import settings
+        from django.utils import timezone
+
         seg = (
             Seguimiento.objects.using("rpg2")
             .filter(seg_numero_serie=self.numero_serie)
             .order_by("-seg_fecha_liberacion")
             .first()
         )
-        if not seg or not seg.equi_codigo:
+        if not seg:
             return None
 
+        # Equipo asociado a ese número de serie
         try:
             mat = Material.objects.using("remota").get(pk=seg.equi_codigo)
-            return mat.valor
+            equipo_nombre = mat.valor
         except Material.DoesNotExist:
-            return None
+            equipo_nombre = None
+
+        meses = getattr(settings, "GARANTIA_MESES", 36)
+        fecha_liberacion = seg.seg_fecha_liberacion
+        fin_garantia = fecha_liberacion + relativedelta(months=meses)
+        
+        if timezone.now() <= fin_garantia:
+            color_garantia="#6fcf85"
+        else:
+            color_garantia="#e46772"   
+
+        return {
+            "numero_serie": self.numero_serie,
+            "equipo_nombre": equipo_nombre,
+            "fecha_liberacion": fecha_liberacion,
+            "fin_garantia": fin_garantia,
+            "color_garantia": color_garantia,
+        }

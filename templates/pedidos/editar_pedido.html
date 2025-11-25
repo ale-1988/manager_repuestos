@@ -144,9 +144,9 @@
     <thead>
         <tr>
             <th class="text-center">ID</th>
+            <th class="text-center">Cant</th>
             <th>Nombre</th>
             <th>Grupo</th>
-            <th class="text-center">Cant</th>
             <th class="text-center">NS</th>
         </tr>
     </thead>
@@ -154,19 +154,25 @@
         {% for item in items %}
         <tr>
             <td class="text-center">{{ item.cod_repuesto }}</td>
-            <td>{{ item.material.valor }}</td>
-            <td class="text-center">{{ item.material.grupo_nombre }}</td>
             <td class="text-center align-middle">{{ item.cantidad|floatformat:"-2" }}</td>
-             <td class="text-center">
-            <!-- {% if item.numero_serie %}
-                {{ item.numero_serie }}
+            <td>{{ item.material.valor }}</td>
+            <td>{{ item.material.grupo_nombre }}</td>
+            {% if item.info_equipo.equipo_nombre %}
+                <td class="text-center" 
+                    style="background-color: {{ item.info_equipo.color_garantia }}"
+                    title="Fecha liberación: {{ item.info_equipo.fecha_liberacion }}">
+
+                <div><strong>{{ item.info_equipo.equipo_nombre }}</strong></div>
             {% else %}
-                -
-            {% endif %} -->
-            {% if item.equipo_nombre %}
-                <div><strong>{{ item.equipo_nombre }}</strong></div>
-                <div class="text-muted small">NS: {{ item.numero_serie }}</div>
+                <td class="text-center">
             {% endif %}
+            
+            {% if item.info_equipo.numero_serie %}
+                {{ item.info_equipo.numero_serie }}
+            {% else %}
+                <span class="text-muted">—</span>
+            {% endif %}
+            </td>
         </tr>
         {% empty %}
         <tr>
