@@ -28,6 +28,34 @@
 function getCSRFToken() {
     return document.querySelector("#csrf-form input[name=csrfmiddlewaretoken]").value;
 }
+
+// =====================================================
+// RESET COMPLETO AL CAMBIAR DE MODO
+// =====================================================
+function resetWorkflow() {
+    // Variables globales
+    equipoIdMateNS = null;
+
+    // Limpiar zonas
+    setHTML("ns_input", "");
+    setHTML("ns_resultado", "");
+    setHTML("ns_garantia_info", "");
+    setHTML("ns_equipo_nombre", "");
+
+    setHTML("equipo_input", "");
+    setHTML("equipo_resultados", "");
+
+    setHTML("desc_input", "");
+    setHTML("desc_resultados", "");
+
+    // Ocultar botones especiales
+    hide("btn_bom_ns");
+
+    // Ocultar lista de materiales
+    hide("zona_lista_materiales");
+    setHTML("lista_materiales", "");
+}
+
 </script>
 
 <!-- ===================================================== -->
@@ -133,8 +161,12 @@ function setHTML(id, html){ qs(id).innerHTML = html; }
 // --------------------- selector modo ----------------------
 document.querySelectorAll(".modo-radio").forEach(radio=>{
   radio.addEventListener("change", ()=>{
-    hide("zona_ns"); hide("zona_equipo"); hide("zona_desc");
+    resetWorkflow();
+    hide("zona_ns"); 
+    hide("zona_equipo"); 
+    hide("zona_desc");
     hide("zona_lista_materiales");
+    
     if(radio.value==="ns") show("zona_ns");
     if(radio.value==="equipo") show("zona_equipo");
     if(radio.value==="desc") show("zona_desc");

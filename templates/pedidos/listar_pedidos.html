@@ -12,8 +12,9 @@
     </div>
 </form>
 
+
 <table class="table table-striped table-bordered">
-    <thead>
+<!--<thead>
         <tr>
             <th class="text-center">ID</th>
             <th>Cliente</th>
@@ -23,8 +24,50 @@
             <th class="text-center">Fecha</th>
             <th class="text-center">Acciones</th>
         </tr>
-    </thead>
+    </thead>-->
 
+    <thead>
+        <tr>
+            {% comment %} Cada th alterna asc/desc {% endcomment %}
+            <th class="text-center">
+                <a href="?orden=id&dir={% if orden == 'id' and dir == 'asc' %}desc{% else %}asc{% endif %}&q={{ q }}">
+                    ID
+                </a>
+            </th>
+
+            <th>
+                <a href="?orden=cliente&dir={% if orden == 'cliente' and dir == 'asc' %}desc{% else %}asc{% endif %}&q={{ q }}">
+                    Cliente
+                </a>
+            </th>
+
+            <th class="text-center">
+                <a href="?orden=items&dir={% if orden == 'items' and dir == 'asc' %}desc{% else %}asc{% endif %}&q={{ q }}">
+                    Items
+                </a>
+            </th>
+
+            <th class="text-center">
+                <a href="?orden=cant&dir={% if orden == 'cant' and dir == 'asc' %}desc{% else %}asc{% endif %}&q={{ q }}">
+                    Cant.
+                </a>
+            </th>
+
+            <th class="text-center">
+                <a href="?orden=estado&dir={% if orden == 'estado' and dir == 'asc' %}desc{% else %}asc{% endif %}&q={{ q }}">
+                    Estado
+                </a>
+            </th>
+
+            <th class="text-center">
+                <a href="?orden=fecha&dir={% if orden == 'fecha' and dir == 'asc' %}desc{% else %}asc{% endif %}&q={{ q }}">
+                    Fecha
+                </a>
+            </th>
+
+            <th class="text-center">Acciones</th>
+        </tr>
+    </thead>
     <tbody>
         {% for p in pedidos %}
         <tr>
@@ -49,5 +92,4 @@
         {% endfor %}
     </tbody>
 </table>
-
 {% endblock %}

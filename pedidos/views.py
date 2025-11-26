@@ -63,9 +63,49 @@ def editar_pedido(request, id):
 # ==========================================================
 # LISTAR PEDIDOS
 # ==========================================================
+#@login_required
+# def listar_pedidos(request):
+#     q = request.GET.get("q", "").strip()
+
+#     pedidos = Pedido.objects.all()
+
+#     if q:
+#         pedidos = pedidos.filter(id__icontains=q) | pedidos.filter(cod_cliente__icontains=q)
+
+#     pedidos = pedidos.annotate(
+#         total_items=Count("detalles"),               # cantidad de repuestos distintos
+#         total_cantidades=Sum("detalles__cantidad")   # suma de cantidades
+#     ).order_by("-id")
+
+#     return render(request, "pedidos/listar_pedidos.html", {
+#         "pedidos": pedidos,
+#         "q": q,
+#     })
 @login_required
 def listar_pedidos(request):
     q = request.GET.get("q", "").strip()
+
+    # Parámetros para ordenar
+    orden = request.GET.get("orden", "fecha")     # default → fecha
+    direccion = request.GET.get("dir", "desc")    # default → descendente
+
+    # Campos válidos (whitelist)
+    campos_validos = {
+        "id": "id",
+        "cliente": "cod_cliente",
+        "items": "total_items",
+        "cant": "total_cantidades",
+        "estado": "estado",
+        "fecha": "fecha",
+    }
+
+    campo = campos_validos.get(orden, "fecha")
+
+    # Construir orden real
+    if direccion == "asc":
+        order_by = campo
+    else:
+        order_by = "-" + campo
 
     pedidos = Pedido.objects.all()
 
@@ -73,13 +113,15 @@ def listar_pedidos(request):
         pedidos = pedidos.filter(id__icontains=q) | pedidos.filter(cod_cliente__icontains=q)
 
     pedidos = pedidos.annotate(
-        total_items=Count("detalles"),               # cantidad de repuestos distintos
-        total_cantidades=Sum("detalles__cantidad")   # suma de cantidades
-    ).order_by("-id")
+        total_items=Count("detalles"),
+        total_cantidades=Sum("detalles__cantidad")
+    ).order_by(order_by)
 
     return render(request, "pedidos/listar_pedidos.html", {
         "pedidos": pedidos,
         "q": q,
+        "orden": orden,
+        "dir": direccion,
     })
 
 # ==========================================================
