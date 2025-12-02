@@ -9,29 +9,30 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
+import environ
 import os
 from pathlib import Path
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# ==============================
+#   ENVIRONMENT VARIABLES
+# ==============================
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))   # lee .env si existe
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-2bqln7rwo1#w5*rf#n#9jm_9w=*&q5+er8p^#id5&l_66of2bs"
+# ==============================
+#   SECURITY / KEYS
+# ==============================
+SECRET_KEY = env("SECRET_KEY")
+DEBUG = env.bool("DEBUG", default=False)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '192.168.100.20',   # IP LAN de tu servidor
-    '192.168.1.50',
-    '*'                # (opcional durante desarrollo)]
-]
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS",default=['localhost', '127.0.0.1'])
 
 # Application definition
 
@@ -42,7 +43,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # django-extensions
     'django_extensions',
     # apps del sistema
     'core',
@@ -87,74 +87,61 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "manager_repuestos.wsgi.application"
 
+#==============================
+#   USUARIO CUSTOM
+# =============================
 AUTH_USER_MODEL = "usuarios.Usuario"
 
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# ==============================
+#   DATABASES (4 BASES)
+# ==============================
 DATABASES = {
-    # ==============================
-    # Base principal del proyecto
-    # ==============================
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'manager_repuestos',
-        'USER': 'root',
-        'PASSWORD': 'Tvq114-e112906',
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-        }
+    # BD principal
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": env("DB_MAIN_NAME"),
+        "USER": env("DB_MAIN_USER"),
+        "PASSWORD": env("DB_MAIN_PASS"),
+        "HOST": env("DB_MAIN_HOST", default="localhost"),
+        "PORT": env("DB_MAIN_PORT", default="3306"),
+        "OPTIONS": {"charset": "utf8mb4"},
     },
 
-    # ==============================
-    # BD legacy rpg2
-    # (Seguimiento)
-    # ==============================
-    'rpg2': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'rpg2',
-        'USER': 'root',
-        'PASSWORD': 'Tvq114-e112906',
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'OPTIONS': {
-            'charset': 'latin1',       # lo habitual en sistemas viejos
-        }
+    # Legacy rpg2
+    "rpg2": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": env("DB_RPG2_NAME"),
+        "USER": env("DB_RPG2_USER"),
+        "PASSWORD": env("DB_RPG2_PASS"),
+        "HOST": env("DB_RPG2_HOST", default="localhost"),
+        "PORT": env("DB_RPG2_PORT", default="3306"),
+        "OPTIONS": {"charset": "latin1"},
     },
 
-    # ==============================
-    # BD legacy clientes
-    # (datos)
-    # ==============================
-    'cliente': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'cliente',
-        'USER': 'root',
-        'PASSWORD': 'Tvq114-e112906',
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'OPTIONS': {
-            'charset': 'utf8mb3',
-        }
+    # Legacy clientes
+    "cliente": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": env("DB_CLI_NAME"),
+        "USER": env("DB_CLI_USER"),
+        "PASSWORD": env("DB_CLI_PASS"),
+        "HOST": env("DB_CLI_HOST", default="localhost"),
+        "PORT": env("DB_CLI_PORT", default="3306"),
+        "OPTIONS": {"charset": "utf8mb3"},
     },
 
-    # ==============================
-    # BD remota (pero en el MISMO servidor, jaja)
-    # (material, material2, grupos, equipos, listamat, etc.)
-    # ==============================
-    'remota': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'remota',       # ESTA ES LA BASE REMOTA
-        'USER': 'root',
-        'PASSWORD': 'Tvq114-e112906',
-        'HOST': 'localhost',     # MISMO servidor
-        'PORT': '3306',
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-        }
+    # BD remota (mismo servidor)
+    "remota": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": env("DB_REM_NAME"),
+        "USER": env("DB_REM_USER"),
+        "PASSWORD": env("DB_REM_PASS"),
+        "HOST": env("DB_REM_HOST", default="localhost"),
+        "PORT": env("DB_REM_PORT", default="3306"),
+        "OPTIONS": {"charset": "utf8mb4"},
     },
 }
 
@@ -185,9 +172,10 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "America/Argentina/Buenos_Aires"
+USE_I18N = True
 USE_TZ = True
 
-USE_I18N = True
+
 
 
 
@@ -197,9 +185,7 @@ USE_I18N = True
 
 STATIC_URL = "static/"
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static"
-]
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
