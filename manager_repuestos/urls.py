@@ -27,4 +27,8 @@ urlpatterns = [
 
     path("", home_redirect, name="inicio"),
 
+
+
+
+
 ]

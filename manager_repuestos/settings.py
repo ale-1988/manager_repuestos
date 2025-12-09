@@ -147,7 +147,7 @@ DATABASES = {
 
 
 
-# Password validation
+# Password validation"no-reply@localhost"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -200,3 +200,14 @@ LOGOUT_REDIRECT_URL = '/sesion/login/' # a dónde va luego de desloguearse
 
 #Extension de la garantia[meses]
 GARANTIA_MESES = 36
+
+# Email real — puedes usar SMTP de tu empresa o Gmail
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = env("EMAIL_HOST")
+EMAIL_PORT = env("EMAIL_PORT")
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD= env("EMAIL_HOST_PASSWORD")
+
+# URL
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
