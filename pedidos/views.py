@@ -53,12 +53,89 @@ def nuevo_pedido_cliente(request):
 @login_required
 def editar_pedido(request, id):
     pedido = get_object_or_404(Pedido, id=id)
-    items = DetallePedido.objects.filter(cod_pedido=pedido)
 
+    modo_dividir = request.GET.get("dividir") == "1"
+
+    if request.method == "POST" and request.POST.get("dividir_confirmado") == "1":
+        items_seleccionados = request.POST.getlist("item_dividir")
+
+        if not items_seleccionados:
+            messages.error(request, "Debe seleccionar al menos un item para dividir.")
+            return redirect(f"/pedidos/{id}/editar?dividir=1")
+
+        request.session["items_a_dividir"] = items_seleccionados
+        return redirect("pedidos:confirmar_division", id=id)
+    items = pedido.detalles.all()
+    puede_dividir = (items.count() > 1) and (pedido.estado in ["BORRADOR", "CREADO"])
+    
     return render(request, "pedidos/editar_pedido.html", {
+        "pedido": pedido,
+        "modo_dividir": modo_dividir,
+        "items": items,
+        "puede_dividir": puede_dividir,
+    })
+
+# ==========================================================
+# CONFIRMAR DIVISIÓN DEL PEDIDO
+# ==========================================================
+@login_required
+def confirmar_division(request, id):
+    pedido = get_object_or_404(Pedido, id=id)
+
+    # Recuperar la lista guardada en la sesión
+    items_ids = request.session.get("items_a_dividir", [])
+
+    # Obtener los items seleccionados
+    items = DetallePedido.objects.filter(id__in=items_ids, cod_pedido=pedido)
+
+    if request.method == "POST":
+        if not items:
+            messages.error(request, "No hay ítems seleccionados para dividir.")
+            return redirect("pedidos:editar", id=id)
+
+        # ----------------------------------------------------
+        # 1) Crear el pedido nuevo (pedido B)
+        # ----------------------------------------------------
+        nuevo = Pedido.objects.create(
+            cod_cliente=pedido.cod_cliente,
+            cod_transportista=pedido.cod_transportista,
+            observaciones=pedido.observaciones,
+            estado="BORRADOR",   # o el estado que quieras
+        )
+
+        # ----------------------------------------------------
+        # 2) Mover los ítems seleccionados al pedido nuevo
+        # ----------------------------------------------------
+        for it in items:
+            DetallePedido.objects.create(
+                cod_pedido=nuevo,
+                cod_repuesto=it.cod_repuesto,
+                cantidad=it.cantidad,
+                numero_serie=it.numero_serie,
+            )
+            it.delete()  # eliminar del pedido original
+
+        # Limpio la sesión
+        try:
+            del request.session["items_a_dividir"]
+        except KeyError:
+            pass
+
+        messages.success(
+            request,
+            f"Pedido dividido correctamente. Nuevo pedido creado: #{nuevo.id}"
+        )
+
+        return redirect("pedidos:editar", id=nuevo.id)
+
+    # --------------------------------------------------------
+    # GET → Mostrar pantalla de confirmación
+    # --------------------------------------------------------
+    return render(request, "pedidos/confirmar_division.html", {
         "pedido": pedido,
         "items": items,
     })
+
 
 # ==========================================================
 # LISTAR PEDIDOS

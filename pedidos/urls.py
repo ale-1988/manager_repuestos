@@ -14,6 +14,7 @@ urlpatterns = [
     
     # CRUD pedido
     path("editar/<int:id>/", views.editar_pedido, name="editar"),
+    path("confirmar_division/<int:id>/", views.confirmar_division, name="confirmar_division"),
     path("cancelar/<int:id>/", views.cancelar_pedido, name="cancelar"),
     path("actualizar_estado/<int:id>/", views.actualizar_estado, name="actualizar_estado"),
     # Ítems del pedido

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load tz %}
+
+{% block contenido %}
+
+<h3>Confirmar división del pedido #{{ pedido.id }}</h3>
+
+<div class="alert alert-warning mt-3">
+    <strong>Atención:</strong> Está por crear un <strong>nuevo pedido</strong> con los ítems seleccionados.<br>
+    El pedido actual conservará solamente los ítems no seleccionados.
+</div>
+
+<h5>Ítems que pasarán al nuevo pedido:</h5>
+
+<table class="table table-striped table-bordered mt-3">
+    <thead>
+        <tr>
+            <th class="text-center">ID</th>
+            <th class="text-center">Cantidad</th>
+            <th>Nombre</th>
+            <th>Grupo</th>
+            <th class="text-center">NS</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td class="text-center">{{ item.cod_repuesto }}</td>
+            <td class="text-center">{{ item.cantidad|floatformat:"-2" }}</td>
+            <td>{{ item.material.valor }}</td>
+            <td>{{ item.material.grupo_nombre }}</td>
+
+            {% if item.info_equipo %}
+                <td class="text-center"
+                    style="background-color: {{ item.info_equipo.color_garantia }}"
+                    title="Fecha liberación: {{ item.info_equipo.fecha_liberacion }}">
+                    <strong>{{ item.info_equipo.equipo_nombre }}</strong><br>
+                    {{ item.info_equipo.numero_serie }}
+                </td>
+            {% else %}
+                <td class="text-center">—</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<form method="POST" class="mt-4">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">
+        Confirmar división
+    </button>
+
+    <a href="{% url 'pedidos:editar' pedido.id %}" class="btn btn-secondary ms-2">
+        Cancelar
+    </a>
+</form>
+
+{% endblock %}
