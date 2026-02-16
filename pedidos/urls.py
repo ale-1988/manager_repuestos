@@ -33,4 +33,8 @@ urlpatterns = [
     path("api/lista_materiales/", api.api_lista_materiales_equipo, name="api_lista_materiales_equipo"),
     path("api/buscar_materiales/", api.api_buscar_materiales, name="api_buscar_materiales"),
     path("api/agregar_item/", api.api_agregar_item, name="api_agregar_item"),
+    
+    #Historiales
+    path("historial/", views.historial_global, name="historial_global"),
+    path("historial/pedido/<int:pedido_id>/", views.historial_global, name="historial_pedido"),
 ]

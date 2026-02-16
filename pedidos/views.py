@@ -13,6 +13,8 @@ from repuestos.utils import get_materiales_por_equipo
 from django.conf import settings
 from django.utils import timezone
 
+from pedidos.models import HistorialEstadoPedido
+
 # ==========================================================
 # NUEVO PEDIDO — BUSCADOR DE CLIENTE (AJAX + LINKS)
 # ==========================================================
@@ -66,13 +68,15 @@ def editar_pedido(request, id):
         request.session["items_a_dividir"] = items_seleccionados
         return redirect("pedidos:confirmar_division", id=id)
     items = pedido.detalles.all()
-    puede_dividir = (items.count() > 1) and (pedido.estado in ["BORRADOR", "CREADO"])
+    puede_dividir = (items.count() > 1) and (pedido.estado == "CREADO")
     
     return render(request, "pedidos/editar_pedido.html", {
         "pedido": pedido,
         "modo_dividir": modo_dividir,
         "items": items,
         "puede_dividir": puede_dividir,
+        "estados_posibles": pedido.estados_disponibles(),
+        "todos_estados": [e[0] for e in Pedido.ESTADOS],
     })
 
 # ==========================================================
@@ -100,7 +104,7 @@ def confirmar_division(request, id):
             cod_cliente=pedido.cod_cliente,
             cod_transportista=pedido.cod_transportista,
             observaciones=pedido.observaciones,
-            estado="BORRADOR",   # o el estado que quieras
+            estado="CREADO",   
         )
 
         # ----------------------------------------------------
@@ -219,18 +223,17 @@ def cancelar_pedido(request, id):
 
     pedido = get_object_or_404(Pedido, id=id)
 
-    # Si es borrador → borrar
-    if pedido.estado == "BORRADOR":
-        pedido.delete()
-        messages.success(request, "El pedido en borrador fue eliminado correctamente.")
-        return redirect("pedidos:listar")
+    try:
+        if pedido.estado == "BORRADOR":
+            pedido.delete()
+            messages.success(request, "El pedido en borrador fue eliminado correctamente.")
+        else:
+            pedido.cambiar_estado("CANCELADO",usuario=request.user)
+            messages.success(request, "El pedido fue cancelado correctamente.")
 
-    # Caso normal: cancelar
-    pedido.estado = "CANCELADO"
-    pedido.save()
-
-    messages.success(request, "El pedido fue cancelado correctamente.")
-    return redirect("pedidos:listar")
+    except ValidationError as e:
+        messages.error(request, e.message)
+    return redirect("pedidos:listar")            
 
 # ==========================================================
 # ACTUALIZAR ESTADO
@@ -256,8 +259,7 @@ def actualizar_estado(request, id):
         if nuevo_estado not in estados_validos:
             messages.error(request, "Estado inválido.")
         else:
-            pedido.estado = nuevo_estado
-            pedido.save()
+            pedido.cambiar_estado(nuevo_estado,usuario=request.user)
             messages.success(request, "Estado actualizado correctamente.")
 
     return redirect("pedidos:editar", id)
@@ -266,7 +268,7 @@ def actualizar_estado(request, id):
 #   AGREGAR ITEMS — Pantalla principal
 # ============================================================
 def _pedido_editable(pedido: Pedido) -> bool:
-    return pedido.estado in ("BORRADOR", "CREADO", "CONFIRMADO")
+    return pedido.estado == "CREADO"
 
 @login_required
 def agregar_items(request, pedido_id):
@@ -301,4 +303,70 @@ def buscar_equipo(request):
     return render(request, "pedidos/buscar_equipo.html", {
         "equipos": equipos,
         "texto": texto,
+    })
+
+@login_required
+def historial_global(request, pedido_id=None):
+
+    historial = HistorialEstadoPedido.objects.select_related(
+        "pedido", "usuario"
+    )
+
+    # Si viene pedido_id → modo pedido
+    pedido = None
+    if pedido_id:
+        pedido = get_object_or_404(Pedido, id=pedido_id)
+        historial = historial.filter(pedido=pedido)
+
+    # -------------------------
+    # Filtros
+    # -------------------------
+    pedido_q = request.GET.get("pedido")
+    usuario_q = request.GET.get("usuario")
+    estado_q = request.GET.get("estado")
+    fecha_q = request.GET.get("fecha")
+
+    if pedido_q and not pedido_id:
+        historial = historial.filter(pedido__id__icontains=pedido_q)
+
+    if usuario_q:
+        historial = historial.filter(usuario__username__icontains=usuario_q)
+
+    if estado_q:
+        historial = historial.filter(
+            Q(estado_anterior__icontains=estado_q) |
+            Q(estado_nuevo__icontains=estado_q)
+        )
+
+    if fecha_q:
+        historial = historial.filter(fecha__date=fecha_q)
+
+    # -------------------------
+    # ORDENAMIENTO
+    # -------------------------
+    orden = request.GET.get("orden", "fecha")
+    direccion = request.GET.get("dir", "desc")
+
+    campos_validos = {
+        "fecha": "fecha",
+        "usuario": "usuario__username",
+        "estado_anterior": "estado_anterior",
+        "estado_nuevo": "estado_nuevo",
+        "pedido": "pedido__id",
+    }
+
+    campo = campos_validos.get(orden, "fecha")
+
+    if direccion == "asc":
+        order_by = campo
+    else:
+        order_by = "-" + campo
+
+    historial = historial.order_by(order_by)
+
+    return render(request, "pedidos/historial.html", {
+        "historial": historial,
+        "pedido_actual": pedido,
+        "orden": orden,
+        "dir": direccion,
     })

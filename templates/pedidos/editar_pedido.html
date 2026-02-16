@@ -91,12 +91,25 @@
                     {% csrf_token %}
                     <label><strong>Estado:</strong></label>
                     <select name="estado" class="form-select" style="max-width: 250px; display: inline-block;">
-                        {% for valor, texto in pedido.ESTADOS %}
-                            <option value="{{ valor }}" {% if pedido.estado == valor %}selected{% endif %}>
-                                {{ texto }}
-                            </option>
+                        {% for estado in todos_estados %}
+                            {% if estado == pedido.estado %}
+                                <option value="{{ estado }}" selected>
+                                    {{ estado }}
+                                </option>
+
+                            {% elif estado in estados_posibles %}
+                                <option value="{{ estado }}">
+                                    {{ estado }}
+                                </option>
+
+                            {% else %}
+                                <option value="{{ estado }}" disabled style="color: #aaa;">
+                                    {{ estado }}
+                                </option>
+                            {% endif %}
                         {% endfor %}
                     </select>
+
                     <button class="btn btn-primary btn-sm ms-2">Actualizar</button>
                     <!-- BOTON DIVIDIR -->
                     {% if puede_dividir and not modo_dividir %}
@@ -106,7 +119,9 @@
                 {% else %}
                 <p><strong>Estado:</strong> {{ pedido.estado }}</p>
                 {% endif %}
-                <p><strong>Fecha:</strong> {{ pedido.fecha|localtime|date:"d/m/Y H:i" }}</p>
+                <p><strong>Fecha:</strong> {{ pedido.fecha|localtime|date:"d/m/Y H:i" }}
+                <a href="{% url 'pedidos:historial_pedido' pedido.id %}" class="btn btn-outline-secondary btn-sm">Historial</a>
+                </p>
             </div>
 
             <!-- ==================== COLUMNA DERECHA ==================== -->

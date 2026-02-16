@@ -2,7 +2,10 @@ from django.db import models
 from usuarios.models import Usuario
 from repuestos.models import Material
 from clientes.models import Clientes
-
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
+from decimal import Decimal
+from django.conf import settings
 
 class Pedido(models.Model):
     ESTADOS = [
@@ -18,14 +21,71 @@ class Pedido(models.Model):
         ('ENTREGADO', 'Entregado'),
         ('CANCELADO', 'Cancelado'),
     ]
+    TRANSICIONES_VALIDAS = {
+        "BORRADOR": ["CREADO", "CANCELADO"],
+        "CREADO": ["CONFIRMADO", "CANCELADO"],
+        "CONFIRMADO": ["CREADO", "CERRADO", "CANCELADO"],
+        "CERRADO": ["FACTURADO"],
+        "FACTURADO": ["PAGADO"],
+        "PAGADO": ["PREPARANDO"],
+        "PREPARANDO": ["CONSOLIDADO"],
+        "CONSOLIDADO": ["ENVIADO"],
+        "ENVIADO": ["ENTREGADO"],
+        "ENTREGADO": [],
+        "CANCELADO": [],
+    }
+
     id = models.BigAutoField(primary_key=True)
     cod_cliente = models.IntegerField(null=True, blank=True)
     fecha = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='BORRADOR')
     cod_transportista = models.ForeignKey(Usuario, on_delete=models.PROTECT,related_name="pedidos_transportista",null=True,blank=True)
     observaciones = models.TextField(blank=True)
- 
-     
+
+
+    def estados_disponibles(self):
+        """
+        Devuelve lista de estados a los que puede transicionar
+        desde el estado actual.
+        """
+        return self.TRANSICIONES_VALIDAS.get(self.estado, [])
+
+
+    def puede_ir_a(self, estado):
+        return estado in self.estados_disponibles()
+    
+    
+    def cambiar_estado(self, nuevo_estado,usuario, observacion=None):
+
+        if not usuario:
+            raise ValidationError("El usuario es obligatorio para cambiar el estado.")
+        
+        estado_actual = self.estado
+
+        if nuevo_estado == estado_actual:
+            return
+
+        transiciones_permitidas = self.TRANSICIONES_VALIDAS.get(estado_actual, [])
+
+        if nuevo_estado not in transiciones_permitidas:
+            raise ValidationError(
+                f"No se puede cambiar de {estado_actual} a {nuevo_estado}"
+            )
+
+        self.estado = nuevo_estado
+        super().save(update_fields=["estado"])
+        
+        # Registrar historial
+        HistorialEstadoPedido.objects.create(
+            pedido=self,
+            estado_anterior=estado_actual,
+            estado_nuevo=nuevo_estado,
+            usuario=usuario,
+            observacion=observacion,
+        )
+
+
+    
     @property
     def cliente(self):
         return Clientes.objects.using("cliente").get(pk=self.cod_cliente) if self.cod_cliente else None
@@ -33,16 +93,97 @@ class Pedido(models.Model):
     def __str__(self):
         cli = self.cliente.nombre if self.cliente else "Sin cliente"
         return f"Pedido {self.id} - {cli}"
+    
+    def puede_facturarse(self):
+        return self.estado == 'CERRADO'
+
+    def puede_prepararse(self):
+        return self.estado == 'PAGADO'
+
+    def puede_enviarse(self):
+        return self.estado == 'CONSOLIDADO'
+    
+    def cancelar(self, motivo=None):
+        """
+        Cancela el pedido si todavía no ingresó
+        al circuito de facturación o logística.
+        """
+        estados_validos = ['BORRADOR', 'CREADO', 'CONFIRMADO']
+
+        if self.estado not in estados_validos:
+            raise ValidationError(
+                f"No se puede cancelar un pedido en estado {self.estado}"
+            )
+
+        self.estado = 'CANCELADO'
+
+        if motivo:
+            self.observaciones = motivo
+
+        self.save(update_fields=['estado'])
+
+    def cerrar(self):
+        """
+        Cierra el pedido para edición.
+        No permite modificar cantidades ni ítems,
+        pero aún no factura.
+        """
+        if self.estado != 'CONFIRMADO':
+            raise ValidationError(
+                "Solo se pueden cerrar pedidos CONFIRMADOS"
+            )
+
+        self.estado = 'CERRADO'
+        self.save(update_fields=['estado'])
+        
+    def save(self, *args, **kwargs):
+        if self.pk:
+            estado_anterior = Pedido.objects.get(pk=self.pk).estado
+            if estado_anterior != self.estado:
+                raise ValidationError(
+                    "El estado no puede modificarse directamente. "
+                    "Use cambiar_estado() para modificar el estado del pedido."
+                )
+
+        super().save(*args, **kwargs)
+        
+    from django.conf import settings
+
+class HistorialEstadoPedido(models.Model):
+    pedido = models.ForeignKey(
+        "Pedido",
+        on_delete=models.CASCADE,
+        related_name="historial_estados"
+    )
+
+    estado_anterior = models.CharField(max_length=20)
+    estado_nuevo = models.CharField(max_length=20)
+
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT
+    )
+
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    observacion = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    class Meta:
+        ordering = ["-fecha"]
 
 
 class DetallePedido(models.Model):
     cod_pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name="detalles")
     cod_repuesto = models.IntegerField() #id_mate
-    cantidad = models.DecimalField(max_digits=10, decimal_places=3,default=1)
+    cantidad = models.DecimalField(max_digits=10, decimal_places=3,default=1,validators=[MinValueValidator(Decimal(0.001))])
     numero_serie = models.CharField(max_length=20, null=True, blank=True)
     
     def __str__(self):
-        return f"{self.cod_repuesto.valor} x {self.cantidad}"
+        return f"Repuesto {self.cod_repuesto} x {self.cantidad}"
     
     @property
     def material(self):
@@ -101,3 +242,29 @@ class DetallePedido(models.Model):
             "fin_garantia": fin_garantia,
             "color_garantia": color_garantia,
         }
+
+    def save(self, *args, **kwargs):
+        if self.cod_pedido.estado != 'CREADO':
+            raise ValidationError(
+                f"Solo se pueden editar ítems cuando el pedido está en estado CREADO "
+                f"(estado actual: {self.cod_pedido.estado})"
+            )
+
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.cod_pedido.estado != 'CREADO':
+            raise ValidationError(
+                f"Solo se pueden eliminar ítems cuando el pedido está en estado CREADO "
+                f"(estado actual: {self.cod_pedido.estado})"
+            )
+
+        super().delete(*args, **kwargs)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["cod_pedido", "cod_repuesto"],
+                name="unique_repuesto_por_pedido"
+            )
+        ]

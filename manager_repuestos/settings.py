@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     # apps del sistema
     'core',
     'usuarios',
-    'pedidos',
+    #'pedidos',
     'repuestos',
     'stock',
     'facturacion',
@@ -55,6 +55,8 @@ INSTALLED_APPS = [
     'reportes',
     'sesiones',
     'clientes',
+    'pedidos.apps.PedidosConfig',
+
 ]
 
 MIDDLEWARE = [
