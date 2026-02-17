@@ -10,6 +10,7 @@ python-django-extensions
 python-django-allauth 
 python-django-crispy-forms 
 python-crispy-bootstrap5 
+python-reportlab
 mariadb
 mariadb-libs
 mariadb-clients

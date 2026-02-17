@@ -4,8 +4,11 @@ from repuestos.models import Material
 from clientes.models import Clientes
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from django.conf import settings
+from facturacion.models import Factura
+from django.db import transaction
+
 
 class Pedido(models.Model):
     ESTADOS = [
@@ -146,8 +149,55 @@ class Pedido(models.Model):
                 )
 
         super().save(*args, **kwargs)
+
         
-    from django.conf import settings
+
+    def crear_factura_desde_pedido(self, usuario):
+
+        if self.estado != "CERRADO":
+            raise ValidationError(
+                "Solo se pueden facturar pedidos en estado CERRADO."
+            )
+
+        if not self.detalles.exists():
+            raise ValidationError(
+                "No se puede facturar un pedido sin ítems."
+            )
+
+        with transaction.atomic():
+
+            # Bloqueo del pedido para evitar doble facturación
+            pedido = type(self).objects.select_for_update().get(pk=self.pk)
+
+            if Factura.objects.filter(pedido=pedido).exists():
+                raise ValidationError(
+                    "Este pedido ya tiene una factura asociada."
+                )
+
+            total = Decimal("0.00")
+
+            for d in pedido.detalles.all():
+                subtotal = Decimal(d.cantidad) * Decimal(d.material.precio)
+                total += subtotal
+
+            total = total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            
+            if total <= Decimal("0"):
+                raise ValidationError(
+                    "El total del pedido debe ser mayor a cero."
+                )
+            print("COD_CLIENTE:", pedido.cod_cliente)
+            factura = Factura.objects.create(
+                pedido=pedido,
+                cod_cliente=pedido.cod_cliente,
+                tipo="FACTURA",
+                importe_total=total,
+                estado="BORRADOR",
+            )
+
+        return factura
+
+
 
 class HistorialEstadoPedido(models.Model):
     pedido = models.ForeignKey(

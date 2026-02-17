@@ -37,4 +37,6 @@ urlpatterns = [
     #Historiales
     path("historial/", views.historial_global, name="historial_global"),
     path("historial/pedido/<int:pedido_id>/", views.historial_global, name="historial_pedido"),
+    
+    path("<int:id>/facturar/", views.facturar_pedido, name="facturar_pedido"),
 ]

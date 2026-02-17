@@ -27,7 +27,8 @@ urlpatterns = [
 
     path("", home_redirect, name="inicio"),
 
-
+    # Facturacion
+    path("facturacion/", include(("facturacion.urls", "facturacion"), namespace="facturacion")),
 
 
 

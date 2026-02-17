@@ -115,6 +115,14 @@
                     {% if puede_dividir and not modo_dividir %}
                         <a href="?dividir=1" class="btn btn-warning btn-sm ms-2">Dividir</a>
                     {% endif %}
+                    <!-- BOTON GENERAR FACTURA -->
+                    {% if pedido.estado == "CERRADO" and not pedido.factura %}
+                        <a href="{% url 'pedidos:facturar_pedido' pedido.id %}" 
+                        class="btn btn-success">Generar Factura</a>
+                    {% endif %}
+
+
+
                 </form>
                 {% else %}
                 <p><strong>Estado:</strong> {{ pedido.estado }}</p>

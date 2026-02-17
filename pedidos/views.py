@@ -14,6 +14,8 @@ from django.conf import settings
 from django.utils import timezone
 
 from pedidos.models import HistorialEstadoPedido
+from facturacion.models import Factura
+from django.core.exceptions import ValidationError
 
 # ==========================================================
 # NUEVO PEDIDO — BUSCADOR DE CLIENTE (AJAX + LINKS)
@@ -232,7 +234,7 @@ def cancelar_pedido(request, id):
             messages.success(request, "El pedido fue cancelado correctamente.")
 
     except ValidationError as e:
-        messages.error(request, e.message)
+        messages.error(request,str(e))
     return redirect("pedidos:listar")            
 
 # ==========================================================
@@ -370,3 +372,18 @@ def historial_global(request, pedido_id=None):
         "orden": orden,
         "dir": direccion,
     })
+    
+@login_required
+def facturar_pedido(request, id):
+    print ("Entro en facturar_pedidos")
+    pedido = get_object_or_404(Pedido, id=id)
+
+    try:
+        factura = pedido.crear_factura_desde_pedido(request.user)
+        messages.success(request, "Factura creada correctamente.")
+
+        return redirect("facturacion:detalle_factura", pk=factura.pk)
+
+    except ValidationError as e:
+        messages.error(request, str(e))
+        return redirect("pedidos:editar", id=pedido.id)
