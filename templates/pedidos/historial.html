@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block contenido %}
+
+<h2>
+    {% if pedido_actual %}
+        Historial del Pedido #{{ pedido_actual.id }}
+    {% else %}
+        Historial Global de Pedidos
+    {% endif %}
+</h2>
+
+<form method="get" class="row g-2 mb-3">
+
+    {% if not pedido_actual %}
+        <div class="col">
+            <input type="text" name="pedido" placeholder="Pedido"
+                   value="{{ request.GET.pedido }}" class="form-control">
+        </div>
+    {% endif %}
+
+    <div class="col">
+        <input type="text" name="usuario" placeholder="Usuario"
+               value="{{ request.GET.usuario }}" class="form-control">
+    </div>
+
+    <div class="col">
+        <input type="text" name="estado" placeholder="Estado"
+               value="{{ request.GET.estado }}" class="form-control">
+    </div>
+
+    <div class="col">
+        <input type="date" name="fecha"
+               value="{{ request.GET.fecha }}" class="form-control">
+    </div>
+
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </div>
+
+</form>
+
+<div class="table-responsive">
+<table class="table table-sm table-bordered table-hover">
+    <thead class="table-light">
+        <tr>
+            {% with nueva_dir="asc" %}
+                {% if orden == "fecha" and dir == "asc" %}
+                    {% with nueva_dir="desc" %}
+                    {% endwith %}
+                {% endif %}
+            {% endwith %}
+        <th>
+            <a href="?orden=fecha&dir={% if orden == 'fecha' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+                Fecha
+                {% if orden == "fecha" %}
+                    {% if dir == "asc" %} ▲ {% else %} ▼ {% endif %}
+                {% endif %}
+            </a>
+        </th>
+            {% if not pedido_actual %}
+        <th>
+            <a href="?orden=pedido&dir={% if orden == 'pedido' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+                Pedido
+                {% if orden == "pedido" %}
+                    {% if dir == "asc" %} ▲ {% else %} ▼ {% endif %}
+                {% endif %}
+            </a>
+        </th>
+            {% endif %}
+
+        <th>
+            <a href="?orden=usuario&dir={% if orden == 'usuario' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+                Usuario
+                {% if orden == "usuario" %}
+                    {% if dir == "asc" %} ▲ {% else %} ▼ {% endif %}
+                {% endif %}
+            </a>
+        </th>
+
+        <th>
+            <a href="?orden=estado_anterior&dir={% if orden == 'estado_anterior' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+                Estado anterior
+                {% if orden == "estado_anterior" %}
+                    {% if dir == "asc" %} ▲ {% else %} ▼ {% endif %}
+                {% endif %}
+            </a>
+        </th>
+
+        <th>
+            <a href="?orden=estado_nuevo&dir={% if orden == 'estado_nuevo' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+                Estado nuevo
+                {% if orden == "estado_nuevo" %}
+                    {% if dir == "asc" %} ▲ {% else %} ▼ {% endif %}
+                {% endif %}                
+            </a>
+        </th>
+
+        <th>Observación</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        {% for h in historial %}
+            <tr>
+                <td>{{ h.fecha|date:"d/m/Y H:i" }}</td>
+
+                {% if not pedido_actual %}
+                    <td>#{{ h.pedido.id }}</td>
+                {% endif %}
+
+                <td>
+                    {% if h.usuario.username == "sistema" %}
+                        <span class="badge bg-secondary">Sistema</span>
+                    {% else %}
+                        {{ h.usuario.username }}
+                    {% endif %}
+                </td>
+
+                <td>{{ h.estado_anterior }}</td>
+                <td><strong>{{ h.estado_nuevo }}</strong></td>
+                <td>{{ h.observacion }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="6" class="text-center text-muted">
+                    No hay registros.
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block contenido %}
+
+<div class="container mt-4">
+
+    <h2>Listado de Facturas</h2>
+
+    <hr>
+
+    <!-- FILTROS -->
+    <form method="get" class="row g-3 mb-4">
+
+        <div class="col-md-3">
+            <label class="form-label">Estado</label>
+            <select name="estado" class="form-select">
+                <option value="">Todos</option>
+                <option value="BORRADOR" {% if request.GET.estado == "BORRADOR" %}selected{% endif %}>Borrador</option>
+                <option value="EMITIDA" {% if request.GET.estado == "EMITIDA" %}selected{% endif %}>Emitida</option>
+                <option value="PAGADA" {% if request.GET.estado == "PAGADA" %}selected{% endif %}>Pagada</option>
+                <option value="ANULADA" {% if request.GET.estado == "ANULADA" %}selected{% endif %}>Anulada</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Tipo</label>
+            <select name="tipo" class="form-select">
+                <option value="">Todos</option>
+                <option value="FACTURA" {% if request.GET.tipo == "FACTURA" %}selected{% endif %}>Factura</option>
+                <option value="NOTA_CREDITO" {% if request.GET.tipo == "NOTA_CREDITO" %}selected{% endif %}>Nota de Crédito</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Cliente</label>
+            <input type="text"
+                   name="cliente"
+                   value="{{ request.GET.cliente }}"
+                   class="form-control"
+                   placeholder="Buscar por cliente">
+        </div>
+
+        <div class="col-md-2 d-flex align-items-end">
+            <div class="form-check">
+                <input class="form-check-input"
+                       type="checkbox"
+                       name="solo_saldo"
+                       value="1"
+                       {% if request.GET.solo_saldo %}checked{% endif %}>
+                <label class="form-check-label">
+                    Solo con saldo
+                </label>
+            </div>
+        </div>
+
+        <div class="col-md-1 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">
+                Filtrar
+            </button>
+        </div>
+
+    </form>
+
+    <hr>
+
+    <!-- TABLA -->
+    <table class="table table-hover table-bordered table-sm align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Nº</th>
+                <th>Tipo</th>
+                <th>Pedido</th>
+                <th>Cliente</th>
+                <th>Estado</th>
+                <th>Total</th>
+                <th>Pagado</th>
+                <th>Notas Crédito</th>
+                <th>Saldo</th>
+                <th>Fecha</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        {% for factura in facturas %}
+            <tr>
+
+                <!-- NUMERO -->
+                <td>
+                    <a href="{% url 'facturacion:detalle_factura' factura.id %}">
+                        {{ factura.numero }}
+                    </a>
+                </td>
+
+                <!-- TIPO -->
+                <td>
+                    {% if factura.tipo == "FACTURA" %}
+                        <span class="badge bg-primary">Factura</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Nota Crédito</span>
+                    {% endif %}
+                </td>
+
+                <!-- PEDIDO -->
+                <td>
+                    {% if factura.pedido %}
+                        <a href="{% url 'pedidos:editar' factura.pedido.id %}">
+                            #{{ factura.pedido.id }}
+                        </a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+
+                <!-- CLIENTE -->
+                <td>{{ factura.cliente }}</td>
+
+                <!-- ESTADO -->
+                <td>
+                    {% if factura.estado == "BORRADOR" %}
+                        <span class="badge bg-secondary">Borrador</span>
+                    {% elif factura.estado == "EMITIDA" %}
+                        <span class="badge bg-warning text-dark">Emitida</span>
+                    {% elif factura.estado == "PAGADA" %}
+                        <span class="badge bg-success">Pagada</span>
+                    {% elif factura.estado == "ANULADA" %}
+                        <span class="badge bg-danger">Anulada</span>
+                    {% endif %}
+                </td>
+
+                <!-- TOTAL -->
+                <td>$ {{ factura.importe_total }}</td>
+
+                <!-- PAGADO -->
+                <td>$ {{ factura.total_pagado }}</td>
+
+                <!-- NOTAS CREDITO -->
+                <td>$ {{ factura.total_notas_credito }}</td>
+
+                <!-- SALDO -->
+                <td>
+                    {% if factura.saldo_actual == 0 %}
+                        <span class="text-success fw-bold">
+                            $ {{ factura.saldo_actual }}
+                        </span>
+                    {% else %}
+                        <span class="text-danger fw-bold">
+                            $ {{ factura.saldo_actual }}
+                        </span>
+                    {% endif %}
+                </td>
+
+                <!-- FECHA -->
+                <td>{{ factura.fecha_emision|date:"d/m/Y H:i" }}</td>
+
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="10" class="text-center">
+                    No hay facturas registradas.
+                </td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}

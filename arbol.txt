@@ -1,0 +1,133 @@
+.
+├── clientes
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── README.md
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── core
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── README.md
+│   ├── tests.py
+│   └── views.py
+├── facturacion
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── README.md
+│   ├── tests.py
+│   ├── urls.py
+│   ├── utils.py
+│   └── views.py
+├── logistica
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── README.md
+│   ├── tests.py
+│   └── views.py
+├── manage.py
+├── manager_repuestos
+│   ├── asgi.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── pedidos
+│   ├── admin.py
+│   ├── api.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── README.md
+│   ├── signals.py
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── README.md
+├── reportes
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── README.md
+│   ├── tests.py
+│   └── views.py
+├── repuestos
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── README.md
+│   ├── templatetags
+│   │   ├── dictools.py
+│   │   └── __init__.py
+│   ├── tests.py
+│   ├── urls.py
+│   ├── utils.py
+│   └── views.py
+├── sesiones
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── README.md
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── static
+│   ├── images
+│   │   ├── favicon.ico
+│   │   └── favicon.png
+│   └── README.md
+├── stock
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── README.md
+│   ├── tests.py
+│   └── views.py
+├── templates
+│   ├── base.html
+│   ├── facturacion
+│   │   ├── detalle_factura.html
+│   │   └── listar_facturas.html
+│   ├── inicio.html
+│   ├── pedidos
+│   │   ├── agregar_items.html
+│   │   ├── confirmar_division.html
+│   │   ├── editar_pedido.html
+│   │   ├── historial.html
+│   │   ├── listar_pedidos.html
+│   │   └── nuevo_pedido_cliente.html
+│   ├── README.md
+│   ├── registration
+│   │   ├── password_reset_complete.html
+│   │   ├── password_reset_confirm.html
+│   │   ├── password_reset_done.html
+│   │   ├── password_reset_email.html
+│   │   └── password_reset_form.html
+│   ├── repuestos
+│   │   ├── buscar.html
+│   │   ├── buscar_manual.html
+│   │   ├── lista_materiales_equipo.html
+│   │   ├── lista_materiales.html
+│   │   ├── repuesto_por_id.html
+│   │   └── seleccionar_equipo.html
+│   ├── sesiones
+│   │   └── login.html
+│   └── usuarios
+│       ├── eliminar.html
+│       ├── form.html
+│       └── listar.html
+└── usuarios
+    ├── admin.py
+    ├── apps.py
+    ├── forms.py
+    ├── models.py
+    ├── README.md
+    ├── tests.py
+    ├── urls.py
+    └── views.py
+
+32 directories, 148 files

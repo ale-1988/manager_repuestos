@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block contenido %}
+
+<div class="container mt-4">
+
+    <h2>
+        {{ factura.tipo }} Nº {{ factura.numero }}
+    </h2>
+
+    <hr>
+
+    <div class="row">
+        <div class="col-md-6">
+            <p><strong>Estado:</strong> {{ factura.estado }}</p>
+            <p><strong>Cliente:</strong> {{ factura.cliente }}</p>
+            <p><strong>Fecha:</strong> {{ factura.fecha_emision }}</p>
+        </div>
+
+        <div class="col-md-6">
+            <p><strong>Importe Total:</strong> $ {{ factura.importe_total }}</p>
+            <p><strong>Total Pagado:</strong> $ {{ factura.total_pagado }}</p>
+            <p><strong>Total Notas Crédito:</strong> $ {{ factura.total_creditos_aplicados }}</p>
+            <p>
+                <strong>Saldo Actual:</strong>
+                <span class="{% if factura.saldo_actual == 0 %}text-success{% else %}text-danger{% endif %}">
+                    $ {{ factura.saldo_actual }}
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <hr>
+
+<hr>
+
+<!-- BOTONES DE ACCIÓN -->
+<div class="mb-3 d-flex gap-2 flex-wrap">
+
+    {% if factura.estado == "BORRADOR" %}
+        <a href="{% url 'facturacion:emitir_factura' factura.id %}"
+        class="btn btn-primary">
+            Emitir
+        </a>
+    {% endif %}
+
+    {% if factura.estado == "EMITIDA" %}
+        <a href="{% url 'facturacion:anular_factura' factura.id %}"
+        class="btn btn-danger">
+            Anular
+        </a>
+    {% endif %}
+
+    {% if factura.estado != "ANULADA" %}
+        <a href="{% url 'facturacion:editar_factura' factura.id %}"
+        class="btn btn-secondary">
+            Editar
+        </a>
+    {% endif %}
+
+    <a href="{% url 'facturacion:generar_pdf_factura' factura.id %}"
+    class="btn btn-outline-secondary">
+        Ver PDF
+    </a>
+
+    <a href="{% url 'facturacion:enviar_factura_email' factura.id %}"
+    class="btn btn-info">
+        Enviar por Email
+    </a>
+
+</div>
+
+
+    <hr>
+
+    <!-- PAGOS -->
+    <h4>Pagos</h4>
+
+    <table class="table table-sm table-striped">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Medio</th>
+                <th>Monto</th>
+                <th>Referencia</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pago in factura.pagos.all %}
+                <tr>
+                    <td>{{ pago.fecha }}</td>
+                    <td>{{ pago.medio_pago }}</td>
+                    <td>
+                        <span class="{% if pago.monto < 0 %}text-warning{% endif %}">
+                            $ {{ pago.monto }}
+                        </span>
+                    </td>
+                    <td>{{ pago.referencia }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">No hay pagos registrados.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if factura.estado == "EMITIDA" or factura.estado == "PAGADA" %}
+        <hr>
+        <h5>Registrar pago</h5>
+
+        {% if factura.estado == "EMITIDA" %}
+            {% if factura.tiene_credito_disponible %}
+                <a href="{% url 'facturacion:aplicar_credito' factura.id %}"
+                class="btn btn-success">
+                    Aplicar crédito existente
+                </a>
+            {% else %}
+                <button class="btn btn-success" disabled>
+                    Aplicar crédito existente
+                </button>
+            {% endif %}
+        {% endif %}
+
+        <form method="post" action="{% url 'facturacion:registrar_pago' factura.id %}">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-3">
+                    {{ pago_form.medio_pago.label_tag }}
+                    {{ pago_form.medio_pago }}
+                </div>
+                <div class="col-md-3">
+                    {{ pago_form.monto.label_tag }}
+                    {{ pago_form.monto }}
+                </div>
+                <div class="col-md-4">
+                    {{ pago_form.referencia.label_tag }}
+                    {{ pago_form.referencia }}
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success w-100">
+                        Registrar
+                    </button>
+                </div>
+            </div>
+        </form>
+    {% endif %}
+
+    <hr>
+
+    <!-- HISTORIAL -->
+    <h4>Historial de estados</h4>
+
+    <table class="table table-sm table-bordered">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Usuario</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for h in factura.historial_estados.all %}
+                <tr>
+                    <td>{{ h.fecha }}</td>
+                    <td>{{ h.estado }}</td>
+                    <td>{{ h.usuario }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">Sin movimientos.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}
+       from .models import AplicacionCredito
+
+        creditos = Factura.objects.filter(
+            tipo="NOTA_CREDITO",
+            cod_cliente=self.cod_cliente,
+            estado="EMITIDA"
+        )
+
+        for nc in creditos:
+
+            # Ya aplicado a esta factura
+            if AplicacionCredito.objects.filter(
+                factura=self,
+                nota_credito=nc
+            ).exists():
+                continue
+
+            monto_disponible = nc.importe_total - nc.total_credito_aplicado()
+
+            if monto_disponible > 0:
+                return True
+
+        return False
