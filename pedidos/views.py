@@ -282,7 +282,7 @@ def agregar_items(request, pedido_id):
 
     return render(request, "pedidos/agregar_items.html", {
         "pedido": pedido,
-        "cliente": pedido.cliente,
+        "cliente": pedido.cod_cliente,
         "editable": True,
     })
 

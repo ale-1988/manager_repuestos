@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from clientes.models import Clientes
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def buscar_clientes_ajax(request):
     texto = request.GET.get("q", "").strip()
 

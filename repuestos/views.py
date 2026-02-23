@@ -17,6 +17,7 @@ from django.db.models import Q
 from .models import Material, Grupos
 from django.shortcuts import render
 
+@login_required
 def buscar_manual(request):
     """
     Búsqueda manual de repuestos con filtros:

@@ -196,9 +196,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # Direccionamiento automatico
-LOGIN_URL = '/session/login/'
-LOGIN_REDIRECT_URL = '/'        # a dónde va luego de loguearse
-LOGOUT_REDIRECT_URL = '/sesion/login/' # a dónde va luego de desloguearse
+#LOGIN_URL = '/session/login/'
+#LOGIN_REDIRECT_URL = '/'        # a dónde va luego de loguearse
+#LOGOUT_REDIRECT_URL = '/sesion/login/' # a dónde va luego de desloguearse
+LOGIN_URL = 'sesiones:login'
+LOGIN_REDIRECT_URL = '/pedidos/listar/'
+LOGOUT_REDIRECT_URL = 'sesiones:login'
+
+
 
 #Extension de la garantia[meses]
 GARANTIA_MESES = 36

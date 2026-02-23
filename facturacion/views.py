@@ -31,7 +31,10 @@ def listar_facturas(request):
         facturas = facturas.filter(tipo=tipo)
 
     if cliente:
-        facturas = facturas.filter(cliente__username__icontains=cliente)
+        facturas = [
+            f for f in facturas
+            if cliente.lower() in str(f.cliente).lower()
+        ]
 
     if solo_saldo:
         facturas = [f for f in facturas if f.saldo_actual() > 0]
@@ -111,11 +114,26 @@ def registrar_pago(request, pk):
         form = PagoForm(request.POST)
 
         if form.is_valid():
+
             pago = form.save(commit=False)
             pago.factura = factura
-            pago.save()
 
-            messages.success(request, "Pago registrado.")
+            try:
+                pago.save()
+
+                if hasattr(pago, "_nc_generada"):
+                    messages.warning(
+                        request,
+                        f"Pago excedente detectado. "
+                        f"Se generó Nota de Crédito Nº {pago._nc_generada.numero} "
+                        f"por ${pago._nc_generada.importe_total}"
+                    )
+                else:
+                    messages.success(request, "Pago registrado correctamente.")
+
+            except ValidationError as e:
+                messages.error(request, str(e))
+
         else:
             messages.error(request, form.errors)
 
@@ -134,7 +152,7 @@ def emitir_factura(request, pk):
         messages.success(request, "Factura emitida correctamente.")
 
     except ValidationError as e:
-        messages.error(request, e.message)
+        messages.error(request, str(e))
 
     return redirect("facturacion:detalle_factura", pk=pk)
 
@@ -150,7 +168,7 @@ def anular_factura(request, pk):
         factura.cambiar_estado("ANULADA", request.user)
         messages.success(request, "Factura anulada correctamente.")
     except ValidationError as e:
-        messages.error(request, e.message)
+        messages.error(request, str(e))
 
     return redirect("facturacion:detalle_factura", pk=pk)
 
@@ -165,11 +183,15 @@ def crear_nota_credito(request, pk):
     if factura.estado == "ANULADA":
         messages.error(request, "No se puede generar nota sobre factura anulada.")
         return redirect("facturacion:detalle_factura", pk=pk)
+    
+    if factura.saldo_actual() <= 0:
+        messages.error(request, "La factura no tiene saldo disponible.")
+        return redirect("facturacion:detalle_factura", pk=pk)
 
     nc = Factura.objects.create(
         tipo="NOTA_CREDITO",
         factura_referencia=factura,
-        cliente=factura.cod_cliente,
+        cod_cliente=factura.cod_cliente,
         importe_total=factura.saldo_actual(),
         estado="BORRADOR"
     )
@@ -220,3 +242,59 @@ def enviar_factura_email(request, pk):
 
     messages.success(request, "Factura enviada por email.")
     return redirect("facturacion:detalle_factura", pk=pk)
+
+
+@login_required
+def aplicar_credito(request, pk):
+
+    factura = get_object_or_404(Factura, pk=pk)
+
+    if factura.estado not in ["EMITIDA", "PAGADA"]:
+        messages.error(request, "No se puede aplicar crédito a esta factura.")
+        return redirect("facturacion:detalle_factura", pk=pk)
+    
+    
+    from .models import AplicacionCredito
+
+    # Buscar créditos disponibles del cliente
+    creditos = Factura.objects.filter(
+        tipo="NOTA_CREDITO",
+        cod_cliente=factura.cod_cliente,
+        estado="EMITIDA"
+    )
+
+    aplicado_algo = False
+
+    for nc in creditos:
+
+        # Verificar si ya fue aplicada a esta factura
+        if AplicacionCredito.objects.filter(
+            factura=factura,
+            nota_credito=nc
+        ).exists():
+            continue
+
+        monto_disponible = nc.importe_total - nc.total_credito_aplicado()
+
+        if monto_disponible <= 0:
+            continue
+
+        saldo_factura = factura.saldo_actual()
+
+        if saldo_factura <= 0:
+            break
+
+        monto_a_aplicar = min(monto_disponible, saldo_factura)
+
+        AplicacionCredito.objects.create(
+            factura=factura,
+            nota_credito=nc,
+            monto=monto_a_aplicar
+        )
+
+        aplicado_algo = True
+
+    if aplicado_algo:
+        messages.success(request, "Créditos aplicados correctamente.")
+    else:
+        messages.warning(request, "No hay créditos disponibles para aplicar.")

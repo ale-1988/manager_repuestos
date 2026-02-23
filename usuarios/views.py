@@ -21,7 +21,6 @@ def requiere_rol(*roles_permitidos):
 # ============================================
 # Lista usuarios
 # ============================================
-@login_required
 @requiere_rol('admin', 'gerente')
 def listar_usuarios(request):
     usuarios = Usuario.objects.all().order_by('username')
@@ -31,7 +30,6 @@ def listar_usuarios(request):
 # ============================================
 # Crea usuario
 # ============================================
-@login_required
 @requiere_rol('admin', 'gerente')
 def nuevo_usuario(request):
     if request.method == "POST":
@@ -52,7 +50,6 @@ def nuevo_usuario(request):
 # ============================================
 # Edita usuario
 # ============================================
-@login_required
 @requiere_rol('admin', 'gerente')
 def editar_usuario(request, id):
     usuario = get_object_or_404(Usuario, pk=id)
@@ -75,7 +72,6 @@ def editar_usuario(request, id):
 # ============================================
 # Elimina usuario
 # ============================================
-@login_required
 @requiere_rol('admin', 'gerente')
 def eliminar_usuario(request, id):
     usuario = get_object_or_404(Usuario, pk=id)
