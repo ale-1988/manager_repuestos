@@ -21,13 +21,15 @@ class Factura(models.Model):
         ("BORRADOR", "Borrador"),
         ("EMITIDA", "Emitida"),
         ("PAGADA", "Pagada"),
+        ("CONSUMIDA", "Consumida"),  # Solo para NC
         ("ANULADA", "Anulada"),
     ]
 
     TRANSICIONES_VALIDAS = {
         "BORRADOR": ["EMITIDA", "ANULADA"],
         "EMITIDA": ["PAGADA", "ANULADA"],
-        "PAGADA": ["EMITIDA"],
+        "PAGADA": [],
+        "CONSUMIDA": [],
         "ANULADA": [],
     }
 
@@ -42,16 +44,16 @@ class Factura(models.Model):
         blank=True,
     )
 
+    # Para NC generadas por sobrepago
     factura_referencia = models.ForeignKey(
         "self",
         null=True,
         blank=True,
         on_delete=models.PROTECT,
-        related_name="notas_credito",
+        related_name="notas_generadas",
     )
 
     cod_cliente = models.IntegerField()
-
 
     # =========================
     # DATOS PRINCIPALES
@@ -82,6 +84,9 @@ class Factura(models.Model):
     class Meta:
         ordering = ["-numero"]
 
+    # ======================================
+    # CLIENTE
+    # ======================================
     @property
     def cliente(self):
         from clientes.models import Clientes
@@ -91,62 +96,27 @@ class Factura(models.Model):
     # VALIDACIONES
     # ======================================
     def clean(self):
-        
+
         try:
             self.cliente
         except Exception:
             raise ValidationError("Cliente inválido.")
 
-        if self.importe_total is None or self.importe_total <= 0:
-            raise ValidationError("El importe debe ser mayor a cero.")
+        if self.importe_total is None or self.importe_total < 0:
+            raise ValidationError("El importe no puede ser negativo.")
 
-        if self.tipo == "FACTURA":
-            if not self.pedido:
-                raise ValidationError("Una factura debe estar asociada a un pedido.")
+        if self.tipo == "FACTURA" and not self.pedido:
+            raise ValidationError("Una factura debe estar asociada a un pedido.")
 
-        if self.tipo == "NOTA_CREDITO":
-
-            # Si tiene factura_referencia, validar coherencia
-            if self.factura_referencia:
-
-                if self.cod_cliente != self.factura_referencia.cod_cliente:
-                    raise ValidationError(
-                        "La NC debe tener el mismo cliente que la factura."
-                    )
-
-                if self.factura_referencia.tipo != "FACTURA":
-                    raise ValidationError(
-                        "Solo se puede generar nota de crédito sobre una factura."
-                    )
-
-            # Si NO tiene factura_referencia,
-            # es crédito a cuenta (por sobrepago) y está permitido
+        if self.tipo == "NOTA_CREDITO" and not self.factura_referencia:
+            raise ValidationError(
+                "Las notas de crédito deben tener factura de referencia."
+            )
 
     # ======================================
-    # NUMERACIÓN AUTOMÁTICA SEGURA
+    # NUMERACIÓN AUTOMÁTICA
     # ======================================
     def save(self, *args, **kwargs):
-
-        if self.pk:
-            original = Factura.objects.get(pk=self.pk)
-
-            if original.estado != "BORRADOR":
-
-                # Permitir solo cambio de estado
-                campos_editables = [
-                    "pedido",
-                    "factura_referencia",
-                    "cod_cliente",
-                    "importe_total",
-                    "tipo",
-                    "observaciones",
-                ]
-
-                for campo in campos_editables:
-                    if getattr(original, campo) != getattr(self, campo):
-                        raise ValidationError(
-                            "Solo se puede editar una factura en estado BORRADOR."
-                        )
 
         self.full_clean()
 
@@ -160,12 +130,13 @@ class Factura(models.Model):
 
         super().save(*args, **kwargs)
 
-
     # ======================================
-    # CAMBIO DE ESTADO CONTROLADO
+    # CAMBIO DE ESTADO
     # ======================================
     def cambiar_estado(self, nuevo_estado, usuario):
+
         with transaction.atomic():
+
             if nuevo_estado not in dict(self.ESTADO_CHOICES):
                 raise ValidationError("Estado inválido.")
 
@@ -174,32 +145,53 @@ class Factura(models.Model):
                     f"No se puede pasar de {self.estado} a {nuevo_estado}"
                 )
 
-            # Validaciones previas específicas
-            if nuevo_estado == "ANULADA" and self.pagos.exists():
-                raise ValidationError("No se puede anular una factura con pagos.")
+            # ======================================
+            # EMISIÓN DE FACTURA
+            # ======================================
+            if self.tipo == "FACTURA" and nuevo_estado == "EMITIDA":
 
-            if self.tipo == "NOTA_CREDITO" and nuevo_estado == "EMITIDA":
-                factura = self.factura_referencia
-                saldo = factura.saldo_actual()
+                creditos = Factura.objects.filter(
+                    tipo="NOTA_CREDITO",
+                    cod_cliente=self.cod_cliente,
+                    estado="EMITIDA",
+                )
 
-                if self.importe_total > saldo:
-                    raise ValidationError(
-                        "La nota de crédito excede el saldo disponible de la factura."
-                    )
+                total_credito = (
+                    creditos.aggregate(Sum("importe_total"))["importe_total__sum"]
+                    or 0
+                )
 
-            # Cambiar estado
+                if total_credito > 0:
+
+                    importe_original = self.importe_total
+
+                    descuento = min(total_credito, importe_original)
+                    restante_credito = total_credito - descuento
+
+                    # Aplicar descuento a la factura
+                    self.importe_total = importe_original - descuento
+
+                    # Consumir todas las NC existentes
+                    for nc in creditos:
+                        nc.estado = "CONSUMIDA"
+                        nc.save()
+
+                    # Si sobró crédito → generar nueva NC
+                    if restante_credito > 0:
+                        Factura.objects.create(
+                            tipo="NOTA_CREDITO",
+                            factura_referencia=self,
+                            cod_cliente=self.cod_cliente,
+                            importe_total=restante_credito,
+                            estado="EMITIDA",
+                            observaciones="Crédito remanente por aplicación automática.",
+                        )
+
+            # ======================================
+            # CAMBIO DE ESTADO
+            # ======================================
             self.estado = nuevo_estado
             self.save()
-
-            # Efectos colaterales
-            if nuevo_estado == "PAGADA" and self.pedido:
-                self.pedido.cambiar_estado("PAGADO", usuario)
-
-            if nuevo_estado == "ANULADA" and self.pedido:
-                self.pedido.cambiar_estado("CERRADO", usuario)
-
-            if self.tipo == "NOTA_CREDITO" and self.factura_referencia:
-                self.factura_referencia.verificar_estado_por_saldo(usuario)
 
             # Historial
             HistorialEstadoFactura.objects.create(
@@ -207,39 +199,30 @@ class Factura(models.Model):
                 estado=nuevo_estado,
                 usuario=usuario,
             )
-
     # ======================================
     # TOTALES
     # ======================================
     def total_pagado(self):
         return self.pagos.aggregate(Sum("monto"))["monto__sum"] or 0
 
-    def total_notas_credito(self):
-        return (
-            self.notas_credito.filter(estado="EMITIDA")
-            .aggregate(Sum("importe_total"))["importe_total__sum"]
-            or 0
-        )
-
-    def total_creditos_aplicados(self):
-        return (
-            self.aplicaciones_credito.aggregate(Sum("monto"))["monto__sum"]
-            or 0
-        )
-
     def saldo_actual(self):
+        return self.importe_total - self.total_pagado()
+
+    @classmethod
+    def credito_disponible_cliente(cls, cod_cliente):
         return (
-            self.importe_total
-            - self.total_pagado()
-            - self.total_creditos_aplicados()
+            cls.objects.filter(
+                tipo="NOTA_CREDITO",
+                cod_cliente=cod_cliente,
+                estado="EMITIDA",
+            ).aggregate(Sum("importe_total"))["importe_total__sum"]
+            or 0
         )
 
-    # ======================================
-    # VERIFICAR ESTADO POR SALDO
-    # ======================================
     def verificar_estado_por_saldo(self, usuario=None):
+
         from usuarios.services import get_usuario_sistema
-                
+
         if not usuario:
             usuario = get_usuario_sistema()
 
@@ -247,35 +230,6 @@ class Factura(models.Model):
 
         if saldo == 0 and self.estado == "EMITIDA":
             self.cambiar_estado("PAGADA", usuario)
-
-        elif saldo > 0 and self.estado == "PAGADA":
-            self.cambiar_estado("EMITIDA",usuario)
-
-
-    def tiene_credito_disponible(self):
-        from .models import AplicacionCredito
-
-        creditos = Factura.objects.filter(
-            tipo="NOTA_CREDITO",
-            cod_cliente=self.cod_cliente,
-            estado="EMITIDA"
-        )
-
-        for nc in creditos:
-
-            # Ya aplicado a esta factura
-            if AplicacionCredito.objects.filter(
-                factura=self,
-                nota_credito=nc
-            ).exists():
-                continue
-
-            monto_disponible = nc.importe_total - nc.total_credito_aplicado()
-
-            if monto_disponible > 0:
-                return True
-
-        return False
 
     def __str__(self):
         return f"{self.tipo} Nº {self.numero}"
@@ -293,6 +247,7 @@ class HistorialEstadoFactura(models.Model):
     )
 
     estado = models.CharField(max_length=15)
+
     fecha = models.DateTimeField(auto_now_add=True)
 
     usuario = models.ForeignKey(
@@ -343,77 +298,46 @@ class Pago(models.Model):
     )
 
     def clean(self):
-
         if not self.factura_id:
             return
-
         if self.factura.estado not in ["EMITIDA", "PAGADA"]:
             raise ValidationError(
-                "No se pueden registrar movimientos en esta factura."
-            )
-
-        total_actual = self.factura.total_pagado()
-
-        if self.pk:
-            pago_original = Pago.objects.get(pk=self.pk)
-            total_actual -= pago_original.monto
-
-        nuevo_total = total_actual + self.monto
-
-        if nuevo_total < 0:
-            raise ValidationError("El total pagado no puede quedar negativo.")
-
-        limite = (
-            self.factura.importe_total
-            - self.factura.total_notas_credito()
-        )
-
-        if self.monto < 0 and not self.referencia.strip():
-            raise ValidationError(
-                "Debe indicar el motivo del reverso."
+                "No se pueden registrar pagos en esta factura."
             )
 
     def save(self, *args, **kwargs):
-        from django.db import transaction
-        from .models import Factura
 
         with transaction.atomic():
 
             self.full_clean()
 
+            if not self.factura_id:
+                raise ValidationError("El pago debe tener factura asociada.")
+            
             factura = self.factura
 
-            # Calcular saldo actual ANTES de guardar
             saldo_pendiente = factura.saldo_actual()
 
-            # Si el pago supera el saldo → hay sobrepago
+            # Sobrepago → generar NC
             if self.monto > saldo_pendiente:
 
                 excedente = self.monto - saldo_pendiente
 
-                # Ajustar el pago al saldo real
                 self.monto = saldo_pendiente
                 super().save(*args, **kwargs)
 
-                # Crear Nota de Crédito automática
-                nc = Factura.objects.create(
+                Factura.objects.create(
                     tipo="NOTA_CREDITO",
-                    factura_referencia=None,
+                    factura_referencia=factura,
                     cod_cliente=factura.cod_cliente,
                     importe_total=excedente,
                     estado="EMITIDA",
-                    observaciones="Crédito generado por sobrepago."
                 )
 
-                # Marcar factura como pagada
-                factura.verificar_estado_por_saldo()
-
-                # Guardar referencia para mostrar mensaje en vista
-                self._nc_generada = nc
             else:
                 super().save(*args, **kwargs)
-                factura.verificar_estado_por_saldo()
 
+            factura.verificar_estado_por_saldo()
 
     def delete(self, *args, **kwargs):
         raise ValidationError(
@@ -422,52 +346,3 @@ class Pago(models.Model):
 
     def __str__(self):
         return f"Pago {self.monto} - Factura {self.factura.numero}"
-
-    
-class AplicacionCredito(models.Model):
-
-    factura = models.ForeignKey(
-        Factura,
-        on_delete=models.CASCADE,
-        related_name="aplicaciones_credito",
-    )
-
-    nota_credito = models.ForeignKey(
-        Factura,
-        on_delete=models.CASCADE,
-        related_name="aplicaciones_realizadas",
-        limit_choices_to={"tipo": "NOTA_CREDITO"},
-    )
-
-    monto = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-    )
-
-    fecha = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ("factura", "nota_credito")
-
-    def clean(self):
-
-        if self.monto <= 0:
-            raise ValidationError("El monto debe ser mayor a cero.")
-
-        saldo_factura = self.factura.saldo_actual()
-        if self.monto > saldo_factura:
-            raise ValidationError("El monto excede el saldo de la factura.")
-
-        saldo_nc = self.nota_credito.saldo_actual()
-        if self.monto > saldo_nc:
-            raise ValidationError("El monto excede el saldo disponible del crédito.")
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
-
-        # Verificar estado posterior
-        self.factura.verificar_estado_por_saldo()
-
-    def __str__(self):
-        return f"Aplicación {self.monto}"

@@ -1,15 +1,14 @@
-import io
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib import colors
-from reportlab.lib.units import inch
-
-
 def build_pdf_factura(factura):
     """
     Genera el PDF de una factura y devuelve los bytes.
     No genera HttpResponse.
     """
+
+    import io
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.lib import colors
+    from reportlab.lib.units import inch
 
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer)
@@ -27,7 +26,6 @@ def build_pdf_factura(factura):
         ["Estado", factura.estado],
         ["Importe Total", f"${factura.importe_total}"],
         ["Total Pagado", f"${factura.total_pagado()}"],
-        ["Total Notas Crédito", f"${factura.total_notas_credito()}"],
         ["Saldo", f"${factura.saldo_actual()}"],
     ]
 

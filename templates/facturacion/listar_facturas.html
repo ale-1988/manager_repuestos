@@ -17,6 +17,7 @@
                 <option value="BORRADOR" {% if request.GET.estado == "BORRADOR" %}selected{% endif %}>Borrador</option>
                 <option value="EMITIDA" {% if request.GET.estado == "EMITIDA" %}selected{% endif %}>Emitida</option>
                 <option value="PAGADA" {% if request.GET.estado == "PAGADA" %}selected{% endif %}>Pagada</option>
+                <option value="CONSUMIDA" {% if request.GET.estado == "CONSUMIDA" %}selected{% endif %}>Consumida</option>
                 <option value="ANULADA" {% if request.GET.estado == "ANULADA" %}selected{% endif %}>Anulada</option>
             </select>
         </div>
@@ -73,7 +74,6 @@
                 <th>Estado</th>
                 <th>Total</th>
                 <th>Pagado</th>
-                <th>Notas Crédito</th>
                 <th>Saldo</th>
                 <th>Fecha</th>
             </tr>
@@ -83,14 +83,12 @@
         {% for factura in facturas %}
             <tr>
 
-                <!-- NUMERO -->
                 <td>
                     <a href="{% url 'facturacion:detalle_factura' factura.id %}">
                         {{ factura.numero }}
                     </a>
                 </td>
 
-                <!-- TIPO -->
                 <td>
                     {% if factura.tipo == "FACTURA" %}
                         <span class="badge bg-primary">Factura</span>
@@ -99,7 +97,6 @@
                     {% endif %}
                 </td>
 
-                <!-- PEDIDO -->
                 <td>
                     {% if factura.pedido %}
                         <a href="{% url 'pedidos:editar' factura.pedido.id %}">
@@ -110,10 +107,8 @@
                     {% endif %}
                 </td>
 
-                <!-- CLIENTE -->
                 <td>{{ factura.cliente }}</td>
 
-                <!-- ESTADO -->
                 <td>
                     {% if factura.estado == "BORRADOR" %}
                         <span class="badge bg-secondary">Borrador</span>
@@ -121,21 +116,17 @@
                         <span class="badge bg-warning text-dark">Emitida</span>
                     {% elif factura.estado == "PAGADA" %}
                         <span class="badge bg-success">Pagada</span>
+                    {% elif factura.estado == "CONSUMIDA" %}
+                        <span class="badge bg-success">Consumida</span>
                     {% elif factura.estado == "ANULADA" %}
                         <span class="badge bg-danger">Anulada</span>
                     {% endif %}
                 </td>
 
-                <!-- TOTAL -->
                 <td>$ {{ factura.importe_total }}</td>
 
-                <!-- PAGADO -->
                 <td>$ {{ factura.total_pagado }}</td>
 
-                <!-- NOTAS CREDITO -->
-                <td>$ {{ factura.total_notas_credito }}</td>
-
-                <!-- SALDO -->
                 <td>
                     {% if factura.saldo_actual == 0 %}
                         <span class="text-success fw-bold">
@@ -148,13 +139,12 @@
                     {% endif %}
                 </td>
 
-                <!-- FECHA -->
                 <td>{{ factura.fecha_emision|date:"d/m/Y H:i" }}</td>
 
             </tr>
         {% empty %}
             <tr>
-                <td colspan="10" class="text-center">
+                <td colspan="9" class="text-center">
                     No hay facturas registradas.
                 </td>
             </tr>

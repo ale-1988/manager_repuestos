@@ -1,13 +1,76 @@
 {% extends "base.html" %}
 {% block contenido %}
+
 <div class="container mt-4">
-    <h2>Editar Factura</h2>
+
+    <h2>
+        Editar {{ form.instance.tipo }} Nº {{ form.instance.numero }}
+    </h2>
+
+    <hr>
+
+    {% if form.instance.estado != "BORRADOR" %}
+        <div class="alert alert-warning">
+            Esta factura no puede editarse porque no está en estado BORRADOR.
+        </div>
+    {% endif %}
+
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">
+
+        <div class="row">
+
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.pedido.label_tag }}
+                    {{ form.pedido }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.cod_cliente.label_tag }}
+                    {{ form.cod_cliente }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.tipo.label_tag }}
+                    {{ form.tipo }}
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.factura_referencia.label_tag }}
+                    {{ form.factura_referencia }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.importe_total.label_tag }}
+                    {{ form.importe_total }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.observaciones.label_tag }}
+                    {{ form.observaciones }}
+                </div>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <button type="submit"
+                class="btn btn-primary"
+                {% if form.instance.estado != "BORRADOR" %}disabled{% endif %}>
             Guardar
         </button>
+
+        <a href="{% url 'facturacion:detalle_factura' form.instance.id %}"
+            class="btn btn-secondary">
+            Cancelar
+        </a>
+
     </form>
+
 </div>
+
 {% endblock %}

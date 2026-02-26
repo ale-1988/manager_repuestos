@@ -94,12 +94,15 @@ def detalle_factura(request, pk):
 
     factura = get_object_or_404(Factura, pk=pk)
 
-    pago_form = PagoForm()
+    credito_cliente = Factura.credito_disponible_cliente(factura.cod_cliente)
 
-    return render(request, "facturacion/detalle_factura.html", {
+    context = {
         "factura": factura,
-        "pago_form": pago_form
-    })
+        "pago_form": PagoForm(factura=factura),
+        "credito_cliente": credito_cliente,
+    }
+
+    return render(request, "facturacion/detalle_factura.html", context)
 
 
 # ==============================
@@ -111,7 +114,7 @@ def registrar_pago(request, pk):
     factura = get_object_or_404(Factura, pk=pk)
 
     if request.method == "POST":
-        form = PagoForm(request.POST)
+        form = PagoForm(request.POST,factura=factura)
 
         if form.is_valid():
 

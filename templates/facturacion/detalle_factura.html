@@ -11,7 +11,17 @@
 
     <div class="row">
         <div class="col-md-6">
-            <p><strong>Estado:</strong> {{ factura.estado }}</p>
+            <p><strong>Estado:</strong>
+                {% if factura.estado == "CONSUMIDA" %}
+                    <span class="badge bg-success">Consumida</span>
+                {% elif factura.estado == "PAGADA" %}
+                    <span class="badge bg-primary">Pagada</span>
+                {% elif factura.estado == "ANULADA" %}
+                    <span class="badge bg-danger">Anulada</span>
+                {% else %}
+                    {{ factura.estado }}
+                {% endif %}
+            </p>
             <p><strong>Cliente:</strong> {{ factura.cliente }}</p>
             <p><strong>Fecha:</strong> {{ factura.fecha_emision }}</p>
         </div>
@@ -19,56 +29,71 @@
         <div class="col-md-6">
             <p><strong>Importe Total:</strong> $ {{ factura.importe_total }}</p>
             <p><strong>Total Pagado:</strong> $ {{ factura.total_pagado }}</p>
-            <p><strong>Total Notas Crédito:</strong> $ {{ factura.total_creditos_aplicados }}</p>
+
             <p>
                 <strong>Saldo Actual:</strong>
-                <span class="{% if factura.saldo_actual == 0 %}text-success{% else %}text-danger{% endif %}">
-                    $ {{ factura.saldo_actual }}
-                </span>
+                {% if factura.saldo_actual == 0 %}
+                    <span class="text-success">$ {{ factura.saldo_actual }}</span>
+                {% elif factura.saldo_actual > 0 %}
+                    <span class="text-danger">$ {{ factura.saldo_actual }}</span>
+                {% else %}
+                    <span class="text-success">
+                        $ {{ factura.saldo_actual }} (NC)
+                    </span>
+                {% endif %}
+
+                {% if factura.tipo == "FACTURA" and credito_cliente > 0 %}
+                    <p>
+                        <strong>Crédito disponible del cliente:</strong>
+                        <span class="text-success">
+                            $ {{ credito_cliente }}
+                        </span>
+                    </p>
+                {% endif %}
+                {% if factura.tipo == "NOTA_CREDITO" %}
+                <p>
+                    <strong>Factura de origen:</strong>
+                    <a href="{% url 'facturacion:detalle_factura' factura.factura_referencia.id %}">
+                        Nº {{ factura.factura_referencia.numero }}
+                    </a>
+                </p>
+                {% endif %}
             </p>
         </div>
     </div>
 
     <hr>
 
-<hr>
+    <!-- BOTONES -->
+    <div class="mb-3 d-flex gap-2 flex-wrap">
 
-<!-- BOTONES DE ACCIÓN -->
-<div class="mb-3 d-flex gap-2 flex-wrap">
+        {% if factura.estado == "BORRADOR" %}
+            <a href="{% url 'facturacion:emitir_factura' factura.id %}"
+               class="btn btn-primary">
+                Emitir
+            </a>
+        {% endif %}
 
-    {% if factura.estado == "BORRADOR" %}
-        <a href="{% url 'facturacion:emitir_factura' factura.id %}"
-        class="btn btn-primary">
-            Emitir
+        {% if factura.estado == "EMITIDA" %}
+            <a href="{% url 'facturacion:anular_factura' factura.id %}"
+               class="btn btn-danger">
+                Anular
+            </a>
+        {% endif %}
+
+        {% if factura.estado != "ANULADA" %}
+            <a href="{% url 'facturacion:editar_factura' factura.id %}"
+               class="btn btn-secondary">
+                Editar
+            </a>
+        {% endif %}
+
+        <a href="{% url 'facturacion:generar_pdf_factura' factura.id %}"
+           class="btn btn-outline-secondary">
+            Ver PDF
         </a>
-    {% endif %}
 
-    {% if factura.estado == "EMITIDA" %}
-        <a href="{% url 'facturacion:anular_factura' factura.id %}"
-        class="btn btn-danger">
-            Anular
-        </a>
-    {% endif %}
-
-    {% if factura.estado != "ANULADA" %}
-        <a href="{% url 'facturacion:editar_factura' factura.id %}"
-        class="btn btn-secondary">
-            Editar
-        </a>
-    {% endif %}
-
-    <a href="{% url 'facturacion:generar_pdf_factura' factura.id %}"
-    class="btn btn-outline-secondary">
-        Ver PDF
-    </a>
-
-    <a href="{% url 'facturacion:enviar_factura_email' factura.id %}"
-    class="btn btn-info">
-        Enviar por Email
-    </a>
-
-</div>
-
+    </div>
 
     <hr>
 
@@ -89,11 +114,7 @@
                 <tr>
                     <td>{{ pago.fecha }}</td>
                     <td>{{ pago.medio_pago }}</td>
-                    <td>
-                        <span class="{% if pago.monto < 0 %}text-warning{% endif %}">
-                            $ {{ pago.monto }}
-                        </span>
-                    </td>
+                    <td>$ {{ pago.monto }}</td>
                     <td>{{ pago.referencia }}</td>
                 </tr>
             {% empty %}
@@ -104,22 +125,9 @@
         </tbody>
     </table>
 
-    {% if factura.estado == "EMITIDA" or factura.estado == "PAGADA" %}
+    {% if factura.estado == "EMITIDA" and factura.saldo_actual > 0 %}
         <hr>
         <h5>Registrar pago</h5>
-
-        {% if factura.estado == "EMITIDA" %}
-            {% if factura.tiene_credito_disponible %}
-                <a href="{% url 'facturacion:aplicar_credito' factura.id %}"
-                class="btn btn-success">
-                    Aplicar crédito existente
-                </a>
-            {% else %}
-                <button class="btn btn-success" disabled>
-                    Aplicar crédito existente
-                </button>
-            {% endif %}
-        {% endif %}
 
         <form method="post" action="{% url 'facturacion:registrar_pago' factura.id %}">
             {% csrf_token %}
@@ -176,26 +184,3 @@
 </div>
 
 {% endblock %}
-       from .models import AplicacionCredito
-
-        creditos = Factura.objects.filter(
-            tipo="NOTA_CREDITO",
-            cod_cliente=self.cod_cliente,
-            estado="EMITIDA"
-        )
-
-        for nc in creditos:
-
-            # Ya aplicado a esta factura
-            if AplicacionCredito.objects.filter(
-                factura=self,
-                nota_credito=nc
-            ).exists():
-                continue
-
-            monto_disponible = nc.importe_total - nc.total_credito_aplicado()
-
-            if monto_disponible > 0:
-                return True
-
-        return False
