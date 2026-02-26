@@ -105,13 +105,28 @@ class Factura(models.Model):
         if self.importe_total is None or self.importe_total < 0:
             raise ValidationError("El importe no puede ser negativo.")
 
-        if self.tipo == "FACTURA" and not self.pedido:
-            raise ValidationError("Una factura debe estar asociada a un pedido.")
+        # =========================
+        # FACTURA
+        # =========================
+        if self.tipo == "FACTURA":
+            if not self.pedido:
+                raise ValidationError("Una factura debe estar asociada a un pedido.")
 
-        if self.tipo == "NOTA_CREDITO" and not self.factura_referencia:
-            raise ValidationError(
-                "Las notas de crédito deben tener factura de referencia."
-            )
+        # =========================
+        # NOTA DE CRÉDITO
+        # =========================
+        if self.tipo == "NOTA_CREDITO":
+
+            # No puede estar en BORRADOR
+            if self.estado == "BORRADOR":
+                raise ValidationError(
+                    "Una Nota de Crédito no puede estar en estado BORRADOR."
+                )
+
+            if not self.factura_referencia:
+                raise ValidationError(
+                    "Las notas de crédito deben tener factura de referencia."
+                )
 
     # ======================================
     # NUMERACIÓN AUTOMÁTICA
@@ -144,7 +159,20 @@ class Factura(models.Model):
                 raise ValidationError(
                     f"No se puede pasar de {self.estado} a {nuevo_estado}"
                 )
+            # =========================
+            # RESTRICCIONES PARA NC
+            # =========================
+            if self.tipo == "NOTA_CREDITO":
 
+                if nuevo_estado == "BORRADOR":
+                    raise ValidationError(
+                        "Una Nota de Crédito no puede volver a BORRADOR."
+                    )
+
+                if nuevo_estado == "PAGADA":
+                    raise ValidationError(
+                        "Una Nota de Crédito no puede pasar a estado PAGADA."
+                    )
             # ======================================
             # EMISIÓN DE FACTURA
             # ======================================
@@ -186,6 +214,23 @@ class Factura(models.Model):
                             estado="EMITIDA",
                             observaciones="Crédito remanente por aplicación automática.",
                         )
+                        
+            # ======================================
+            # ANULACIÓN DE FACTURA
+            # ======================================
+            if self.tipo == "FACTURA" and nuevo_estado == "ANULADA":
+
+                # Generar NC por el importe total de la factura
+                if self.importe_total > 0:
+
+                    Factura.objects.create(
+                        tipo="NOTA_CREDITO",
+                        factura_referencia=self,
+                        cod_cliente=self.cod_cliente,
+                        importe_total=self.importe_total,
+                        estado="EMITIDA",
+                        observaciones="Nota de crédito generada por anulación de factura.",
+                    )
 
             # ======================================
             # CAMBIO DE ESTADO

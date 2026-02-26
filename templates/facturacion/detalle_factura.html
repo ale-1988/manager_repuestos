@@ -11,7 +11,8 @@
 
     <div class="row">
         <div class="col-md-6">
-            <p><strong>Estado:</strong>
+            <p>
+                <strong>Estado:</strong>
                 {% if factura.estado == "CONSUMIDA" %}
                     <span class="badge bg-success">Consumida</span>
                 {% elif factura.estado == "PAGADA" %}
@@ -19,9 +20,10 @@
                 {% elif factura.estado == "ANULADA" %}
                     <span class="badge bg-danger">Anulada</span>
                 {% else %}
-                    {{ factura.estado }}
+                    <span class="badge bg-secondary">{{ factura.estado }}</span>
                 {% endif %}
             </p>
+
             <p><strong>Cliente:</strong> {{ factura.cliente }}</p>
             <p><strong>Fecha:</strong> {{ factura.fecha_emision }}</p>
         </div>
@@ -41,24 +43,25 @@
                         $ {{ factura.saldo_actual }} (NC)
                     </span>
                 {% endif %}
+            </p>
 
-                {% if factura.tipo == "FACTURA" and credito_cliente > 0 %}
-                    <p>
-                        <strong>Crédito disponible del cliente:</strong>
-                        <span class="text-success">
-                            $ {{ credito_cliente }}
-                        </span>
-                    </p>
-                {% endif %}
-                {% if factura.tipo == "NOTA_CREDITO" %}
+            {% if factura.tipo == "FACTURA" and credito_cliente > 0 %}
+                <p>
+                    <strong>Crédito disponible del cliente:</strong>
+                    <span class="text-success">
+                        $ {{ credito_cliente }}
+                    </span>
+                </p>
+            {% endif %}
+
+            {% if factura.tipo == "NOTA_CREDITO" and factura.factura_referencia %}
                 <p>
                     <strong>Factura de origen:</strong>
                     <a href="{% url 'facturacion:detalle_factura' factura.factura_referencia.id %}">
                         Nº {{ factura.factura_referencia.numero }}
                     </a>
                 </p>
-                {% endif %}
-            </p>
+            {% endif %}
         </div>
     </div>
 
@@ -67,21 +70,21 @@
     <!-- BOTONES -->
     <div class="mb-3 d-flex gap-2 flex-wrap">
 
-        {% if factura.estado == "BORRADOR" %}
+        {% if factura.tipo == "FACTURA" and factura.estado == "BORRADOR" %}
             <a href="{% url 'facturacion:emitir_factura' factura.id %}"
                class="btn btn-primary">
                 Emitir
             </a>
         {% endif %}
 
-        {% if factura.estado == "EMITIDA" %}
+        {% if factura.tipo == "FACTURA" and factura.estado == "EMITIDA" %}
             <a href="{% url 'facturacion:anular_factura' factura.id %}"
                class="btn btn-danger">
                 Anular
             </a>
         {% endif %}
 
-        {% if factura.estado != "ANULADA" %}
+        {% if factura.tipo == "FACTURA" and factura.estado != "ANULADA" %}
             <a href="{% url 'facturacion:editar_factura' factura.id %}"
                class="btn btn-secondary">
                 Editar
@@ -95,62 +98,66 @@
 
     </div>
 
-    <hr>
+    {% if factura.tipo == "FACTURA" %}
 
-    <!-- PAGOS -->
-    <h4>Pagos</h4>
-
-    <table class="table table-sm table-striped">
-        <thead>
-            <tr>
-                <th>Fecha</th>
-                <th>Medio</th>
-                <th>Monto</th>
-                <th>Referencia</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for pago in factura.pagos.all %}
-                <tr>
-                    <td>{{ pago.fecha }}</td>
-                    <td>{{ pago.medio_pago }}</td>
-                    <td>$ {{ pago.monto }}</td>
-                    <td>{{ pago.referencia }}</td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="4">No hay pagos registrados.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    {% if factura.estado == "EMITIDA" and factura.saldo_actual > 0 %}
         <hr>
-        <h5>Registrar pago</h5>
 
-        <form method="post" action="{% url 'facturacion:registrar_pago' factura.id %}">
-            {% csrf_token %}
-            <div class="row">
-                <div class="col-md-3">
-                    {{ pago_form.medio_pago.label_tag }}
-                    {{ pago_form.medio_pago }}
+        <!-- PAGOS -->
+        <h4>Pagos</h4>
+
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Medio</th>
+                    <th>Monto</th>
+                    <th>Referencia</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pago in factura.pagos.all %}
+                    <tr>
+                        <td>{{ pago.fecha }}</td>
+                        <td>{{ pago.medio_pago }}</td>
+                        <td>$ {{ pago.monto }}</td>
+                        <td>{{ pago.referencia }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4">No hay pagos registrados.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if factura.estado == "EMITIDA" and factura.saldo_actual > 0 %}
+            <hr>
+            <h5>Registrar pago</h5>
+
+            <form method="post" action="{% url 'facturacion:registrar_pago' factura.id %}">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-3">
+                        {{ pago_form.medio_pago.label_tag }}
+                        {{ pago_form.medio_pago }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ pago_form.monto.label_tag }}
+                        {{ pago_form.monto }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ pago_form.referencia.label_tag }}
+                        {{ pago_form.referencia }}
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success w-100">
+                            Registrar
+                        </button>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    {{ pago_form.monto.label_tag }}
-                    {{ pago_form.monto }}
-                </div>
-                <div class="col-md-4">
-                    {{ pago_form.referencia.label_tag }}
-                    {{ pago_form.referencia }}
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-success w-100">
-                        Registrar
-                    </button>
-                </div>
-            </div>
-        </form>
+            </form>
+        {% endif %}
+
     {% endif %}
 
     <hr>
