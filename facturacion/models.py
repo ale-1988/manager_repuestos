@@ -178,7 +178,7 @@ class Factura(models.Model):
             # ======================================
             if self.tipo == "FACTURA" and nuevo_estado == "EMITIDA":
 
-                creditos = Factura.objects.filter(
+                creditos = Factura.objects.select_for_update().filter(
                     tipo="NOTA_CREDITO",
                     cod_cliente=self.cod_cliente,
                     estado="EMITIDA",
@@ -219,15 +219,17 @@ class Factura(models.Model):
             # ANULACIÓN DE FACTURA
             # ======================================
             if self.tipo == "FACTURA" and nuevo_estado == "ANULADA":
-
-                # Generar NC por el importe total de la factura
-                if self.importe_total > 0:
-
+                
+                # Pago real
+                total_pagado = self.total_pagado()
+                
+                # Generar NC por el importe pagado de la factura
+                if total_pagado > 0:
                     Factura.objects.create(
                         tipo="NOTA_CREDITO",
                         factura_referencia=self,
                         cod_cliente=self.cod_cliente,
-                        importe_total=self.importe_total,
+                        importe_total=total_pagado,
                         estado="EMITIDA",
                         observaciones="Nota de crédito generada por anulación de factura.",
                     )
@@ -345,6 +347,13 @@ class Pago(models.Model):
     def clean(self):
         if not self.factura_id:
             return
+        
+        # No permitir pagos sobre NC
+        if self.factura.tipo != "FACTURA":
+            raise ValidationError(
+                "No se pueden registrar pagos en una Nota de Crédito."
+            )
+        
         if self.factura.estado not in ["EMITIDA", "PAGADA"]:
             raise ValidationError(
                 "No se pueden registrar pagos en esta factura."
