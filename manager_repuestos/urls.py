@@ -17,7 +17,7 @@ urlpatterns = [
     path("repuestos/", include(("repuestos.urls", "repuestos"), namespace="repuestos")),
     path("pedidos/", include(("pedidos.urls", "pedidos"), namespace="pedidos")),
     path("facturacion/", include(("facturacion.urls", "facturacion"), namespace="facturacion")),
-
+    path("logistica/", include(("logistica.urls", "logistica"), namespace="logistica")),
     path("", home_redirect, name="inicio"),
 ]
 handler404 = "manager_repuestos.views.custom_404"

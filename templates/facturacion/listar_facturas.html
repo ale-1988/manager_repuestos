@@ -67,15 +67,15 @@
     <table class="table table-hover table-bordered table-sm align-middle">
         <thead class="table-light">
             <tr>
-                <th>Nº</th>
-                <th>Tipo</th>
-                <th>Pedido</th>
+                <th class="text-center">Nº</th>
+                <th class="text-center">Tipo</th>
+                <th class="text-center">Pedido</th>
                 <th>Cliente</th>
-                <th>Estado</th>
-                <th>Total</th>
-                <th>Pagado</th>
-                <th>Saldo</th>
-                <th>Fecha</th>
+                <th class="text-center">Estado</th>
+                <th class="text-end">Total</th>
+                <th class="text-end">Pagado</th>
+                <th class="text-end">Saldo</th>
+                <th class="text-center">Fecha</th>
             </tr>
         </thead>
         <tbody>
@@ -83,13 +83,13 @@
         {% for factura in facturas %}
             <tr>
 
-                <td>
+                <td class="text-center">
                     <a href="{% url 'facturacion:detalle_factura' factura.id %}">
                         {{ factura.numero }}
                     </a>
                 </td>
 
-                <td>
+                <td class="text-center">
                     {% if factura.tipo == "FACTURA" %}
                         <span class="badge bg-primary">Factura</span>
                     {% else %}
@@ -97,7 +97,7 @@
                     {% endif %}
                 </td>
 
-                <td>
+                <td class="text-center">
                     {% if factura.pedido %}
                         <a href="{% url 'pedidos:editar' factura.pedido.id %}">
                             #{{ factura.pedido.id }}
@@ -109,7 +109,7 @@
 
                 <td>{{ factura.cliente }}</td>
 
-                <td>
+                <td class="text-center">
                     {% if factura.estado == "BORRADOR" %}
                         <span class="badge bg-secondary">Borrador</span>
                     {% elif factura.estado == "EMITIDA" %}
@@ -123,11 +123,11 @@
                     {% endif %}
                 </td>
 
-                <td>$ {{ factura.importe_total }}</td>
+                <td class="text-end">$ {{ factura.importe_total }}</td>
 
-                <td>$ {{ factura.total_pagado }}</td>
+                <td class="text-end">$ {{ factura.total_pagado }}</td>
 
-                <td>
+                <td class="text-end">
                     {% if factura.saldo_actual == 0 %}
                         <span class="text-success fw-bold">
                             $ {{ factura.saldo_actual }}
@@ -139,7 +139,7 @@
                     {% endif %}
                 </td>
 
-                <td>{{ factura.fecha_emision|date:"d/m/Y H:i" }}</td>
+                <td class="text-center">{{ factura.fecha_emision|date:"d/m/Y H:i" }}</td>
 
             </tr>
         {% empty %}

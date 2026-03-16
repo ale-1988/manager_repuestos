@@ -11,6 +11,18 @@ from django.db import transaction
 
 
 class Pedido(models.Model):
+    BORRADOR = "BORRADOR"
+    CREADO = "CREADO"
+    CONFIRMADO = "CONFIRMADO"
+    CERRADO = "CERRADO"
+    FACTURADO = "FACTURADO"
+    PAGADO = "PAGADO"
+    PREPARANDO = "PREPARANDO"
+    CONSOLIDADO = "CONSOLIDADO"
+    ENVIADO = "ENVIADO"
+    ENTREGADO = "ENTREGADO"
+    CANCELADO = "CANCELADO"
+    
     ESTADOS = [
         ('BORRADOR', 'Borrador'),
         ('CREADO', 'Creado'),
@@ -66,7 +78,7 @@ class Pedido(models.Model):
         estado_actual = self.estado
 
         if nuevo_estado == estado_actual:
-            return
+            return False
 
         transiciones_permitidas = self.TRANSICIONES_VALIDAS.get(estado_actual, [])
 
@@ -75,18 +87,19 @@ class Pedido(models.Model):
                 f"No se puede cambiar de {estado_actual} a {nuevo_estado}"
             )
 
-        self.estado = nuevo_estado
-        super().save(update_fields=["estado"])
-        
-        # Registrar historial
-        HistorialEstadoPedido.objects.create(
-            pedido=self,
-            estado_anterior=estado_actual,
-            estado_nuevo=nuevo_estado,
-            usuario=usuario,
-            observacion=observacion,
-        )
-
+        with transaction.atomic():
+            self.estado = nuevo_estado
+            super().save(update_fields=["estado"])
+            
+            # Registrar historial
+            HistorialEstadoPedido.objects.create(
+                pedido=self,
+                estado_anterior=estado_actual,
+                estado_nuevo=nuevo_estado,
+                usuario=usuario,
+                observacion=observacion,
+            )
+        return True
 
     
     @property
@@ -231,6 +244,7 @@ class DetallePedido(models.Model):
     cod_repuesto = models.IntegerField() #id_mate
     cantidad = models.DecimalField(max_digits=10, decimal_places=3,default=1,validators=[MinValueValidator(Decimal(0.001))])
     numero_serie = models.CharField(max_length=20, null=True, blank=True)
+    cantidad_preparada = models.DecimalField(max_digits=10,decimal_places=3,default=0)
     
     def __str__(self):
         return f"Repuesto {self.cod_repuesto} x {self.cantidad}"
@@ -294,11 +308,15 @@ class DetallePedido(models.Model):
         }
 
     def save(self, *args, **kwargs):
-        if self.cod_pedido.estado != 'CREADO':
-            raise ValidationError(
-                f"Solo se pueden editar ítems cuando el pedido está en estado CREADO "
-                f"(estado actual: {self.cod_pedido.estado})"
-            )
+        if self.cod_pedido.estado != "CREADO":
+            campos_editables_logistica = ["cantidad_preparada"]
+
+            if self.pk:
+                original = DetallePedido.objects.get(pk=self.pk)
+
+                for campo in ["cod_repuesto", "cantidad", "numero_serie"]:
+                    if getattr(self, campo) != getattr(original, campo):
+                        raise ValidationError(f"Solo se pueden editar ítems cuando el pedido está en estado CREADO (estado actual: {self.cod_pedido.estado})")
 
         super().save(*args, **kwargs)
 

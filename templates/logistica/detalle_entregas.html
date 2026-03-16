@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<h2>Entrega del pedido {{ pedido.id }}</h2>
+
+<p><b>Cliente:</b> {{ pedido.cliente }}</p>
+<p><b>Estado:</b> {{ pedido.estado }}</p>
+
+<hr>
+
+<a class="btn btn-primary"
+   href="{% url 'logistica:enviar_pedido' pedido.id %}">
+   Marcar como enviado
+</a>
+
+<a class="btn btn-success"
+   href="{% url 'logistica:confirmar_entrega' pedido.id %}">
+   Confirmar entrega
+</a>
+
+<a class="btn btn-secondary"
+   href="{% url 'logistica:listar_entregas' %}">
+   Volver
+</a>
+
+{% endblock %}
