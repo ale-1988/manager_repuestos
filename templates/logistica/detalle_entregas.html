@@ -5,19 +5,105 @@
 <h2>Entrega del pedido {{ pedido.id }}</h2>
 
 <p><b>Cliente:</b> {{ pedido.cliente }}</p>
-<p><b>Estado:</b> {{ pedido.estado }}</p>
+
+<p>
+<b>Estado:</b>
+<span class="badge bg-info">{{ pedido.get_estado_display }}</span>
+</p>
 
 <hr>
 
+<h5>Información logística</h5>
+
+<p>
+<b>Ingreso a logística:</b>
+{% if fechas.logistica %}
+{{ fechas.logistica|date:"d/m/Y H:i" }}
+{% else %}
+—
+{% endif %}
+</p>
+
+<p>
+<b>Consolidado:</b>
+{% if fechas.consolidado %}
+{{ fecha.consolidado|date:"d/m/Y H:i" }}
+{% else %}
+—
+{% endif %}
+</p>
+
+<p>
+<b>Enviado:</b>
+{% if fechas.enviado %}
+{{ fechas.enviado|date:"d/m/Y H:i" }}
+{% else %}
+—
+{% endif %}
+</p>
+
+<p>
+<b>Entregado:</b>
+{% if fechas.entregado %}
+{{ fechas.entregado|date:"d/m/Y H:i" }}
+{% else %}
+—
+{% endif %}
+</p>
+
+<hr>
+
+<p>
+<b>Transportista asignado:</b>
+{% if pedido.cod_transportista %}
+{{ pedido.cod_transportista }}
+{% else %}
+<span class="text-warning">No asignado</span>
+{% endif %}
+</p>
+
+{% if pedido.estado != pedido.ENTREGADO and pedido.estado != pedido.ENVIADO %}
+<form method="post">
+{% csrf_token %}
+
+<label class="form-label"><b>Transportista</b></label>
+
+<select name="transportista" class="form-select">
+
+<option value="">— Seleccionar —</option>
+
+{% for t in transportistas %}
+<option value="{{ t.id }}"
+{% if pedido.cod_transportista_id == t.id %}selected{% endif %}
+>
+{{ t.nombre }} {{ t.apellido }}
+</option>
+{% endfor %}
+
+</select>
+
+<button class="btn btn-primary mt-2">
+Asignar
+</button>
+
+</form>
+{% endif %}
+
+<hr>
+
+{% if pedido.estado == pedido.CONSOLIDADO and pedido.cod_transportista %}
 <a class="btn btn-primary"
    href="{% url 'logistica:enviar_pedido' pedido.id %}">
    Marcar como enviado
 </a>
+{% endif %}
 
+{% if pedido.estado == pedido.ENVIADO %}
 <a class="btn btn-success"
    href="{% url 'logistica:confirmar_entrega' pedido.id %}">
    Confirmar entrega
 </a>
+{% endif %}
 
 <a class="btn btn-secondary"
    href="{% url 'logistica:listar_entregas' %}">

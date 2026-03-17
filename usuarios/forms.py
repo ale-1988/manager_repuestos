@@ -39,7 +39,7 @@ class UsuarioCreateForm(forms.ModelForm):
         ]
 
         # Si el usuario NO es transportista, ocultar esos campos
-        if self.instance and self.instance.rol != 'transportista':
+        if self.instance and self.instance.pk and self.instance.rol != 'transportista':
             for campo in self.campos_transportista:
                 self.fields.pop(campo, None)        
 

@@ -39,7 +39,7 @@ class Usuario(AbstractUser):
     
 
     def __str__(self):
-        return self.username
+        return f"{self.nombre} {self.apellido}"
     
 # ==============================
 # Usuario especializado

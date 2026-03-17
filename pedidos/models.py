@@ -1,14 +1,15 @@
-from django.db import models
+from django.db import models, transaction
+from django.db.models import Min
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
+from django.conf import settings
+from django.utils import timezone
+
+from decimal import Decimal, ROUND_HALF_UP
 from usuarios.models import Usuario
 from repuestos.models import Material
 from clientes.models import Clientes
-from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
-from decimal import Decimal, ROUND_HALF_UP
-from django.conf import settings
 from facturacion.models import Factura
-from django.db import transaction
-
 
 class Pedido(models.Model):
     BORRADOR = "BORRADOR"
@@ -56,8 +57,9 @@ class Pedido(models.Model):
     estado = models.CharField(max_length=20, choices=ESTADOS, default='BORRADOR')
     cod_transportista = models.ForeignKey(Usuario, on_delete=models.PROTECT,related_name="pedidos_transportista",null=True,blank=True)
     observaciones = models.TextField(blank=True)
-
-
+    fecha_envio = models.DateTimeField(null=True,blank=True)
+    fecha_entrega = models.DateTimeField(null=True, blank=True)
+    
     def estados_disponibles(self):
         """
         Devuelve lista de estados a los que puede transicionar
@@ -100,6 +102,30 @@ class Pedido(models.Model):
                 observacion=observacion,
             )
         return True
+
+    def fechas_logisticas(self):
+        """
+        Devuelve un diccionario con las fechas clave del flujo logístico
+        obtenidas desde HistorialEstadoPedido.
+        """
+        from .models import HistorialEstadoPedido
+
+        historial = (
+            HistorialEstadoPedido.objects
+            .filter(pedido=self)
+            .values("estado_nuevo")
+            .annotate(fecha=Min("fecha"))
+        )
+
+        fechas = {h["estado_nuevo"]: h["fecha"] for h in historial}
+
+        return {
+            "logistica": fechas.get(self.PAGADO),
+            "consolidado": fechas.get(self.CONSOLIDADO),
+            "enviado": fechas.get(self.ENVIADO),
+            "entregado": fechas.get(self.ENTREGADO),
+        }
+
 
     
     @property

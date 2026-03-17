@@ -1,10 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from pedidos.models import Pedido, DetallePedido
 from django.core.exceptions import ValidationError
+from django.utils import timezone
+from django.db.models import OuterRef, Subquery
+
 from decimal import Decimal
-from django.http import JsonResponse
+from pedidos.models import Pedido, DetallePedido, HistorialEstadoPedido
 from repuestos.models import Repuesto
+from usuarios.models import Usuario
 
 # Create your views here.
 
@@ -72,28 +75,6 @@ def detalle_preparacion(request, id):
             "pedido_completo": pedido_completo
         }
     )
-    
-def listar_entregas(request):
-
-    pedidos = Pedido.objects.filter(
-        estado__in=["CONSOLIDADO", "ENVIADO"]
-    ).order_by("fecha")
-
-    return render(
-        request,
-        "logistica/listar_entregas.html",
-        {"pedidos": pedidos}
-    )
-    
-def detalle_entregas(request, id):
-
-    pedido = get_object_or_404(Pedido, pk=id)
-
-    return render(
-        request,
-        "logistica/detalle_entregas.html",
-        {"pedido": pedido}
-    )          
 
 def comenzar_preparacion(request, id):
 
@@ -119,7 +100,7 @@ def consolidar_pedido(request, id):
 
     try:
         pedido.cambiar_estado(
-            Pedido.ESTADO_CONSOLIDADO,
+            Pedido.CONSOLIDADO,
             usuario=request.user,
             observacion="Pedido consolidado"
         )
@@ -201,3 +182,118 @@ def actualizar_preparado(request, id):
 
     return redirect("logistica:detalle_preparacion", id=item.cod_pedido.id)
 
+def listar_entregas(request):
+
+    pedidos = Pedido.objects.filter(
+        estado__in=[Pedido.CONSOLIDADO, Pedido.ENVIADO, Pedido.ENTREGADO]
+    ).order_by("fecha", "id")
+
+    return render(
+        request,
+        "logistica/listar_entregas.html",
+        {"pedidos": pedidos}
+    )
+    
+
+
+
+def detalle_entregas(request, id):
+
+    pedido = get_object_or_404(Pedido, pk=id)
+    fechas = pedido.fechas_logisticas()
+
+    transportistas = Usuario.objects.filter(
+        rol="transportista"
+    ).order_by("username")
+    
+    if request.method == "POST" and pedido.estado == Pedido.CONSOLIDADO:
+        transportista_id = request.POST.get("transportista")
+
+        if transportista_id:
+            pedido.cod_transportista_id = transportista_id
+            pedido.save(update_fields=["cod_transportista"])
+
+        return redirect("logistica:detalle_entregas", id=pedido.id)
+    
+    return render(
+        request,
+        "logistica/detalle_entregas.html",
+        {
+            "pedido": pedido,
+            "transportistas": transportistas,
+            "fechas": fechas
+        }
+    )
+    
+
+
+
+def enviar_pedido(request, id):
+    pedido = get_object_or_404(Pedido, pk=id)
+    if not pedido.cod_transportista:
+        messages.error(
+            request,
+            "Debe asignarse un transportista antes de enviar el pedido."
+        )
+        return redirect("logistica:detalle_entregas", id=pedido.id)
+    pedido.fecha_envio = timezone.now()
+    pedido.cambiar_estado(
+        Pedido.ENVIADO,
+        usuario=request.user,
+        observacion="Pedido despachado"
+    )
+    pedido.save(update_fields=["fecha_envio"])
+    return redirect("logistica:listar_entregas")
+
+def confirmar_entrega(request, id):
+
+    pedido = get_object_or_404(Pedido, pk=id)
+
+    pedido.cambiar_estado(
+        "ENTREGADO",
+        usuario=request.user,
+        observacion="Entrega confirmada"
+    )
+
+    return redirect("logistica:listar_entregas")
+
+
+
+def listar_entregas(request):
+    historial = HistorialEstadoPedido.objects.filter(pedido=OuterRef("pk"))
+
+    pedidos = (
+        Pedido.objects
+        .filter(estado__in=[Pedido.CONSOLIDADO, Pedido.ENVIADO, Pedido.ENTREGADO])
+        .annotate(
+            fecha_logistica=Subquery(
+                historial.filter(
+                    estado_nuevo=Pedido.PAGADO
+                ).values("fecha")[:1]
+            ),
+            fecha_consolidado=Subquery(
+                historial.filter(
+                    estado_nuevo=Pedido.CONSOLIDADO
+                ).values("fecha")[:1]
+            ),
+            fecha_enviado=Subquery(
+                historial.filter(
+                    estado_nuevo=Pedido.ENVIADO
+                ).values("fecha")[:1]
+            ),
+            fecha_entregado=Subquery(
+                historial.filter(
+                    estado_nuevo=Pedido.ENTREGADO
+                ).values("fecha")[:1]
+            ),
+            
+        )
+        .order_by("-fecha_entregado", "-fecha_enviado", "-fecha_consolidado")
+    )
+
+
+    return render(
+        request,
+        "logistica/listar_entregas.html",
+        {"pedidos": pedidos}
+    )
