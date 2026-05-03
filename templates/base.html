@@ -3,10 +3,7 @@
 {% load static %}
 <head>
     <meta charset="UTF-8">
-    <div class="logo">
-            Manager de Repuestos
-            <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}"/>
-    </div>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}"/>
 
 
     <!-- Bootstrap 5 -->
@@ -46,7 +43,10 @@
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
 
-        <a class="navbar-brand" href="{% url 'sesiones:inicio' %}">Manager Repuestos</a>
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'sesiones:inicio' %}">
+        <img src="{% static 'images/favicon.png' %}" alt="Logo" height="30" class="me-2">
+            Manager de Repuestos
+        </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>

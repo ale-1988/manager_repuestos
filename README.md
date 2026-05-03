@@ -11,6 +11,8 @@ python-django-allauth
 python-django-crispy-forms 
 python-crispy-bootstrap5 
 python-reportlab
+python-pytest
+pytohn-pytest-django
 mariadb
 mariadb-libs
 mariadb-clients
