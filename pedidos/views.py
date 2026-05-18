@@ -17,6 +17,11 @@ from pedidos.models import HistorialEstadoPedido
 from facturacion.models import Factura
 from django.core.exceptions import ValidationError
 
+from django.http import HttpResponse
+
+from django.core.mail import EmailMessage
+from .utils import build_pdf_preliminar
+
 # ==========================================================
 # NUEVO PEDIDO — BUSCADOR DE CLIENTE (AJAX + LINKS)
 # ==========================================================
@@ -286,6 +291,82 @@ def agregar_items(request, pedido_id):
         "editable": True,
     })
 
+# ============================================================
+# MODIFICAR CANTIDAD DE ITEM
+# ============================================================
+@login_required
+@require_POST
+def modificar_cantidad(request, detalle_id):
+
+    detalle = get_object_or_404(
+        DetallePedido,
+        id=detalle_id
+    )
+
+    pedido = detalle.cod_pedido
+
+    if pedido.estado not in ["BORRADOR", "CREADO", "CONFIRMADO"]:
+        return redirect("pedidos:editar", pedido.id)
+
+    accion = request.POST.get("accion")
+
+# --------------------------------------------------------
+# SUMA 1
+# --------------------------------------------------------
+    if accion == "sumar":
+        detalle.cantidad += 1
+        detalle.save()
+
+# --------------------------------------------------------
+# RESTA 1
+# --------------------------------------------------------
+    elif accion == "restar":
+        if detalle.cantidad > 1:
+            detalle.cantidad -= 1
+            detalle.save()
+
+# --------------------------------------------------------
+# ELIMINA ITEM DERECHO VIEJO
+# --------------------------------------------------------
+    elif accion == "eliminar":
+        detalle.delete()
+
+    return redirect("pedidos:editar", pedido.id)
+
+
+
+""" @login_required
+@require_POST
+def modificar_cantidad(request, detalle_id):
+    detalle = get_object_or_404(DetallePedido, id=detalle_id)
+
+    pedido = detalle.cod_pedido
+
+    # Validar que el pedido sea editable
+    if pedido.estado != "CREADO":
+        return JsonResponse({
+            "ok": False,
+            "error": "El pedido no puede modificarse."
+        })
+
+    accion = request.POST.get("accion")
+
+    if accion == "sumar":
+        detalle.cantidad += 1
+        detalle.save()
+
+    elif accion == "restar":
+
+        if detalle.cantidad > 1:
+            detalle.cantidad -= 1
+            detalle.save()
+        else:
+            detalle.delete()
+
+    return JsonResponse({
+        "ok": True
+    }) """
+
 
 @login_required
 def buscar_equipo(request):
@@ -388,4 +469,81 @@ def facturar_pedido(request, id):
         messages.error(request, str(e))
         return redirect("pedidos:editar", id=pedido.id)
     
-    
+@login_required
+def comprobante_preliminar(request, id):
+
+    pedido = get_object_or_404(Pedido, id=id)
+
+    # --------------------------------------------
+    # SOLO BORRADOR / CREADO / CONFIRMADO
+    # --------------------------------------------
+    estados_validos = ["BORRADOR", "CREADO", "CONFIRMADO"]
+
+    if pedido.estado not in estados_validos:
+        messages.error(
+            request,
+            "No puede emitirse comprobante preliminar para este estado."
+        )
+        return redirect("pedidos:editar", id=pedido.id)
+
+    detalles = pedido.detalles.all()
+
+    total = 0
+
+    for d in detalles:
+        try:
+            subtotal = float(d.material.precio) * float(d.cantidad)
+        except Exception:
+            subtotal = 0
+        d.subtotal=subtotal
+        total += subtotal
+        
+    return render(
+        request,
+        "pedidos/comprobante_preliminar.html",
+        {
+            "pedido": pedido,
+            "detalles": detalles,
+            "total": total,
+            "fecha": timezone.now(),
+        }
+    )    
+
+@login_required
+def generar_pdf_preliminar(request, id):
+
+    pedido = get_object_or_404(Pedido, id=id)
+
+    pdf_bytes = build_pdf_preliminar(pedido)
+
+    # -----------------------------------------
+    # ENVIO EMAIL OPCIONAL
+    # -----------------------------------------
+    enviar_email = request.GET.get("email") == "1"
+
+    if enviar_email and pedido.cliente and pedido.cliente.email:
+
+        email = EmailMessage(
+            subject=f"Pedido preliminar #{pedido.id}",
+            body="Adjuntamos comprobante preliminar.",
+            to=[pedido.cliente.email],
+        )
+
+        email.attach(
+            f"pedido_preliminar_{pedido.id}.pdf",
+            pdf_bytes,
+            "application/pdf",
+        )
+
+        email.send()
+
+    response = HttpResponse(
+        pdf_bytes,
+        content_type="application/pdf"
+    )
+
+    response["Content-Disposition"] = (
+        f'inline; filename="pedido_preliminar_{pedido.id}.pdf"'
+    )
+
+    return response

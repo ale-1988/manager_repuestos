@@ -52,7 +52,7 @@
         class="form-control form-control-sm text-center"
         style="width:90px;">
 
-        <button class="btn btn-sm btn-success">✓</button>
+        <button class="btn btn-sm btn-success" title="Actualizar"><i class="bi bi-floppy"></i></button>
 
     </form>
 {% else %}
@@ -79,6 +79,10 @@
 </table>
 
 <hr>
+<a class="btn btn-secondary"
+   href="{% url 'logistica:listar_preparacion' %}" title="Volver">
+   <i class="bi bi-arrow-left fs-5"></i>
+</a>
 
 {% if pedido.estado == "PAGADO" %}
 <a class="btn btn-warning"
@@ -93,10 +97,5 @@
    Consolidar pedido
 </a>
 {% endif %}
-
-<a class="btn btn-secondary"
-   href="{% url 'logistica:listar_preparacion' %}">
-   Volver
-</a>
 
 {% endblock %}

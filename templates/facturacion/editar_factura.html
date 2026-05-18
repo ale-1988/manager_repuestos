@@ -58,16 +58,16 @@
 
         <hr>
 
+        <a href="{% url 'facturacion:detalle_factura' form.instance.id %}"
+            class="btn btn-secondary" title="Cancelar">
+            <i class="bi bi-arrow-left fs-5"></i>
+        </a>
         <button type="submit"
-                class="btn btn-primary"
-                {% if form.instance.estado != "BORRADOR" %}disabled{% endif %}>
-            Guardar
+            class="btn btn-primary" title="Guardar"
+            {% if form.instance.estado != "BORRADOR" %}disabled{% endif %}>
+            <i class="bi bi-floppy fs-5"></i>
         </button>
 
-        <a href="{% url 'facturacion:detalle_factura' form.instance.id %}"
-            class="btn btn-secondary">
-            Cancelar
-        </a>
 
     </form>
 

@@ -39,6 +39,9 @@ urlpatterns = [
     path("historial/pedido/<int:pedido_id>/", views.historial_global, name="historial_pedido"),
     
     path("<int:id>/facturar/", views.facturar_pedido, name="facturar_pedido"),
-    
+    path("<int:id>/comprobante_preliminar/",views.comprobante_preliminar,name="comprobante_preliminar"),
+    path("<int:id>/pdf_preliminar/",views.generar_pdf_preliminar,name="pdf_preliminar"),
+    path("detalle/<int:detalle_id>/modificar-cantidad/",views.modificar_cantidad,name="modificar_cantidad"),
+
 
 ]

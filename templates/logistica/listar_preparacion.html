@@ -51,8 +51,8 @@ Cantidad de pedidos: {{ pedidos|length }}
             <td class="text-end">
 
                 <a class="btn btn-sm btn-primary"
-                   href="{% url 'logistica:detalle_preparacion' pedido.id %}">
-                   Ver
+                   href="{% url 'logistica:detalle_preparacion' pedido.id %}" title="Ver">
+                   <i class="bi bi-eye"></i>
                 </a>
 
             </td>

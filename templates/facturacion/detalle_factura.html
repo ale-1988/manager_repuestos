@@ -72,29 +72,26 @@
 
         {% if factura.tipo == "FACTURA" and factura.estado == "BORRADOR" %}
             <a href="{% url 'facturacion:emitir_factura' factura.id %}"
-               class="btn btn-primary">
-                Emitir
-            </a>
-        {% endif %}
-
-        {% if factura.tipo == "FACTURA" and factura.estado == "EMITIDA" %}
-            <a href="{% url 'facturacion:anular_factura' factura.id %}"
-               class="btn btn-danger">
-                Anular
+               class="btn btn-primary" title="Emitir factura"><i class="bi file-binary fs-5"></i>
             </a>
         {% endif %}
 
         {% if factura.tipo == "FACTURA" and factura.estado != "ANULADA" %}
             <a href="{% url 'facturacion:editar_factura' factura.id %}"
-               class="btn btn-secondary">
-                Editar
+               class="btn btn-secondary" title="Editar factura"><i class="bi bi-pencil-square fs-5"></i>
             </a>
         {% endif %}
 
         <a href="{% url 'facturacion:generar_pdf_factura' factura.id %}"
-           class="btn btn-outline-secondary">
-            Ver PDF
+           class="btn btn-outline-secondary" title="Generar PDF"><i class="bi bi-filetype-pdf fs-5"></i>
         </a>
+
+        {% if factura.tipo == "FACTURA" and factura.estado == "EMITIDA" %}
+            <a href="{% url 'facturacion:anular_factura' factura.id %}"
+               class="btn btn-danger" title="Anular factura"><i class="bi bi-trash fs-5"></i>
+            </a>
+        {% endif %}
+
 
     </div>
 

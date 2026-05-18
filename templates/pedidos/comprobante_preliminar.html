@@ -1,0 +1,228 @@
+{% load tz %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+
+<title>
+Comprobante preliminar pedido {{ pedido.id }}
+</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    margin:40px;
+}
+
+.watermark{
+    position:fixed;
+    top:35%;
+    left:15%;
+    font-size:90px;
+    color:#dddddd;
+    transform:rotate(-30deg);
+    z-index:-1;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th, td{
+    border:1px solid #999;
+    padding:8px;
+}
+
+.numero{
+    text-align:right;
+    font-variant-numeric: tabular-nums;
+    font-family: Consolas, "Courier New", monospace;
+}
+
+.centrado{
+    text-align:center;
+}
+
+th{
+    background:#efefef;
+}
+
+.header{
+    margin-bottom:30px;
+}
+
+.total{
+    margin-top:20px;
+    text-align:right;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.estado{
+    display:inline-block;
+    padding:6px 12px;
+    background:#ffe7a8;
+    border-radius:8px;
+    font-weight:bold;
+}
+
+@media print{
+    .no-print{
+        display:none;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="watermark">
+PRELIMINAR
+</div>
+
+<div class="header">
+
+<div style="display:flex; align-items:center; gap:15px;">
+
+    <img
+        src="{% static 'images/favicon.png' %}"
+        style="height:48px;"
+    >
+
+    <h1 style="margin:0;">
+        Comprobante preliminar
+    </h1>
+
+</div>
+
+<p>
+<strong>Pedido:</strong>
+#{{ pedido.id }}
+</p>
+
+<p>
+<strong>Fecha:</strong>
+{{ fecha }}
+</p>
+
+<p>
+<strong>Estado:</strong>
+
+<span.centrado{
+    text-align:center;
+} class="estado">
+{{ pedido.estado }}
+</span.centrado>
+</p>
+
+<p>
+<strong>Cliente:</strong>
+
+{% if pedido.cliente %}
+    {{ pedido.cliente }}
+{% else %}
+    Sin cliente
+{% endif %}
+</p>
+
+</div>
+
+<table>
+
+<thead>
+<tr>
+    <th class="centrado">ID</th>
+    <th>Descripción</th>
+    <th>Cantidad</th>
+    <th>Precio</th>
+    <th>Subtotal</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for d in detalles %}
+
+<tr>
+
+<td class="centrado">
+{{ d.cod_repuesto }}
+</td>
+
+<td>
+{{ d.material.valor }}
+</td>
+
+<td class="numero">
+{{ d.cantidad|floatformat:"-3" }}
+</td>
+
+<td class="numero">
+${{ d.material.precio|floatformat:"-2" }}
+</td>
+
+<td class="numero">
+${{ d.subtotal|floatformat:2 }}
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+<div class="total">
+TOTAL APROX:
+$ {{ total|floatformat:2 }}
+</div>
+
+<br>
+
+<div class="no-print">
+
+<label style="margin-right:20px;">
+    <input type="checkbox" id="chkEmail">
+    Enviar por email
+</label>
+
+<button onclick="window.print()">
+Imprimir
+</button>
+
+<button onclick="generarPDF()">
+Generar PDF
+</button>
+
+<button onclick="history.back()">
+Volver
+</button>
+
+</div>
+
+<script>
+
+function generarPDF(){
+
+    let url = "{% url 'pedidos:pdf_preliminar' pedido.id %}"
+
+    let enviar = document.getElementById("chkEmail").checked
+
+    if(enviar){
+        url += "?email=1"
+    }
+
+    window.open(url, "_blank")
+}
+
+</script>
+
+</body>
+</html>

@@ -30,12 +30,12 @@
     <br>
 
     <button type="submit" 
-            style="padding:6px 12px;background:#247;color:white;border:none;border-radius:4px;">
-        {{ accion }}
+            style="padding:6px 12px;background:#247;color:white;border:none;border-radius:4px;" title="{{ accion }}"><i class="bi bi-floppy"></i>
+        
     </button>
 
     <a href="{% url 'usuarios:listar' %}" 
-       style="margin-left:10px;">Cancelar</a>
+       style="margin-left:10px;" title="Cancelar"><i class="bi bi-x-circle"></i></a>
 </form>
 
 <script>

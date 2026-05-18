@@ -7,8 +7,8 @@
 
 <p>
     <a href="{% url 'usuarios:nuevo' %}" 
-       style="padding:6px 12px;background:#2c7;color:white;text-decoration:none;border-radius:4px;">
-       + Crear usuario
+       style="padding:6px 12px;background:#2c7;color:white;text-decoration:none;border-radius:4px;" title="Crear usuario">
+       <i class="bi bi-plus-circle"></i>
     </a>
 </p>
 
@@ -31,8 +31,8 @@
             <td>{{ u.email }}</td>
             <td>{{ u.rol }}</td>
             <td>
-                <a href="{% url 'usuarios:editar' u.id %}">Editar</a> |
-                <a href="{% url 'usuarios:eliminar' u.id %}">Eliminar</a>
+                <a href="{% url 'usuarios:editar' u.id %}" title="Editar"><i class="bi bi-pencil-square fs-5"></i></a> |
+                <a href="{% url 'usuarios:eliminar' u.id %}" title="Eliminar"><i class="bi bi-trash fs-5"></i></a>
             </td>
         </tr>
         {% endfor %}

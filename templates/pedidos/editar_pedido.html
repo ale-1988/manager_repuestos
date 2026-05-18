@@ -85,12 +85,12 @@
         <div class="row">
 
             <!-- ==================== COLUMNA IZQUIERDA ==================== -->
-            <div class="col-md-6">
+            <div class="col-12">
                 {% if request.user.rol == "admin" or request.user.rol == "gerente" or request.user.rol == "operador" %}
-                <form action="{% url 'pedidos:actualizar_estado' pedido.id %}" method="POST" class="mb-3">
+                <form action="{% url 'pedidos:actualizar_estado' pedido.id %}" method="POST" class="mb-3 d-flex align-items-center flex-wrap gap-2">
                     {% csrf_token %}
-                    <label><strong>Estado:</strong></label>
-                    <select name="estado" class="form-select" style="max-width: 250px; display: inline-block;">
+                    <label class="mb-0 me-1"><strong>Estado:</strong></label>
+                    <select name="estado" class="form-control form-control-sm d-inline-block" style="width:auto; min-width:180px;">
                         {% for estado in todos_estados %}
                             {% if estado == pedido.estado %}
                                 <option value="{{ estado }}" selected>
@@ -110,19 +110,45 @@
                         {% endfor %}
                     </select>
 
-                    <button class="btn btn-primary btn-sm ms-2">Actualizar</button>
+                    <button class="btn btn-primary btn-sm" title="Actualizar estado">
+                    <!-- <i class="bi bi-arrow-repeat"></i>    -->
+                    <i class="bi bi-arrow-clockwise fs-5"></i>
+                    </button>
                     <!-- BOTON DIVIDIR -->
                     {% if puede_dividir and not modo_dividir %}
-                        <a href="?dividir=1" class="btn btn-warning btn-sm ms-2">Dividir</a>
+                        <a href="?dividir=1" class="btn btn-warning btn-sm" title="Dividir pedido">
+                        <i class="bi bi-scissors fs-5"></i>    
+                        </a>
+                    {% endif %}
+                    <!-- BOTON COMPROBANTE PRELIMINAR -->
+                    {% if pedido.estado == "BORRADOR" or pedido.estado == "CREADO" or pedido.estado == "CONFIRMADO" %}
+                        <a href="{% url 'pedidos:comprobante_preliminar' pedido.id %}"
+                        class="btn btn-outline-dark btn-sm"
+                        target="_blank"
+                        title="Comprobante preliminar">
+                        <i class="bi bi-printer fs-5"></i>
+                        </a>
                     {% endif %}
                     <!-- BOTON GENERAR FACTURA -->
                     {% if pedido.estado == "CERRADO" and not pedido.factura %}
                         <a href="{% url 'pedidos:facturar_pedido' pedido.id %}" 
-                        class="btn btn-success">Generar Factura</a>
+                        class="btn btn-success btn-sm" title="Generar Factura"><i class="bi bi-file-earmark-binary fs-5"></i></a>
                     {% endif %}
+                    
+                    <!-- BOTON Cancelar pedido -->
+                    {% if request.user.rol == "admin" or request.user.rol == "gerente" %}
 
+                        <button
+                            type="submit"
+                            formaction="{% url 'pedidos:cancelar' pedido.id %}"
+                            formmethod="POST"
+                            class="btn btn-danger btn-sm ms-auto"
+                            onclick="return confirm('¿Seguro desea cancelar este pedido?');"
+                            title="Cancelar pedido">
+                            <i class="bi bi-trash fs-5"></i>
+                        </button>
 
-
+                    {% endif %}
                 </form>
                 {% else %}
                 <p><strong>Estado:</strong> {{ pedido.estado }}</p>
@@ -131,23 +157,6 @@
                 <a href="{% url 'pedidos:historial_pedido' pedido.id %}" class="btn btn-outline-secondary btn-sm">Historial</a>
                 </p>
             </div>
-
-            <!-- ==================== COLUMNA DERECHA ==================== -->
-            <div class="col-md-6 text-md-end">
-
-                {% if request.user.rol == "admin" or request.user.rol == "gerente" %}
-                <form action="{% url 'pedidos:cancelar' pedido.id %}" method="POST" class="d-inline">
-                    {% csrf_token %}
-                    <button class="btn btn-danger mt-2"
-                            onclick="return confirm('¿Seguro desea cancelar este pedido?');">
-                        Cancelar este pedido
-                    </button>
-                </form>
-                {% endif %}
-
-
-            </div>
-
         </div>
 
     </div>
@@ -161,8 +170,8 @@
     <h4>Items del Pedido</h4>
 
     {% if pedido.estado in "BORRADOR CREADO CONFIRMADO" and not modo_dividir %}
-        <a href="{% url 'pedidos:agregar_items' pedido.id %}" class="btn btn-primary">
-            Agregar ítems
+        <a href="{% url 'pedidos:agregar_items' pedido.id %}" class="btn btn-primary" title="Agregar item">
+            <i class="bi bi-plus-circle fs-5"></i>
         </a>
     {% endif %}
 </div>
@@ -198,8 +207,66 @@
                     <input type="checkbox" name="item_dividir" value="{{ item.id }}">
                 </td>
                 <td class="text-center">{{ item.cod_repuesto }}</td>
-                <td class="text-center align-middle">{{ item.cantidad|floatformat:"-2" }}</td>
-                <td>{{ item.material.valor }}</td>
+                <td class="text-center align-middle">
+
+                    {% if pedido.estado == "CREADO" %}
+
+                        <form action="{% url 'pedidos:modificar_cantidad' item.id %}"
+                            method="POST"
+                            style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="accion" value="restar">
+                            <button class="btn btn-sm btn-danger fw-bold px-3"
+                            {% if item.cantidad <= 1 %}disabled{% endif %}>-</button>
+                        </form>
+
+                    {% endif %}
+
+                    <span class="mx-2">
+                        {{ item.cantidad|floatformat:"-2" }}
+                    </span>
+
+                    {% if pedido.estado == "CREADO" %}
+
+                        <form action="{% url 'pedidos:modificar_cantidad' item.id %}"
+                            method="POST"
+                            style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="accion" value="sumar">
+                            <button class="btn btn-sm btn-success fw-bold px-3">+</button>
+                        </form>
+
+                    {% endif %}
+
+                </td>
+                <!-- <td class="text-center align-middle">{{ item.cantidad|floatformat:"-2" }}</td> -->
+                
+                <!-- <td>{{ item.material.valor }}</td> -->
+                <td>
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <span>{{ item.material.valor }}</span>
+
+                        {% if pedido.estado == "BORRADOR" or pedido.estado == "CREADO" or pedido.estado == "CONFIRMADO" %}
+
+                        <form action="{% url 'pedidos:modificar_cantidad' item.id %}"
+                            method="POST"
+                            style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="accion" value="eliminar">
+
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    onclick="return confirm('¿Eliminar ítem del pedido?');"
+                                    title="Eliminar item">
+                                    <i class="bi bi-trash fs-6"></i>
+                            </button>
+                        </form>
+
+                        {% endif %}
+
+                    </div>
+
+                </td>
                 <td>{{ item.material.grupo_nombre }}</td>
 
                 {% if item.info_equipo.equipo_nombre %}
@@ -254,8 +321,66 @@
         {% for item in items %}
         <tr>
             <td class="text-center">{{ item.cod_repuesto }}</td>
-            <td class="text-center align-middle">{{ item.cantidad|floatformat:"-2" }}</td>
-            <td>{{ item.material.valor }}</td>
+            <!-- <td class="text-center align-middle">{{ item.cantidad|floatformat:"-2" }}</td> -->
+            <td class="text-center align-middle">
+
+                {% if pedido.estado == "CREADO" %}
+
+                    <form action="{% url 'pedidos:modificar_cantidad' item.id %}"
+                        method="POST"
+                        style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="accion" value="restar">
+                        <button class="btn btn-sm btn-danger fw-bold px-3"
+                        {% if item.cantidad <= 1 %}disabled{% endif %}>-</button>
+                    </form>
+
+                {% endif %}
+
+                <span class="mx-2">
+                    {{ item.cantidad|floatformat:"-2" }}
+                </span>
+
+                {% if pedido.estado == "CREADO" %}
+
+                    <form action="{% url 'pedidos:modificar_cantidad' item.id %}"
+                        method="POST"
+                        style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="accion" value="sumar">
+                        <button class="btn btn-sm btn-success fw-bold px-3">+</button>
+                    </form>
+
+                {% endif %}
+
+            </td>
+            <!-- <td>{{ item.material.valor }}</td> -->
+            <td>
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <span>{{ item.material.valor }}</span>
+
+                    {% if pedido.estado == "BORRADOR" or pedido.estado == "CREADO" or pedido.estado == "CONFIRMADO" %}
+
+                    <form action="{% url 'pedidos:modificar_cantidad' item.id %}"
+                        method="POST"
+                        style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="accion" value="eliminar">
+
+                        <button class="btn btn-sm btn-outline-secondary"
+                                onclick="return confirm('¿Eliminar ítem del pedido?');"
+                                title="Eliminar item">
+                                <i class="bi bi-trash fs-6"></i>
+                        </button>
+                    </form>
+
+                    {% endif %}
+
+                </div>
+
+            </td>            
             <td>{{ item.material.grupo_nombre }}</td>
 
             {% if item.info_equipo.equipo_nombre %}
@@ -284,6 +409,6 @@
 
 {% endif %}
 
-<a href="{% url 'pedidos:listar' %}" class="btn btn-secondary mt-3">Volver al listado</a>
+<a href="{% url 'pedidos:listar' %}" class="btn btn-secondary mt-3" title="Volver al listado"><i class="bi bi-arrow-left"></i></a>
 
 {% endblock %}
