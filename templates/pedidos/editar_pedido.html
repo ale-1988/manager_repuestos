@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load static %}
 {% load tz %}
 {% block contenido %}
-
+<form id="csrf-form" style="display:none;"> {% csrf_token %} </form>
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Editar Pedido #{{ pedido.id }}</h2>
 </div>
@@ -202,66 +203,68 @@
         </thead>
         <tbody>
             {% for item in items %}
-            <tr>
+            <tr id="fila-item-{{ item.id }}">
                 <td class="text-center">
                     <input type="checkbox" name="item_dividir" value="{{ item.id }}">
                 </td>
                 <td class="text-center">{{ item.cod_repuesto }}</td>
                 <td class="text-center align-middle">
 
-                    {% if pedido.estado == "CREADO" %}
+                    <div class="input-group input-group-sm justify-content-center">
 
-                        <form action="{% url 'pedidos:modificar_cantidad' item.id %}"
-                            method="POST"
-                            style="display:inline;">
-                            {% csrf_token %}
-                            <input type="hidden" name="accion" value="restar">
-                            <button class="btn btn-sm btn-danger fw-bold px-3"
-                            {% if item.cantidad <= 1 %}disabled{% endif %}>-</button>
-                        </form>
+                        <!-- RESTAR -->
 
-                    {% endif %}
+                        <button
+                            type="button"
+                            class="btn btn-outline-danger btn-cantidad"
+                            data-url="{% url 'pedidos:modificar_cantidad' item.id %}"
+                            data-accion="restar"
+                            title="Quitar unidad"
+                            {% if item.cantidad <= 1 %}disabled{% endif %}
+                        >
+                            <i class="bi bi-dash-lg"></i>
+                        </button>
 
-                    <span class="mx-2">
-                        {{ item.cantidad|floatformat:"-2" }}
-                    </span>
+                        <!-- CANTIDAD -->
 
-                    {% if pedido.estado == "CREADO" %}
+                        <input
+                            type="text"
+                            class="form-control text-center cantidad-input"
+                            value="{{ item.cantidad|floatformat:'-2' }}"
+                            data-detalle-id="{{ item.id }}"
+                            style="max-width: 80px;"
+                        >
 
-                        <form action="{% url 'pedidos:modificar_cantidad' item.id %}"
-                            method="POST"
-                            style="display:inline;">
-                            {% csrf_token %}
-                            <input type="hidden" name="accion" value="sumar">
-                            <button class="btn btn-sm btn-success fw-bold px-3">+</button>
-                        </form>
+                        <!-- SUMAR -->
 
-                    {% endif %}
+                        <button
+                            type="button"
+                            class="btn btn-outline-success btn-cantidad"
+                            data-url="{% url 'pedidos:modificar_cantidad' item.id %}"
+                            data-accion="sumar"
+                            title="Agregar unidad"
+                        >
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+
+                    </div>
 
                 </td>
-                <!-- <td class="text-center align-middle">{{ item.cantidad|floatformat:"-2" }}</td> -->
-                
-                <!-- <td>{{ item.material.valor }}</td> -->
+
+
+
                 <td>
                     <div class="d-flex justify-content-between align-items-center">
 
                         <span>{{ item.material.valor }}</span>
 
                         {% if pedido.estado == "BORRADOR" or pedido.estado == "CREADO" or pedido.estado == "CONFIRMADO" %}
-
-                        <form action="{% url 'pedidos:modificar_cantidad' item.id %}"
-                            method="POST"
-                            style="display:inline;">
-                            {% csrf_token %}
-                            <input type="hidden" name="accion" value="eliminar">
-
-                            <button class="btn btn-sm btn-outline-secondary"
-                                    onclick="return confirm('¿Eliminar ítem del pedido?');"
-                                    title="Eliminar item">
-                                    <i class="bi bi-trash fs-6"></i>
+                            <button type="button" 
+                                class="btn btn-sm btn-outline-secondary btn-eliminar" 
+                                data-url="{% url 'pedidos:modificar_cantidad' item.id %}" 
+                                title="Eliminar item" > 
+                                <i class="bi bi-trash fs-6"></i> 
                             </button>
-                        </form>
-
                         {% endif %}
 
                     </div>
@@ -319,68 +322,68 @@
     </thead>
     <tbody>
         {% for item in items %}
-        <tr>
+        <tr id="fila-item-{{ item.id }}">
             <td class="text-center">{{ item.cod_repuesto }}</td>
-            <!-- <td class="text-center align-middle">{{ item.cantidad|floatformat:"-2" }}</td> -->
             <td class="text-center align-middle">
 
-                {% if pedido.estado == "CREADO" %}
+                <div class="input-group input-group-sm justify-content-center">
 
-                    <form action="{% url 'pedidos:modificar_cantidad' item.id %}"
-                        method="POST"
-                        style="display:inline;">
-                        {% csrf_token %}
-                        <input type="hidden" name="accion" value="restar">
-                        <button class="btn btn-sm btn-danger fw-bold px-3"
-                        {% if item.cantidad <= 1 %}disabled{% endif %}>-</button>
-                    </form>
+                    <!-- RESTAR -->
 
-                {% endif %}
+                    <button
+                        type="button"
+                        class="btn btn-outline-danger btn-cantidad"
+                        data-url="{% url 'pedidos:modificar_cantidad' item.id %}"
+                        data-accion="restar"
+                        title="Quitar unidad"
+                        {% if item.cantidad <= 1 %}disabled{% endif %}
+                    >
+                        <i class="bi bi-dash-lg"></i>
+                    </button>
 
-                <span class="mx-2">
-                    {{ item.cantidad|floatformat:"-2" }}
-                </span>
+                    <!-- CANTIDAD -->
 
-                {% if pedido.estado == "CREADO" %}
+                    <input
+                        type="text"
+                        class="form-control text-center cantidad-input"
+                        value="{{ item.cantidad|floatformat:'-2' }}"
+                        data-detalle-id="{{ item.id }}"
+                        style="max-width: 80px;"
+                    >
 
-                    <form action="{% url 'pedidos:modificar_cantidad' item.id %}"
-                        method="POST"
-                        style="display:inline;">
-                        {% csrf_token %}
-                        <input type="hidden" name="accion" value="sumar">
-                        <button class="btn btn-sm btn-success fw-bold px-3">+</button>
-                    </form>
+                    <!-- SUMAR -->
 
-                {% endif %}
+                    <button
+                        type="button"
+                        class="btn btn-outline-success btn-cantidad"
+                        data-url="{% url 'pedidos:modificar_cantidad' item.id %}"
+                        data-accion="sumar"
+                        title="Agregar unidad"
+                    >
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+
+                </div>
 
             </td>
-            <!-- <td>{{ item.material.valor }}</td> -->
             <td>
-
                 <div class="d-flex justify-content-between align-items-center">
 
                     <span>{{ item.material.valor }}</span>
 
                     {% if pedido.estado == "BORRADOR" or pedido.estado == "CREADO" or pedido.estado == "CONFIRMADO" %}
-
-                    <form action="{% url 'pedidos:modificar_cantidad' item.id %}"
-                        method="POST"
-                        style="display:inline;">
-                        {% csrf_token %}
-                        <input type="hidden" name="accion" value="eliminar">
-
-                        <button class="btn btn-sm btn-outline-secondary"
-                                onclick="return confirm('¿Eliminar ítem del pedido?');"
-                                title="Eliminar item">
-                                <i class="bi bi-trash fs-6"></i>
+                        <button type="button" 
+                            class="btn btn-sm btn-outline-secondary btn-eliminar" 
+                            data-url="{% url 'pedidos:modificar_cantidad' item.id %}" 
+                            title="Eliminar item" > 
+                            <i class="bi bi-trash fs-6"></i> 
                         </button>
-                    </form>
-
                     {% endif %}
 
                 </div>
 
-            </td>            
+            </td>
+            
             <td>{{ item.material.grupo_nombre }}</td>
 
             {% if item.info_equipo.equipo_nombre %}
@@ -411,4 +414,5 @@
 
 <a href="{% url 'pedidos:listar' %}" class="btn btn-secondary mt-3" title="Volver al listado"><i class="bi bi-arrow-left"></i></a>
 
+<script src="{% static 'js/editar_pedido.js' %}"></script>
 {% endblock %}

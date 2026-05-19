@@ -21,6 +21,7 @@ from django.http import HttpResponse
 
 from django.core.mail import EmailMessage
 from .utils import build_pdf_preliminar
+from decimal import Decimal, InvalidOperation
 
 # ==========================================================
 # NUEVO PEDIDO — BUSCADOR DE CLIENTE (AJAX + LINKS)
@@ -291,9 +292,11 @@ def agregar_items(request, pedido_id):
         "editable": True,
     })
 
+
 # ============================================================
 # MODIFICAR CANTIDAD DE ITEM
 # ============================================================
+
 @login_required
 @require_POST
 def modificar_cantidad(request, detalle_id):
@@ -306,32 +309,70 @@ def modificar_cantidad(request, detalle_id):
     pedido = detalle.cod_pedido
 
     if pedido.estado not in ["BORRADOR", "CREADO", "CONFIRMADO"]:
+
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+
+            return JsonResponse({
+                "ok": False,
+                "error": "Pedido no editable"
+            })
+
         return redirect("pedidos:editar", pedido.id)
 
     accion = request.POST.get("accion")
 
-# --------------------------------------------------------
-# SUMA 1
-# --------------------------------------------------------
+    eliminado = False
+
+    # --------------------------------------------------------
+    # SUMA
+    # --------------------------------------------------------
     if accion == "sumar":
         detalle.cantidad += 1
         detalle.save()
 
-# --------------------------------------------------------
-# RESTA 1
-# --------------------------------------------------------
+    # --------------------------------------------------------
+    # RESTA
+    # --------------------------------------------------------
     elif accion == "restar":
         if detalle.cantidad > 1:
             detalle.cantidad -= 1
             detalle.save()
 
-# --------------------------------------------------------
-# ELIMINA ITEM DERECHO VIEJO
-# --------------------------------------------------------
+    # --------------------------------------------------------
+    # ELIMINAR
+    # --------------------------------------------------------
     elif accion == "eliminar":
         detalle.delete()
+        eliminado = True
+        
+    # -------------------------------------------------------- 
+    # SETEAR CANTIDAD 
+    # -------------------------------------------------------- 
+    elif accion == "setear": 
+        try: 
+            nueva_cantidad = Decimal( request.POST.get("cantidad", "0")) 
+            if nueva_cantidad > 0: 
+                detalle.cantidad = nueva_cantidad
+                detalle.save() 
+        except (InvalidOperation, ValueError): 
+            pass        
 
+    # --------------------------------------------------------
+    # RESPUESTA AJAX
+    # --------------------------------------------------------
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return JsonResponse({
+            "ok": True,
+            "detalle_id": detalle_id,
+            "cantidad": None if eliminado else detalle.cantidad,
+            "eliminado": eliminado,
+        })
+
+    # --------------------------------------------------------
+    # FALLBACK NORMAL
+    # --------------------------------------------------------
     return redirect("pedidos:editar", pedido.id)
+
 
 
 

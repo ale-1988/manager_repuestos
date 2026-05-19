@@ -1,0 +1,132 @@
+<div id="resultados">
+
+    {% if materiales|length == 0 %}
+
+        {% if texto or grupo != '---' or mostrar_obsoletos or orden %}
+
+            <div class="alert alert-warning mt-3">
+                No existen materiales que coincidan con los filtros seleccionados.
+            </div>
+
+        {% endif %}
+
+    {% else %}
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <h5 class="mb-0">
+                Resultados ({{ materiales|length }})
+            </h5>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-striped table-hover align-middle">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th class="sortable text-center"
+                            onclick="ordenar('id_mate')">
+
+                            ID
+
+                            {% if orden == 'id_mate' %}
+                                {% if direccion == 'asc' %}
+                                    ▲
+                                {% else %}
+                                    ▼
+                                {% endif %}
+                            {% endif %}
+                        </th>
+
+                        <th class="sortable"
+                            onclick="ordenar('valor')">
+
+                            Valor
+
+                            {% if orden == 'valor' %}
+                                {% if direccion == 'asc' %}
+                                    ▲
+                                {% else %}
+                                    ▼
+                                {% endif %}
+                            {% endif %}
+                        </th>
+
+                        {% if grupo == '---' %}
+
+                        <th class="sortable"
+                            onclick="ordenar('id_grup__GRUPO')">
+
+                            Grupo
+
+                            {% if orden == 'id_grup__GRUPO' %}
+                                {% if direccion == 'asc' %}
+                                    ▲
+                                {% else %}
+                                    ▼
+                                {% endif %}
+                            {% endif %}
+                        </th>
+
+                        {% endif %}
+
+                        <th class="sortable text-center"
+                            onclick="ordenar('stock')">
+
+                            Stock
+
+                            {% if orden == 'stock' %}
+                                {% if direccion == 'asc' %}
+                                    ▲
+                                {% else %}
+                                    ▼
+                                {% endif %}
+                            {% endif %}
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for mat in materiales %}
+
+                    <tr class="fila {% if mat.material2.obsoleto %}obsoleto{% endif %}">
+
+                        <td class="text-center">
+                            {{ mat.id_mate }}
+                        </td>
+
+                        <td>
+                            {{ mat.valor }}
+                        </td>
+
+                        {% if grupo == '---' %}
+                            <td>
+                                {{ mat.id_grup.GRUPO }}
+                            </td>
+                        {% endif %}
+
+                        <td class="text-center">
+                            {{ mat.stock|floatformat:0 }}
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% endif %}
+
+</div>
+```

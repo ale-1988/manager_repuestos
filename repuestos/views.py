@@ -7,7 +7,8 @@ from django.contrib import messages
 from collections import defaultdict, OrderedDict
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-
+from django.template.loader import render_to_string 
+from django.http import HttpResponse
 
 # ============================================================
 #   BÚSQUEDA MANUAL DE REPUESTOS (por texto o grupo)
@@ -72,7 +73,7 @@ def buscar_manual(request):
         # Límite de seguridad
         materiales = qs[:500]
 
-    return render(request, "repuestos/buscar_manual.html", {
+    contexto = {
         "materiales": materiales,
         "texto": texto,
         "grupo": grupo,
@@ -80,7 +81,24 @@ def buscar_manual(request):
         "mostrar_obsoletos": mostrar_obsoletos,
         "orden": orden,
         "direccion": direccion,
-    })
+    }
+
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+
+        html = render_to_string(
+            "repuestos/partials/resultados_busqueda.html",
+            contexto,
+            request=request
+        )
+
+        return HttpResponse(html)
+
+    return render(
+        request,
+        "repuestos/buscar_manual.html",
+        contexto
+    )
+
 
 @login_required
 def repuesto_por_id(request, id_mate):
