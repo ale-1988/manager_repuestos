@@ -123,7 +123,7 @@
                     {% endif %}
                     <!-- BOTON COMPROBANTE PRELIMINAR -->
                     {% if pedido.estado == "BORRADOR" or pedido.estado == "CREADO" or pedido.estado == "CONFIRMADO" %}
-                        <a href="{% url 'pedidos:comprobante_preliminar' pedido.id %}"
+                        <a href="{% url 'pedidos:comprobante_preliminar' pedido.id %}?volver={% url 'pedidos:editar' pedido.id %}"
                         class="btn btn-outline-dark btn-sm"
                         target="_blank"
                         title="Comprobante preliminar">

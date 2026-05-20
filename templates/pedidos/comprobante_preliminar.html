@@ -5,7 +5,11 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
 <title>
 Comprobante preliminar pedido {{ pedido.id }}
 </title>
@@ -188,22 +192,24 @@ $ {{ total|floatformat:2 }}
 
 <div class="no-print">
 
-<label style="margin-right:20px;">
-    <input type="checkbox" id="chkEmail">
-    Enviar por email
+<a href="{{ request.GET.volver }}"
+   class="btn btn-secondary"
+   title="Volver">
+    <i class="bi bi-arrow-left fs-5"></i>
+</a>
+
+<button onclick="window.print()" title="Imprimir"><i class="bi bi-printer fs-5"></i>
+</button>
+
+<button onclick="generarPDF()" title="Generar PDF"><i class="bi bi-file-earmark-pdf fs-5"></i>
+</button>
+
+<input type="checkbox" class="btn-check" id="chkEmail" autocomplete="off">
+
+<label class="btn btn-outline-secondary btn-sm" for="chkEmail" title="Enviar por email">
+    <i class="bi bi-envelope fs-5"></i>
 </label>
 
-<button onclick="window.print()">
-Imprimir
-</button>
-
-<button onclick="generarPDF()">
-Generar PDF
-</button>
-
-<button onclick="history.back()">
-Volver
-</button>
 
 </div>
 
