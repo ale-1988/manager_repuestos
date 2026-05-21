@@ -72,7 +72,7 @@
 
         {% if factura.tipo == "FACTURA" and factura.estado == "BORRADOR" %}
             <a href="{% url 'facturacion:emitir_factura' factura.id %}"
-               class="btn btn-primary" title="Emitir factura"><i class="bi file-binary fs-5"></i>
+               class="btn btn-primary" title="Emitir factura"><i class="bi bi-receipt fs-5"></i>
             </a>
         {% endif %}
 

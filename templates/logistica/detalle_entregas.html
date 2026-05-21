@@ -70,20 +70,22 @@
 
 <select name="transportista" class="form-select">
 
-<option value="">— Seleccionar —</option>
+   <option value="">— Seleccionar —</option>
 
-{% for t in transportistas %}
-<option value="{{ t.id }}"
-{% if pedido.cod_transportista_id == t.id %}selected{% endif %}
->
-{{ t.nombre }} {{ t.apellido }}
-</option>
-{% endfor %}
+   {% for t in transportistas %}
+   <option value="{{ t.id }}"
+   {% if pedido.cod_transportista_id == t.id %}selected{% endif %}
+   >
+   {{ t.nombre }} {{ t.apellido }}
+   </option>
+   {% endfor %}
 
 </select>
 
-<button class="btn btn-primary mt-2">
-Asignar
+
+
+<button class="btn btn-primary mt-2" title="Asignar">
+   <i class="bi bi-truck fs-5"></i>
 </button>
 
 </form>
@@ -91,22 +93,22 @@ Asignar
 
 <hr>
 
+<a class="btn btn-secondary"
+   href="{% url 'logistica:listar_entregas' %}" title="Volver"><i class="bi bi-arrow-left fs-5"></i>
+</a>
+
 {% if pedido.estado == pedido.CONSOLIDADO and pedido.cod_transportista %}
 <a class="btn btn-primary"
-   href="{% url 'logistica:enviar_pedido' pedido.id %}">
-   Marcar como enviado
+   href="{% url 'logistica:enviar_pedido' pedido.id %}" title="Marcar como enviado">
+   <i class="bi bi-send fs-5"></i>
 </a>
 {% endif %}
 
 {% if pedido.estado == pedido.ENVIADO %}
 <a class="btn btn-success"
-   href="{% url 'logistica:confirmar_entrega' pedido.id %}">
-   Confirmar entrega
+   href="{% url 'logistica:confirmar_entrega' pedido.id %}" title="Confirmar entrega">
+   <i class="bi bi-house-check fs-5"></i>
 </a>
 {% endif %}
-
-<a class="btn btn-secondary"
-   href="{% url 'logistica:listar_entregas' %}" title="Volver"><i class="bi bi-arrow-left"></i>
-</a>
 
 {% endblock %}

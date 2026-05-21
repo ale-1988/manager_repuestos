@@ -93,8 +93,8 @@
 
 {% if pedido.estado == "PREPARANDO" and pedido_completo %}
 <a class="btn btn-success"
-   href="{% url 'logistica:consolidar_pedido' pedido.id %}">
-   Consolidar pedido
+   href="{% url 'logistica:consolidar_pedido' pedido.id %}" title="Consolidar pedido">
+   <i class="bi bi-box-seam"></i>
 </a>
 {% endif %}
 

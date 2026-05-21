@@ -82,84 +82,132 @@
 
 <div class="card mb-4">
     <div class="card-body">
-
         <div class="row">
-
-            <!-- ==================== COLUMNA IZQUIERDA ==================== -->
             <div class="col-12">
-                {% if request.user.rol == "admin" or request.user.rol == "gerente" or request.user.rol == "operador" %}
-                <form action="{% url 'pedidos:actualizar_estado' pedido.id %}" method="POST" class="mb-3 d-flex align-items-center flex-wrap gap-2">
-                    {% csrf_token %}
-                    <label class="mb-0 me-1"><strong>Estado:</strong></label>
-                    <select name="estado" class="form-control form-control-sm d-inline-block" style="width:auto; min-width:180px;">
-                        {% for estado in todos_estados %}
-                            {% if estado == pedido.estado %}
-                                <option value="{{ estado }}" selected>
-                                    {{ estado }}
-                                </option>
 
-                            {% elif estado in estados_posibles %}
-                                <option value="{{ estado }}">
-                                    {{ estado }}
-                                </option>
+                <div class="d-flex flex-wrap align-items-center gap-3">
 
-                            {% else %}
-                                <option value="{{ estado }}" disabled style="color: #aaa;">
-                                    {{ estado }}
-                                </option>
-                            {% endif %}
-                        {% endfor %}
-                    </select>
+                    <!-- FECHA -->
 
-                    <button class="btn btn-primary btn-sm" title="Actualizar estado">
-                    <!-- <i class="bi bi-arrow-repeat"></i>    -->
-                    <i class="bi bi-arrow-clockwise fs-5"></i>
-                    </button>
-                    <!-- BOTON DIVIDIR -->
-                    {% if puede_dividir and not modo_dividir %}
-                        <a href="?dividir=1" class="btn btn-warning btn-sm" title="Dividir pedido">
-                        <i class="bi bi-scissors fs-5"></i>    
+                    <div>
+                        <strong>Fecha:</strong>
+                        {{ pedido.fecha|localtime|date:"d/m/Y H:i" }}
+                    </div>
+
+                    <!-- ESTADO -->
+
+                    <div>
+
+                        {% if request.user.rol == "admin" or request.user.rol == "gerente" or request.user.rol == "operador" %}
+
+                        <form action="{% url 'pedidos:actualizar_estado' pedido.id %}"
+                            method="POST"
+                            class="d-flex align-items-center gap-2 mb-0">
+
+                            {% csrf_token %}
+
+                            <label class="mb-0">
+                                <strong>Estado:</strong>
+                            </label>
+
+                            <select name="estado"
+                                    id="select-estado"
+                                    class="form-control form-control-sm"
+                                    style="width:auto; min-width:180px;">
+
+                                {% for estado in todos_estados %}
+
+                                    {% if estado == pedido.estado %}
+                                        <option value="{{ estado }}" selected>
+                                            {{ estado }}
+                                        </option>
+
+                                    {% elif estado in estados_posibles %}
+                                        <option value="{{ estado }}">
+                                            {{ estado }}
+                                        </option>
+
+                                    {% else %}
+                                        <option value="{{ estado }}" disabled style="color: #aaa;">
+                                            {{ estado }}
+                                        </option>
+                                    {% endif %}
+
+                                {% endfor %}
+
+                            </select>
+                            <button
+                                type="submit"
+                                class="btn btn-success btn-sm"
+                                title="Actualizar estado">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                        </form>
+
+                        {% else %}
+
+                            <strong>Estado:</strong> {{ pedido.estado }}
+
+                        {% endif %}
+                    </div>
+
+                    <!-- BOTONES -->
+
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+
+                        <!-- HISTORIAL -->
+
+                        <a href="{% url 'pedidos:historial_pedido' pedido.id %}"
+                        class="btn btn-outline-secondary btn-sm"
+                        title="Historial">
+                            <i class="bi bi-clock-history fs-5"></i>
                         </a>
-                    {% endif %}
-                    <!-- BOTON COMPROBANTE PRELIMINAR -->
-                    {% if pedido.estado == "BORRADOR" or pedido.estado == "CREADO" or pedido.estado == "CONFIRMADO" %}
-                        <a href="{% url 'pedidos:comprobante_preliminar' pedido.id %}?volver={% url 'pedidos:editar' pedido.id %}"
-                        class="btn btn-outline-dark btn-sm"
-                        target="_blank"
-                        title="Comprobante preliminar">
-                        <i class="bi bi-printer fs-5"></i>
-                        </a>
-                    {% endif %}
-                    <!-- BOTON GENERAR FACTURA -->
-                    {% if pedido.estado == "CERRADO" and not pedido.factura %}
-                        <a href="{% url 'pedidos:facturar_pedido' pedido.id %}" 
-                        class="btn btn-success btn-sm" title="Generar Factura"><i class="bi bi-file-earmark-binary fs-5"></i></a>
-                    {% endif %}
-                    
-                    <!-- BOTON Cancelar pedido -->
+
+                        <!-- DIVIDIR -->
+
+                        {% if puede_dividir and not modo_dividir %}
+                            <a href="?dividir=1"
+                            class="btn btn-warning btn-sm"
+                            title="Dividir pedido">
+                                <i class="bi bi-scissors fs-5"></i>
+                            </a>
+                        {% endif %}
+
+                        <!-- COMPROBANTE -->
+
+                        {% if pedido.estado == "BORRADOR" or pedido.estado == "CREADO" or pedido.estado == "CONFIRMADO" %}
+                            <a href="{% url 'pedidos:comprobante_preliminar' pedido.id %}?volver={% url 'pedidos:editar' pedido.id %}"
+                            class="btn btn-outline-dark btn-sm"
+                            target="_blank"
+                            title="Comprobante preliminar">
+                                <i class="bi bi-printer fs-5"></i>
+                            </a>
+                        {% endif %}
+
+                        <!-- FACTURA -->
+
+                        {% if pedido.estado == "CERRADO" and not pedido.factura %}
+                            <a href="{% url 'pedidos:facturar_pedido' pedido.id %}"
+                            class="btn btn-success btn-sm"
+                            title="Emitir factura">
+                                <i class="bi bi-receipt fs-5"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <!-- CANCELAR -->
+
                     {% if request.user.rol == "admin" or request.user.rol == "gerente" %}
-
-                        <button
-                            type="submit"
-                            formaction="{% url 'pedidos:cancelar' pedido.id %}"
-                            formmethod="POST"
-                            class="btn btn-danger btn-sm ms-auto"
-                            onclick="return confirm('¿Seguro desea cancelar este pedido?');"
-                            title="Cancelar pedido">
+                        <a href="{% url 'pedidos:cancelar' pedido.id %}"
+                        class="btn btn-danger btn-sm ms-auto"
+                        onclick="return confirm('¿Seguro desea cancelar este pedido?');"
+                        title="Cancelar pedido">
                             <i class="bi bi-trash fs-5"></i>
-                        </button>
-
+                        </a>
                     {% endif %}
-                </form>
-                {% else %}
-                <p><strong>Estado:</strong> {{ pedido.estado }}</p>
-                {% endif %}
-                <p><strong>Fecha:</strong> {{ pedido.fecha|localtime|date:"d/m/Y H:i" }}
-                <a href="{% url 'pedidos:historial_pedido' pedido.id %}" class="btn btn-outline-secondary btn-sm">Historial</a>
-                </p>
+                </div>
             </div>
-        </div>
-
+        </div>        
     </div>
 </div>
 
