@@ -118,7 +118,14 @@
 
                 <td>{{ h.estado_anterior }}</td>
                 <td><strong>{{ h.estado_nuevo }}</strong></td>
-                <td>{{ h.observacion }}</td>
+                <td>
+                    {{ h.observacion }}
+                    {% if h.pedido_relacionado %}
+                        <a href="{% url 'pedidos:editar' h.pedido_relacionado.id %}">
+                            #{{ h.pedido_relacionado.id }}
+                        </a>
+                    {% endif %}
+                </td>
             </tr>
         {% empty %}
             <tr>

@@ -45,7 +45,7 @@
     {% csrf_token %}
 
     <input type="number"
-        step="0.001"
+        step="1"
         max="{{ item.cantidad }}"
         name="cantidad_preparada"
         value="{{ item.cantidad_preparada }}"
@@ -86,8 +86,8 @@
 
 {% if pedido.estado == "PAGADO" %}
 <a class="btn btn-warning"
-   href="{% url 'logistica:comenzar_preparacion' pedido.id %}">
-   Comenzar preparación
+   href="{% url 'logistica:comenzar_preparacion' pedido.id %}" title="Comenzar preparación">
+   <i class="bi bi-box-seam fs-5"></i> 
 </a>
 {% endif %}
 

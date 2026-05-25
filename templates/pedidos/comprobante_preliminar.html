@@ -22,13 +22,18 @@ body{
 }
 
 .watermark{
-    position:fixed;
-    top:35%;
-    left:15%;
-    font-size:90px;
-    color:#dddddd;
-    transform:rotate(-30deg);
-    z-index:-1;
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-25deg);
+
+    font-size: 90px;
+    font-weight: bold;
+    color: rgba(0,0,0,0.04);
+
+    pointer-events: none;
+    user-select: none;
+    z-index: -1;
 }
 
 table{

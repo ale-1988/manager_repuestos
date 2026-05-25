@@ -111,7 +111,6 @@
                             </label>
 
                             <select name="estado"
-                                    id="select-estado"
                                     class="form-control form-control-sm"
                                     style="width:auto; min-width:180px;">
 
@@ -165,7 +164,7 @@
 
                         <!-- DIVIDIR -->
 
-                        {% if puede_dividir and not modo_dividir %}
+                        {% if puede_dividir and not modo_dividir and pedido.estado == "CREADO" %}
                             <a href="?dividir=1"
                             class="btn btn-warning btn-sm"
                             title="Dividir pedido">
@@ -175,7 +174,7 @@
 
                         <!-- COMPROBANTE -->
 
-                        {% if pedido.estado == "BORRADOR" or pedido.estado == "CREADO" or pedido.estado == "CONFIRMADO" %}
+                        {% if pedido.estado == "CREADO" or pedido.estado == "CONFIRMADO" %}
                             <a href="{% url 'pedidos:comprobante_preliminar' pedido.id %}?volver={% url 'pedidos:editar' pedido.id %}"
                             class="btn btn-outline-dark btn-sm"
                             target="_blank"
@@ -202,7 +201,7 @@
                         class="btn btn-danger btn-sm ms-auto"
                         onclick="return confirm('¿Seguro desea cancelar este pedido?');"
                         title="Cancelar pedido">
-                            <i class="bi bi-trash fs-5"></i>
+                            <i class="bi bi-x-circle fs-5"></i>
                         </a>
                     {% endif %}
                 </div>
@@ -218,7 +217,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4>Items del Pedido</h4>
 
-    {% if pedido.estado in "BORRADOR CREADO CONFIRMADO" and not modo_dividir %}
+    {% if pedido.estado == "CREADO" and not modo_dividir %}
         <a href="{% url 'pedidos:agregar_items' pedido.id %}" class="btn btn-primary" title="Agregar item">
             <i class="bi bi-plus-circle fs-5"></i>
         </a>
@@ -306,7 +305,7 @@
 
                         <span>{{ item.material.valor }}</span>
 
-                        {% if pedido.estado == "BORRADOR" or pedido.estado == "CREADO" or pedido.estado == "CONFIRMADO" %}
+                        {% if pedido.estado == "CREADO" %}
                             <button type="button" 
                                 class="btn btn-sm btn-outline-secondary btn-eliminar" 
                                 data-url="{% url 'pedidos:modificar_cantidad' item.id %}" 
@@ -345,8 +344,8 @@
         </tbody>
     </table>
 
-    <button class="btn btn-primary mt-3">Confirmar división</button>
-    <a href="." class="btn btn-secondary mt-3">Cancelar</a>
+    <button class="btn btn-primary mt-3" title="Confirmar división"><i class="bi bi-scissors fs-5"></i></button>
+    <a href="." class="btn btn-secondary mt-3" title="Cancelar"><i class="bi bi-x-circle fs-5"></i></a>
 
 </form>
 
@@ -373,53 +372,55 @@
         <tr id="fila-item-{{ item.id }}">
             <td class="text-center">{{ item.cod_repuesto }}</td>
             <td class="text-center align-middle">
+                {% if pedido.estado == "CREADO" %}
+                    <div class="input-group input-group-sm justify-content-center">
 
-                <div class="input-group input-group-sm justify-content-center">
+                        <!-- RESTAR -->
 
-                    <!-- RESTAR -->
+                        <button
+                            type="button"
+                            class="btn btn-outline-danger btn-cantidad"
+                            data-url="{% url 'pedidos:modificar_cantidad' item.id %}"
+                            data-accion="restar"
+                            title="Quitar unidad"
+                            {% if item.cantidad <= 1 %}disabled{% endif %}
+                        >
+                            <i class="bi bi-dash-lg"></i>
+                        </button>
 
-                    <button
-                        type="button"
-                        class="btn btn-outline-danger btn-cantidad"
-                        data-url="{% url 'pedidos:modificar_cantidad' item.id %}"
-                        data-accion="restar"
-                        title="Quitar unidad"
-                        {% if item.cantidad <= 1 %}disabled{% endif %}
-                    >
-                        <i class="bi bi-dash-lg"></i>
-                    </button>
+                        <!-- CANTIDAD -->
 
-                    <!-- CANTIDAD -->
+                        <input
+                            type="text"
+                            class="form-control text-center cantidad-input"
+                            value="{{ item.cantidad|floatformat:'-2' }}"
+                            data-detalle-id="{{ item.id }}"
+                            style="max-width: 80px;"
+                        >
 
-                    <input
-                        type="text"
-                        class="form-control text-center cantidad-input"
-                        value="{{ item.cantidad|floatformat:'-2' }}"
-                        data-detalle-id="{{ item.id }}"
-                        style="max-width: 80px;"
-                    >
+                        <!-- SUMAR -->
 
-                    <!-- SUMAR -->
+                        <button
+                            type="button"
+                            class="btn btn-outline-success btn-cantidad"
+                            data-url="{% url 'pedidos:modificar_cantidad' item.id %}"
+                            data-accion="sumar"
+                            title="Agregar unidad"
+                        >
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
 
-                    <button
-                        type="button"
-                        class="btn btn-outline-success btn-cantidad"
-                        data-url="{% url 'pedidos:modificar_cantidad' item.id %}"
-                        data-accion="sumar"
-                        title="Agregar unidad"
-                    >
-                        <i class="bi bi-plus-lg"></i>
-                    </button>
-
-                </div>
-
+                    </div>
+                {% else %}
+                    {{ item.cantidad|floatformat:'-2' }}
+                {% endif %}
             </td>
             <td>
                 <div class="d-flex justify-content-between align-items-center">
 
                     <span>{{ item.material.valor }}</span>
 
-                    {% if pedido.estado == "BORRADOR" or pedido.estado == "CREADO" or pedido.estado == "CONFIRMADO" %}
+                    {% if pedido.estado == "CREADO" %}
                         <button type="button" 
                             class="btn btn-sm btn-outline-secondary btn-eliminar" 
                             data-url="{% url 'pedidos:modificar_cantidad' item.id %}" 
@@ -462,5 +463,7 @@
 
 <a href="{% url 'pedidos:listar' %}" class="btn btn-secondary mt-3" title="Volver al listado"><i class="bi bi-arrow-left"></i></a>
 
-<script src="{% static 'js/editar_pedido.js' %}"></script>
+{% if pedido.estado == "CREADO" %}
+    <script src="{% static 'js/editar_pedido.js' %}"></script>
+{% endif %}
 {% endblock %}

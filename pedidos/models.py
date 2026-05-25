@@ -225,7 +225,7 @@ class Pedido(models.Model):
                 raise ValidationError(
                     "El total del pedido debe ser mayor a cero."
                 )
-            print("COD_CLIENTE:", pedido.cod_cliente)
+            #print("COD_CLIENTE:", pedido.cod_cliente)
             factura = Factura.objects.create(
                 pedido=pedido,
                 cod_cliente=pedido.cod_cliente,
@@ -253,6 +253,14 @@ class HistorialEstadoPedido(models.Model):
         on_delete=models.PROTECT
     )
 
+    pedido_relacionado = models.ForeignKey(
+        Pedido,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+"
+    )
+
     fecha = models.DateTimeField(auto_now_add=True)
 
     observacion = models.CharField(
@@ -260,6 +268,7 @@ class HistorialEstadoPedido(models.Model):
         blank=True,
         null=True
     )
+
 
     class Meta:
         ordering = ["-fecha"]
@@ -321,9 +330,9 @@ class DetallePedido(models.Model):
         fin_garantia = fecha_liberacion + relativedelta(months=meses)
         
         if timezone.now() <= fin_garantia:
-            color_garantia="#6fcf85"
+            color_garantia="#8ad69c"
         else:
-            color_garantia="#e46772"   
+            color_garantia="#ec8a92"   
 
         return {
             "numero_serie": self.numero_serie,

@@ -47,13 +47,14 @@
 
 <form method="POST" class="mt-4">
     {% csrf_token %}
-    <button type="submit" class="btn btn-primary">
-        Confirmar división
+    <button type="submit" class="btn btn-primary" title="Confirmar división">
+        <i class="bi bi-scissors fs-5"></i>
     </button>
-
-    <a href="{% url 'pedidos:editar' pedido.id %}" class="btn btn-secondary ms-2">
-        Cancelar
+        
+    <a href="{% url 'pedidos:editar' pedido.id %}" class="btn btn-secondary ms-2" title="Cancelar">
+        <i class="bi bi-x-circle fs-5"></i>
     </a>
 </form>
 
 {% endblock %}
+

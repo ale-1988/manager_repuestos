@@ -133,6 +133,30 @@ def confirmar_division(request, id):
         except KeyError:
             pass
 
+        # ----------------------------------------------------
+        # HISTORIAL PEDIDO ORIGINAL
+        # ----------------------------------------------------
+        HistorialEstadoPedido.objects.create(
+            pedido=pedido,
+            usuario=request.user,
+            estado_anterior=pedido.estado,
+            estado_nuevo=pedido.estado,
+            observacion="Algunos repuestos pasaron al pedido",
+            pedido_relacionado=nuevo,
+        )
+
+        # ----------------------------------------------------
+        # HISTORIAL PEDIDO NUEVO
+        # ----------------------------------------------------
+        HistorialEstadoPedido.objects.create(
+            pedido=nuevo,
+            usuario=request.user,
+            estado_anterior="-",
+            estado_nuevo="CREADO",
+            observacion="Dividido del pedido",
+            pedido_relacionado=pedido,
+        )
+
         messages.success(
             request,
             f"Pedido dividido correctamente. Nuevo pedido creado: #{nuevo.id}"
@@ -497,7 +521,7 @@ def historial_global(request, pedido_id=None):
     
 @login_required
 def facturar_pedido(request, id):
-    print ("Entro en facturar_pedidos")
+    #print ("Entro en facturar_pedidos")
     pedido = get_object_or_404(Pedido, id=id)
 
     try:
