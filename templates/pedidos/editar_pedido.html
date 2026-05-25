@@ -197,12 +197,14 @@
                     <!-- CANCELAR -->
 
                     {% if request.user.rol == "admin" or request.user.rol == "gerente" %}
-                        <a href="{% url 'pedidos:cancelar' pedido.id %}"
-                        class="btn btn-danger btn-sm ms-auto"
-                        onclick="return confirm('¿Seguro desea cancelar este pedido?');"
-                        title="Cancelar pedido">
-                            <i class="bi bi-x-circle fs-5"></i>
-                        </a>
+                        {% if pedido.estado not in "ENVIADO,ENTREGADO" %}
+                            <a href="{% url 'pedidos:cancelar' pedido.id %}"
+                            class="btn btn-danger btn-sm ms-auto"
+                            onclick="return confirm('¿Seguro desea cancelar este pedido?');"
+                            title="Cancelar pedido">
+                                <i class="bi bi-x-circle fs-5"></i>
+                            </a>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
@@ -343,7 +345,6 @@
             {% endfor %}
         </tbody>
     </table>
-
     <button class="btn btn-primary mt-3" title="Confirmar división"><i class="bi bi-scissors fs-5"></i></button>
     <a href="." class="btn btn-secondary mt-3" title="Cancelar"><i class="bi bi-x-circle fs-5"></i></a>
 

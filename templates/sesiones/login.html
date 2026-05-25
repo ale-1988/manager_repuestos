@@ -45,7 +45,7 @@
         .login-button {
             width: 56px;
             height: 56px;
-            background: #0069d9;
+            background: #009eed;
             color: white;
             border: none;
             border-radius: 6px;
@@ -55,6 +55,7 @@
             justify-content: center;
             padding: 0;
             flex-shrink: 0;
+            margin-left: auto;
         }
 
         .login-button:hover {
@@ -68,7 +69,6 @@
         .login-actions {
             display: flex;
             align-items: center;
-            gap: 12px;
             margin-top: 10px;
         }
 
@@ -99,8 +99,8 @@
 
         <div class="logo-container">
             <img src="{% static 'images/favicon.png' %}"
-                 alt="Logo"
-                 height="50">
+                alt="Logo"
+                height="50">
         </div>
 
         <h2>Manager de Repuestos</h2>
@@ -122,26 +122,23 @@
 
             <label>Usuario</label>
             <input type="text"
-                   name="username"
-                   required
-                   autofocus>
+                name="username"
+                required
+                autofocus>
 
             <label>Contraseña</label>
             <input type="password"
-                   name="password"
-                   required>
+                name="password"
+                required>
 
             <div class="login-actions">
-                <button type="submit"
-                        class="login-button"
-                        title="Ingresar">
-                    <i class="bi bi-box-arrow-in-right"></i>
-                </button>
-
-                <a href="{% url 'sesiones:password_reset' %}"
-                   class="forgot-password">
-                    ¿Olvidó su contraseña?
+                <a href="{% url 'sesiones:password_reset' %}" class="forgot-password">
+                    Recuperar contraseña                    
                 </a>
+                <button type="submit"
+                        class="login-button" title="Ingresar">
+                    <i class="bi bi-box-arrow-in-right fs-6"></i>
+                </button>
             </div>
         </form>
 

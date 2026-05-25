@@ -59,19 +59,11 @@
 
             <!-- MENÚ IZQUIERDO -->
             <ul class="navbar-nav me-auto">
-
-                <!-- SUBMENÚ PEDIDOS -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="pedidosDropdown" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">
-                        Pedidos
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="pedidosDropdown">
-                        <li><a class="dropdown-item" href="{% url 'pedidos:nuevo_cliente' %}">Nuevo</a></li>
-                        <li><a class="dropdown-item" href="{% url 'pedidos:listar' %}">Listar</a></li>
-                    </ul>
+                <!-- MENÚ PEDIDOS -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'pedidos:listar' %}">Listar Pedidos</a>
                 </li>
-
+    
                 <!-- MENÚ REPUESTOS -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'repuestos:listar' %}">Catálogo</a>

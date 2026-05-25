@@ -176,28 +176,11 @@ def confirmar_division(request, id):
 # ==========================================================
 # LISTAR PEDIDOS
 # ==========================================================
-#@login_required
-# def listar_pedidos(request):
-#     q = request.GET.get("q", "").strip()
-
-#     pedidos = Pedido.objects.all()
-
-#     if q:
-#         pedidos = pedidos.filter(id__icontains=q) | pedidos.filter(cod_cliente__icontains=q)
-
-#     pedidos = pedidos.annotate(
-#         total_items=Count("detalles"),               # cantidad de repuestos distintos
-#         total_cantidades=Sum("detalles__cantidad")   # suma de cantidades
-#     ).order_by("-id")
-
-#     return render(request, "pedidos/listar_pedidos.html", {
-#         "pedidos": pedidos,
-#         "q": q,
-#     })
 @login_required
 def listar_pedidos(request):
     q = request.GET.get("q", "").strip()
-
+    ver_entregados = request.GET.get("ver_entregados")
+    
     # Parámetros para ordenar
     orden = request.GET.get("orden", "fecha")     # default → fecha
     direccion = request.GET.get("dir", "desc")    # default → descendente
@@ -221,7 +204,12 @@ def listar_pedidos(request):
         order_by = "-" + campo
 
     pedidos = Pedido.objects.all()
-
+    
+    # Ocultar entregados por defecto
+    if not ver_entregados:
+        pedidos = pedidos.exclude(estado="ENTREGADO")
+    
+    # Filtro búsqueda
     if q:
         pedidos = pedidos.filter(id__icontains=q) | pedidos.filter(cod_cliente__icontains=q)
 
