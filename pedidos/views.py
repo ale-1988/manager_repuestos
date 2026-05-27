@@ -76,6 +76,10 @@ def editar_pedido(request, id):
         request.session["items_a_dividir"] = items_seleccionados
         return redirect("pedidos:confirmar_division", id=id)
     items = pedido.detalles.all()
+    
+    for item in items:
+        #Mitad de la pila minima
+        item.stock_critico = item.material.pila / 2
     puede_dividir = (items.count() > 1) and (pedido.estado == "CREADO")
     
     return render(request, "pedidos/editar_pedido.html", {

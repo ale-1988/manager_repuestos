@@ -244,6 +244,7 @@
             <tr>
                 <th class="text-center">Selec.</th>
                 <th class="text-center">ID</th>
+                <th class="text-center">En Stock</th>
                 <th class="text-center">Cant</th>
                 <th>Nombre</th>
                 <th>Grupo</th>
@@ -253,10 +254,21 @@
         <tbody>
             {% for item in items %}
             <tr id="fila-item-{{ item.id }}">
-                <td class="text-center">
+                <td class="text-center align-middle">
                     <input type="checkbox" name="item_dividir" value="{{ item.id }}">
                 </td>
-                <td class="text-center">{{ item.cod_repuesto }}</td>
+                <td class="text-center align-middle">{{ item.cod_repuesto }}</td>
+                <td class="text-center align-middle"> {{ item.material.stock|floatformat:'-2' }}
+                    <!-- {% if item.material.stock > 0 %}
+                        <span class="badge bg-success">
+                            {{ item.material.stock|floatformat:'-2' }}
+                        </span>
+                    {% else %}
+                        <span class="badge bg-danger">
+                            0
+                        </span>
+                    {% endif %} -->
+                </td>                
                 <td class="text-center align-middle">
 
                     <div class="input-group input-group-sm justify-content-center">
@@ -319,7 +331,7 @@
                     </div>
 
                 </td>
-                <td>{{ item.material.grupo_nombre }}</td>
+                <td class="align-middle">{{ item.material.grupo_nombre }}</td>
 
                 {% if item.info_equipo.equipo_nombre %}
                     <td class="text-center" 
@@ -334,13 +346,13 @@
                 {% if item.info_equipo.numero_serie %}
                     {{ item.info_equipo.numero_serie }}
                 {% else %}
-                    <span class="text-muted">—</span>
+                    <span class="text-muted align-middle">—</span>
                 {% endif %}
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="6" class="text-center">No hay ítems.</td>
+                <td colspan="7" class="text-center">No hay ítems.</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -362,6 +374,7 @@
     <thead>
         <tr>
             <th class="text-center">ID</th>
+            <th class="text-center">En stock</th>
             <th class="text-center">Cant</th>
             <th>Nombre</th>
             <th>Grupo</th>
@@ -371,7 +384,22 @@
     <tbody>
         {% for item in items %}
         <tr id="fila-item-{{ item.id }}">
-            <td class="text-center">{{ item.cod_repuesto }}</td>
+            <td class="text-center align-middle">{{ item.cod_repuesto }}</td>
+            
+            <td class="text-center align-middle"
+                {% if item.material.stock > item.material.pila %}
+                    style="background-color: #b7ffb7;"
+
+                {% elif item.material.stock > item.stock_critico %}
+                    style="background-color: #fff3b0;"
+
+                {% else %}
+                    style="background-color: #ffb3b3;"
+
+                {% endif %}">
+                {{ item.material.stock|floatformat:'-2' }}
+            </td>
+
             <td class="text-center align-middle">
                 {% if pedido.estado == "CREADO" %}
                     <div class="input-group input-group-sm justify-content-center">
@@ -434,7 +462,7 @@
 
             </td>
             
-            <td>{{ item.material.grupo_nombre }}</td>
+            <td class="align-middle">{{ item.material.grupo_nombre }}</td>
 
             {% if item.info_equipo.equipo_nombre %}
                 <td class="text-center" 
@@ -448,13 +476,13 @@
             {% if item.info_equipo.numero_serie %}
                 {{ item.info_equipo.numero_serie }}
             {% else %}
-                <span class="text-muted">—</span>
+                <span class="text-muted align-middle">—</span>
             {% endif %}
             </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="6" class="text-center">No hay ítems.</td>
+            <td colspan="7" class="text-center">No hay ítems.</td>
         </tr>
         {% endfor %}
     </tbody>
