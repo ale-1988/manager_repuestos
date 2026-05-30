@@ -1,3 +1,4 @@
+
 function getCSRFToken() {
 
     return document.querySelector(
@@ -44,20 +45,20 @@ document.addEventListener("click", async function(ev) {
 
     const data = await r.json();
 
+    
+
     if (!data.ok) {
         alert(data.error || "Error");
         return;
     }
 
-    const input = document.querySelector(
-        `.cantidad-input[data-detalle-id="${data.detalle_id}"]`
-    );
-
+    const input = document.querySelector(`.cantidad-input[data-detalle-id="${data.detalle_id}"]`);
+    
     if (input) {
         input.value =
             parseFloat(data.cantidad).toString();
     }
-
+    
 });
 
 // =====================================================
@@ -134,6 +135,9 @@ document.addEventListener("focusout", async function(ev) {
 
     const valor =
         input.value.trim();
+        alert(
+            "FOCUSOUT valor=" + valor
+        );
 
     const fila =
         input.closest("tr");
@@ -174,9 +178,8 @@ document.addEventListener("focusout", async function(ev) {
         return;
     }
 
-    input.value =
-        parseFloat(data.cantidad).toString();
-
+    input.value = parseFloat(data.cantidad).toString();
+ 
 }, true);
 
 // =====================================================
@@ -200,4 +203,41 @@ document.addEventListener("keydown", function(ev) {
 
     }
 
+});
+// =====================================================
+// MOSTRAR O NO ICONO DIVIDIR
+// =====================================================
+document.addEventListener("DOMContentLoaded", () => {
+
+    const checkboxes = document.querySelectorAll(
+        'input[name="item_dividir"]'
+    );
+
+    const btnDividir = document.getElementById(
+        "btn-dividir-confirmar"
+    );
+    if (!btnDividir || checkboxes.length === 0) {
+        return;
+    }
+
+    function actualizarBotonDividir() {
+
+        const total = checkboxes.length;
+
+        const seleccionados = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .length;
+
+        const visible =
+            seleccionados > 0 &&
+            seleccionados < total;
+
+        btnDividir.classList.toggle("d-none", !visible);
+    }
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener("change", actualizarBotonDividir);
+    });
+
+    actualizarBotonDividir();
 });

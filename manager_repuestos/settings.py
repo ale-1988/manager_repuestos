@@ -186,7 +186,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
-
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Default primary key field type
@@ -196,9 +195,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # Direccionamiento automatico
-#LOGIN_URL = '/session/login/'
-#LOGIN_REDIRECT_URL = '/'        # a dónde va luego de loguearse
-#LOGOUT_REDIRECT_URL = '/sesion/login/' # a dónde va luego de desloguearse
 LOGIN_URL = 'sesiones:login'
 LOGIN_REDIRECT_URL = '/pedidos/listar/'
 LOGOUT_REDIRECT_URL = 'sesiones:login'

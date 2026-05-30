@@ -390,41 +390,6 @@ def modificar_cantidad(request, detalle_id):
     return redirect("pedidos:editar", pedido.id)
 
 
-
-
-""" @login_required
-@require_POST
-def modificar_cantidad(request, detalle_id):
-    detalle = get_object_or_404(DetallePedido, id=detalle_id)
-
-    pedido = detalle.cod_pedido
-
-    # Validar que el pedido sea editable
-    if pedido.estado != "CREADO":
-        return JsonResponse({
-            "ok": False,
-            "error": "El pedido no puede modificarse."
-        })
-
-    accion = request.POST.get("accion")
-
-    if accion == "sumar":
-        detalle.cantidad += 1
-        detalle.save()
-
-    elif accion == "restar":
-
-        if detalle.cantidad > 1:
-            detalle.cantidad -= 1
-            detalle.save()
-        else:
-            detalle.delete()
-
-    return JsonResponse({
-        "ok": True
-    }) """
-
-
 @login_required
 def buscar_equipo(request):
     """
