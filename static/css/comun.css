@@ -1,0 +1,34 @@
+/* ==========================================
+   Botones táctiles
+   ========================================== */
+
+.btn-touch {
+    min-width: 44px;
+    min-height: 44px;
+}
+
+/* ==========================================
+   Botones con iconos
+   ========================================== */
+
+.btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ==========================================
+   Celdas numéricas
+   ========================================== */
+
+.text-num {
+    text-align: right;
+}
+
+/* ==========================================
+   Elementos no seleccionables
+   ========================================== */
+
+.no-select {
+    user-select: none;
+}
