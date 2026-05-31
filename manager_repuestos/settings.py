@@ -214,3 +214,15 @@ EMAIL_HOST_PASSWORD= env("EMAIL_HOST_PASSWORD")
 
 # URL
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
+
+
+# ============================================================
+# DATOS DE EMPRESA
+# ============================================================
+
+EMPRESA_NOMBRE = "CEC Electrónica SRL"
+EMPRESA_DIRECCION = ("Bv. Los Hungaros 5027 5147 Los Boulevares Córdoba - Argentina")
+EMPRESA_CUIT = "30-12345678-9"
+EMPRESA_INGRESOS_BRUTOS = "123456789"
+EMPRESA_INICIO_ACTIVIDADES = "01/01/1973"
+EMPRESA_LOGO = BASE_DIR / "static" / "images" / "favicon.png"
