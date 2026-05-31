@@ -3,7 +3,7 @@
 {% block contenido %}
 
 <h2>Preparación de pedidos</h2>
-Cantidad de pedidos: {{ pedidos|length }}
+Cantidad de pedidos: {{ cantidad_pedidos }}
 
 <table class="table table-striped table-hover">
 
@@ -38,25 +38,17 @@ Cantidad de pedidos: {{ pedidos|length }}
                 </div>
             </td>
 
-            
-
             <td class="text-center">{{ pedido.total_items }}</td>
-
             <td class="text-center">{{ pedido.total_cantidad }}</td>
-
             <td class="text-center">{{ pedido.estado }}</td>
-
             <td class="text-center">{{ pedido.fecha|date:"d/m/Y" }}</td>
-
             <td class="text-end">
 
                 <a class="btn btn-sm btn-primary btn-touch"
-                   href="{% url 'logistica:detalle_preparacion' pedido.id %}" title="Ver">
-                   <i class="bi bi-eye fs-5"></i>
+                    href="{% url 'logistica:detalle_preparacion' pedido.id %}" title="Ver">
+                    <i class="bi bi-eye fs-5"></i>
                 </a>
-
             </td>
-
         </tr>
 
     {% empty %}
@@ -72,5 +64,5 @@ Cantidad de pedidos: {{ pedidos|length }}
     </tbody>
 
 </table>
-
+{% include "includes/pie_paginacion.html" with page_obj=pedidos %}
 {% endblock %}

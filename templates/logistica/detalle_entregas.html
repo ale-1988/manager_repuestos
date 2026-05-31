@@ -2,7 +2,12 @@
 
 {% block contenido %}
 
-<h2>Entrega del pedido {{ pedido.id }}</h2>
+<h2>
+    Entrega del
+    <a href="{% url 'pedidos:editar' pedido.id %}">
+        pedido {{ pedido.id }}
+    </a>
+</h2>
 
 <p><b>Cliente:</b> {{ pedido.cliente }}</p>
 

@@ -11,6 +11,9 @@ from django.http import HttpResponse
 from django.core.mail import EmailMessage
 from .utils import build_pdf_factura
 
+from django.core.paginator import Paginator
+from pedidos.utils import es_movil
+
 # ==============================
 # LISTAR FACTURAS
 # ==============================
@@ -39,6 +42,12 @@ def listar_facturas(request):
     if solo_saldo:
         facturas = [f for f in facturas if f.saldo_actual() > 0]
 
+    #Paginacion
+    items_por_pagina = 10 if es_movil(request) else 25
+    paginator = Paginator(facturas, items_por_pagina)
+    page_number = request.GET.get("page")
+    facturas = paginator.get_page(page_number)
+    
     return render(request, "facturacion/listar_facturas.html", {
         "facturas": facturas,
     })
@@ -135,7 +144,7 @@ def registrar_pago(request, pk):
                     )
                 else:
                     factura.refresh_from_db()
-                    if factura.saldo_actual == 0:
+                    if factura.saldo_actual() <= 0:
                         messages.success(
                             request,
                             "Factura cancelada completamente. "

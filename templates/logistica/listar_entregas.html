@@ -90,6 +90,7 @@
             {% else %}
             —
             {% endif %}
+            </td>
             <td class="text-end">
                 <a class="btn btn-sm btn-primary btn-touch"
                 href="{% url 'logistica:detalle_entregas' pedido.id %}" title="Ver">
@@ -110,5 +111,5 @@
     </tbody>
 
 </table>
-
+{% include "includes/pie_paginacion.html" with page_obj=pedidos %}
 {% endblock %}

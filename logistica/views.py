@@ -11,14 +11,21 @@ from usuarios.models import Usuario
 
 from datetime import timedelta
 
-# Create your views here.
+from django.core.paginator import Paginator
+from pedidos.utils import es_movil
 
+# Create your views here.
+#*****************************
+#*****************************
+#*****************************
 def listar_preparacion(request):
 
     pedidos = Pedido.objects.filter(
         estado__in=["PAGADO","PREPARANDO"]
-    ).order_by("fecha", "id")
-
+    ).order_by("-fecha", "-id")
+    
+    cantidad_pedidos = pedidos.count()
+    
     for pedido in pedidos:
 
         total = 0
@@ -39,13 +46,26 @@ def listar_preparacion(request):
         else:
             pedido.progreso_preparacion = 0    
     
+        
+    # Paginación
+    items_por_pagina = 10 if es_movil(request) else 25
+    paginator = Paginator(pedidos, items_por_pagina)
+    page_number = request.GET.get("page")
+    pedidos = paginator.get_page(page_number)
+
     
     return render(
         request,
         "logistica/listar_preparacion.html",
-        {"pedidos": pedidos}
+        {
+            "pedidos": pedidos,
+            "cantidad_pedidos": cantidad_pedidos,
+        }
     )
-
+    
+#*****************************
+#*****************************
+#*****************************
 def detalle_preparacion(request, id):
 
     pedido = get_object_or_404(Pedido, pk=id)
@@ -78,6 +98,9 @@ def detalle_preparacion(request, id):
         }
     )
 
+#*****************************
+#*****************************
+#*****************************
 def comenzar_preparacion(request, id):
 
     pedido = get_object_or_404(Pedido, pk=id)
@@ -96,6 +119,9 @@ def comenzar_preparacion(request, id):
 
     return redirect("logistica:detalle_preparacion", id=pedido.id)
 
+#*****************************
+#*****************************
+#*****************************
 def consolidar_pedido(request, id):
 
     pedido = get_object_or_404(Pedido, pk=id)
@@ -117,6 +143,9 @@ def consolidar_pedido(request, id):
 
     return redirect("logistica:detalle_preparacion", id=pedido.id)
 
+#*****************************
+#*****************************
+#*****************************
 def enviar_pedido(request, id):
 
     pedido = get_object_or_404(Pedido, pk=id)
@@ -135,6 +164,9 @@ def enviar_pedido(request, id):
 
     return redirect("logistica:detalle_entregas", id=pedido.id)
 
+#*****************************
+#*****************************
+#*****************************
 def confirmar_entrega(request, id):
 
     pedido = get_object_or_404(Pedido, pk=id)
@@ -153,7 +185,9 @@ def confirmar_entrega(request, id):
 
     return redirect("logistica:detalle_entregas", id=pedido.id)
 
-
+#*****************************
+#*****************************
+#*****************************
 def guardar_preparacion(request, id):
 
     pedido = get_object_or_404(Pedido, pk=id)
@@ -173,6 +207,9 @@ def guardar_preparacion(request, id):
 
     return redirect("logistica:detalle_preparacion", id=pedido.id)
 
+#*****************************
+#*****************************
+#*****************************
 def actualizar_preparado(request, id):
 
     item = get_object_or_404(DetallePedido, pk=id)
@@ -188,21 +225,12 @@ def actualizar_preparado(request, id):
 
     return redirect("logistica:detalle_preparacion", id=item.cod_pedido.id)
 
-def listar_entregas(request):
-
-    pedidos = Pedido.objects.filter(
-        estado__in=[Pedido.CONSOLIDADO, Pedido.ENVIADO, Pedido.ENTREGADO]
-    ).order_by("fecha", "id")
-
-    return render(
-        request,
-        "logistica/listar_entregas.html",
-        {"pedidos": pedidos}
-    )
-    
 
 
 
+#*****************************
+#*****************************
+#*****************************
 def detalle_entregas(request, id):
 
     pedido = get_object_or_404(Pedido, pk=id)
@@ -231,9 +259,9 @@ def detalle_entregas(request, id):
         }
     )
     
-
-
-
+#*****************************
+#*****************************
+#*****************************
 def enviar_pedido(request, id):
     pedido = get_object_or_404(Pedido, pk=id)
     if not pedido.cod_transportista:
@@ -251,6 +279,9 @@ def enviar_pedido(request, id):
     pedido.save(update_fields=["fecha_envio"])
     return redirect("logistica:listar_entregas")
 
+#*****************************
+#*****************************
+#*****************************
 def confirmar_entrega(request, id):
 
     pedido = get_object_or_404(Pedido, pk=id)
@@ -263,8 +294,9 @@ def confirmar_entrega(request, id):
 
     return redirect("logistica:listar_entregas")
 
-
-
+#*****************************
+#*****************************
+#*****************************
 def listar_entregas(request):
 
     filtro = request.GET.get("entregados", "ninguno")
@@ -327,6 +359,12 @@ def listar_entregas(request):
         pedido.fecha_enviado = fechas["enviado"]
         pedido.fecha_entregado = fechas["entregado"]
 
+    # Paginación
+    items_por_pagina = 10 if es_movil(request) else 25
+    paginator = Paginator(pedidos, items_por_pagina)
+    page_number = request.GET.get("page")
+    pedidos = paginator.get_page(page_number)
+
     return render(
         request,
         "logistica/listar_entregas.html",
@@ -335,10 +373,4 @@ def listar_entregas(request):
             "filtro_entregados": filtro,
         }
     )
-
-
-    return render(
-        request,
-        "logistica/listar_entregas.html",
-        {"pedidos": pedidos}
-    )
+    

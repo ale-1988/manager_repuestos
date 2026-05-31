@@ -3,29 +3,44 @@
 
 <h2>Lista de Pedidos</h2>
 
-<form method="get" class="row g-3 mb-4  align-items-center">
+<form method="get" class="row g-3 mb-4 align-items-center">
+
     <div class="col-md-4">
-        <input type="text" name="q" class="form-control" placeholder="ID o Cod. Cliente" value="{{ q }}">
+        <input type="text"
+            name="q"
+            class="form-control"
+            placeholder="ID o Cod. Cliente"
+            value="{{ q }}">
     </div>
+
     <div class="col-md-auto d-flex gap-2">
         <button class="btn btn-primary" title="Buscar">
             <i class="bi bi-search fs-5"></i>
         </button>
 
         <div class="form-check mb-0 d-flex align-items-center">
-            <input class="form-check-input" type="checkbox" name="ver_entregados"
+            <input class="form-check-input"
+                type="checkbox"
+                name="ver_entregados"
                 value="1"
                 id="ver_entregados"
                 {% if request.GET.ver_entregados %}checked{% endif %}
                 onchange="this.form.submit()">
+
             <label class="form-check-label ms-1" for="ver_entregados">
                 Ver entregados
             </label>
         </div>
-        <a href="{% url 'pedidos:nuevo_cliente' %}" class="btn btn-success" title="Nuevo pedido">
+    </div>
+
+    <div class="col ms-auto text-end">
+        <a href="{% url 'pedidos:nuevo_cliente' %}"
+            class="btn btn-success"
+            title="Nuevo pedido">
             <i class="bi bi-plus-circle fs-5"></i>
         </a>
     </div>
+
 </form>
 
 
@@ -96,33 +111,5 @@
         {% endfor %}
     </tbody>
 </table>
-<nav>
-    <ul class="pagination justify-content-center">
-
-        {% if page_obj.has_previous %}
-        <li class="page-item">
-            <a class="page-link"
-               href="?page={{ page_obj.previous_page_number }}">
-                Anterior
-            </a>
-        </li>
-        {% endif %}
-
-        <li class="page-item disabled">
-            <span class="page-link">
-                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
-            </span>
-        </li>
-
-        {% if page_obj.has_next %}
-        <li class="page-item">
-            <a class="page-link"
-               href="?page={{ page_obj.next_page_number }}">
-                Siguiente
-            </a>
-        </li>
-        {% endif %}
-
-    </ul>
-</nav>
+{% include "includes/pie_paginacion.html" with page_obj=page_obj %}
 {% endblock %}

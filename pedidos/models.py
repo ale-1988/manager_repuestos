@@ -235,7 +235,24 @@ class Pedido(models.Model):
             )
 
         return factura
+    
+    @property
+    def permite_ver_preparacion(self):
+        return self.estado in (
+            "PAGADO",
+            "PREPARANDO",
+            "CONSOLIDADO",
+            "ENVIADO",
+            "ENTREGADO"
+        )
 
+    @property
+    def permite_ver_entrega(self):
+        return self.estado in (
+            "CONSOLIDADO",
+            "ENVIADO",
+            "ENTREGADO"
+        )
 
 
 class HistorialEstadoPedido(models.Model):
@@ -348,7 +365,6 @@ class DetallePedido(models.Model):
 
             if self.pk:
                 original = DetallePedido.objects.get(pk=self.pk)
-
                 for campo in ["cod_repuesto", "cantidad", "numero_serie"]:
                     if getattr(self, campo) != getattr(original, campo):
                         raise ValidationError(f"Solo se pueden editar ítems cuando el pedido está en estado CREADO (estado actual: {self.cod_pedido.estado})")
@@ -371,3 +387,6 @@ class DetallePedido(models.Model):
                 name="unique_repuesto_por_pedido"
             )
         ]
+
+
+    

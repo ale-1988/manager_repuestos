@@ -5,6 +5,13 @@
 
     <h2>
         {{ factura.tipo }} Nº {{ factura.numero }}
+
+        <small class="text fs-5">
+            <===
+            <a href="{% url 'pedidos:editar' factura.pedido.id %}">
+                Pedido #{{ factura.pedido.id }}
+            </a>
+        </small>
     </h2>
 
     <hr>

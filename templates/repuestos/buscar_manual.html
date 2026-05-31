@@ -103,29 +103,30 @@
     </div>
 </div>
 
-<<script>
+<script>
 
 function ordenar(campo) {
 
-    document.getElementById("orden").value = campo;
+    const ordenInput = document.getElementById("orden");
+    const dirInput = document.getElementById("dir");
 
-    let dirActual = document.getElementById("dir").value;
-    let ordenActual =
-        document.getElementById("orden").value;
+    const ordenActual = ordenInput.value;
 
     if (ordenActual === campo) {
 
-        document.getElementById("dir").value =
-            (dirActual === "asc") ? "desc" : "asc";
+        dirInput.value =
+            (dirInput.value === "asc") ? "desc" : "asc";
 
     } else {
 
-        document.getElementById("dir").value = "asc";
+        ordenInput.value = campo;
+        dirInput.value = "asc";
 
     }
 
     actualizarBusqueda();
 }
+
 
 function actualizarBusqueda() {
 

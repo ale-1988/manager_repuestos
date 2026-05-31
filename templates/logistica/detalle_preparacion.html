@@ -2,7 +2,12 @@
 {% load static %}
 {% block contenido %}
 
-<h2>Preparación del pedido {{ pedido.id }}</h2>
+<h2>
+    Preparación del
+    <a href="{% url 'pedidos:editar' pedido.id %}">
+        pedido #{{ pedido.id }}
+    </a>
+</h2>
 
 <p><b>Cliente:</b> {{ pedido.cliente }}</p>
 <p><b>Estado:</b> {{ pedido.estado }}</p>

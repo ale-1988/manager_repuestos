@@ -39,7 +39,8 @@ class Usuario(AbstractUser):
     
 
     def __str__(self):
-        return f"{self.nombre} {self.apellido}"
+        texto = f"{self.nombre or ''} {self.apellido or ''}".strip()
+        return texto if texto else self.username
     
 # ==============================
 # Usuario especializado
@@ -53,5 +54,6 @@ class Transportista(Usuario):
         verbose_name_plural = "Transportistas"
 
     def __str__(self):
-        return f"{self.username} (Transportista)"
+        texto = f"{self.nombre or ''} {self.apellido or ''}".strip()
+        return texto if texto else self.username
     

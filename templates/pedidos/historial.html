@@ -3,7 +3,10 @@
 
 <h2>
     {% if pedido_actual %}
-        Historial del Pedido #{{ pedido_actual.id }}
+        Historial del 
+        <a href="{% url 'pedidos:editar' pedido_actual.id %}">
+            Pedido #{{ pedido_actual.id }}
+        </a>
     {% else %}
         Historial Global de Pedidos
     {% endif %}
@@ -14,23 +17,23 @@
     {% if not pedido_actual %}
         <div class="col">
             <input type="text" name="pedido" placeholder="Pedido"
-                   value="{{ request.GET.pedido }}" class="form-control">
+                value="{{ request.GET.pedido }}" class="form-control">
         </div>
     {% endif %}
 
     <div class="col">
         <input type="text" name="usuario" placeholder="Usuario"
-               value="{{ request.GET.usuario }}" class="form-control">
+            value="{{ request.GET.usuario }}" class="form-control">
     </div>
 
     <div class="col">
         <input type="text" name="estado" placeholder="Estado"
-               value="{{ request.GET.estado }}" class="form-control">
+            value="{{ request.GET.estado }}" class="form-control">
     </div>
 
     <div class="col">
         <input type="date" name="fecha"
-               value="{{ request.GET.fecha }}" class="form-control">
+            value="{{ request.GET.fecha }}" class="form-control">
     </div>
 
     <div class="col-auto">
@@ -137,5 +140,5 @@
     </tbody>
 </table>
 </div>
-
+{% include "includes/pie_paginacion.html" with page_obj=historial %}
 {% endblock %}

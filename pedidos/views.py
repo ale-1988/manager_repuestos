@@ -299,7 +299,28 @@ def actualizar_estado(request, id):
             messages.error(request, "Estado inválido.")
         else:
             pedido.cambiar_estado(nuevo_estado,usuario=request.user)
-            messages.success(request, "Estado actualizado correctamente.")
+            if nuevo_estado == "BORRADOR":
+                messages.success(request, "Pedido generado. Páselo a CREADO para cargar artículos")    
+            elif nuevo_estado == "CREADO":
+                messages.success(request, "Ya puede agregar articulos al pedido.")    
+            elif nuevo_estado == "CONFIRMADO":
+                messages.success(request, "Pedido confirmado por el cliente.")
+            elif nuevo_estado == "CERRADO":
+                messages.success(request, "Pedido cerrado. Deberá generarse la factura")
+            elif nuevo_estado == "FACTURADO":                
+                messages.success(request, "Pedido facturado. Debera asentar el pago completo.")
+            elif nuevo_estado == "PAGADO":                
+                messages.success(request, "Pedido pagado. Listo para preparación.")
+            elif nuevo_estado == "PREPARANDO":                
+                messages.success(request, "Pedido en preparación.")
+            elif nuevo_estado == "CONSOLIDADO":                
+                messages.success(request, "Pedido consolidado, Listo para entregar.")
+            elif nuevo_estado == "ENVIADO":                
+                messages.success(request, "Pedido en transito hacia el cliente.")
+            elif nuevo_estado == "ENTREGADO":                
+                messages.success(request, "Pedido entregado al cliente.")
+            else: 
+                messages.success(request, "Pedido cancelado.")    
 
     return redirect("pedidos:editar", id)
 
@@ -484,6 +505,12 @@ def historial_global(request, pedido_id=None):
 
     historial = historial.order_by(order_by)
 
+    #Paginacion
+    items_por_pagina = 10 if es_movil(request) else 25
+    paginator = Paginator(historial, items_por_pagina)
+    page_number = request.GET.get("page")
+    historial = paginator.get_page(page_number)
+
     return render(request, "pedidos/historial.html", {
         "historial": historial,
         "pedido_actual": pedido,
@@ -493,12 +520,12 @@ def historial_global(request, pedido_id=None):
     
 login_required
 def facturar_pedido(request, id):
-    #print ("Entro en facturar_pedidos")
+
     pedido = get_object_or_404(Pedido, id=id)
 
     try:
         factura = pedido.crear_factura_desde_pedido(request.user)
-        messages.success(request, "Factura creada correctamente. Registre el pago para habilitar preparación.")
+        messages.success(request, "Factura creada correctamente. Emita la factura y registre el pago para habilitar preparación.")
 
         return redirect("facturacion:detalle_factura", pk=factura.pk)
 

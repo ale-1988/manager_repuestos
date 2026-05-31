@@ -3,6 +3,7 @@
 {% load static %}
 <head>
     <meta charset="UTF-8">
+    <title>{% block title %}CEC - Manager de Repuestos{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/comun.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}"/>
@@ -47,7 +48,8 @@
                         </li>
                     {% endif %}
                 {% endif %}
-
+                
+                <!-- MENÚ HISTORIAL -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'pedidos:historial_global' %}">
                         Historial

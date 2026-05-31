@@ -22,10 +22,10 @@ from django.shortcuts import render
 def buscar_manual(request):
     """
     Búsqueda manual de repuestos con filtros:
-      - texto
-      - grupo (combobox)
-      - mostrar_obsoletos (checkbox)
-      - orden y dirección (ID, Valor, Grupo, Stock)
+        - texto
+        - grupo (combobox)
+        - mostrar_obsoletos (checkbox)
+        - orden y dirección (ID, Valor, Grupo, Stock)
     """
 
     texto = request.GET.get("texto", "").strip()

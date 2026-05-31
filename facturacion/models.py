@@ -249,9 +249,11 @@ class Factura(models.Model):
     # ======================================
     # TOTALES
     # ======================================
+    
     def total_pagado(self):
         return self.pagos.aggregate(Sum("monto"))["monto__sum"] or 0
 
+    
     def saldo_actual(self):
         return self.importe_total - self.total_pagado()
 
