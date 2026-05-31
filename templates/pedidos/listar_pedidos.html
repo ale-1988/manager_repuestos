@@ -73,7 +73,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for p in pedidos %}
+        {% for p in page_obj %}
         <tr>
             <td class="text-center">{{ p.id }}</td>
             <td>{{ p.cliente.id }} - {{ p.cliente.nombre }}</td>
@@ -96,4 +96,33 @@
         {% endfor %}
     </tbody>
 </table>
+<nav>
+    <ul class="pagination justify-content-center">
+
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link"
+               href="?page={{ page_obj.previous_page_number }}">
+                Anterior
+            </a>
+        </li>
+        {% endif %}
+
+        <li class="page-item disabled">
+            <span class="page-link">
+                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link"
+               href="?page={{ page_obj.next_page_number }}">
+                Siguiente
+            </a>
+        </li>
+        {% endif %}
+
+    </ul>
+</nav>
 {% endblock %}

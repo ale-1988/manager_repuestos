@@ -23,6 +23,10 @@ from django.core.mail import EmailMessage
 from .utils import build_pdf_preliminar
 from decimal import Decimal, InvalidOperation
 
+from django.core.paginator import Paginator
+
+from pedidos.utils import es_movil
+
 # ==========================================================
 # NUEVO PEDIDO — BUSCADOR DE CLIENTE (AJAX + LINKS)
 # ==========================================================
@@ -182,14 +186,13 @@ def confirmar_division(request, id):
 # ==========================================================
 @login_required
 def listar_pedidos(request):
+
     q = request.GET.get("q", "").strip()
     ver_entregados = request.GET.get("ver_entregados")
-    
-    # Parámetros para ordenar
-    orden = request.GET.get("orden", "fecha")     # default → fecha
-    direccion = request.GET.get("dir", "desc")    # default → descendente
 
-    # Campos válidos (whitelist)
+    orden = request.GET.get("orden", "fecha")
+    direccion = request.GET.get("dir", "desc")
+
     campos_validos = {
         "id": "id",
         "cliente": "cod_cliente",
@@ -201,33 +204,45 @@ def listar_pedidos(request):
 
     campo = campos_validos.get(orden, "fecha")
 
-    # Construir orden real
     if direccion == "asc":
         order_by = campo
     else:
         order_by = "-" + campo
 
     pedidos = Pedido.objects.all()
-    
-    # Ocultar entregados por defecto
+
     if not ver_entregados:
         pedidos = pedidos.exclude(estado="ENTREGADO")
-    
-    # Filtro búsqueda
+
     if q:
-        pedidos = pedidos.filter(id__icontains=q) | pedidos.filter(cod_cliente__icontains=q)
+        pedidos = pedidos.filter(
+            Q(id__icontains=q) |
+            Q(cod_cliente__icontains=q)
+        )
 
     pedidos = pedidos.annotate(
         total_items=Count("detalles"),
         total_cantidades=Sum("detalles__cantidad")
     ).order_by(order_by)
 
-    return render(request, "pedidos/listar_pedidos.html", {
-        "pedidos": pedidos,
-        "q": q,
-        "orden": orden,
-        "dir": direccion,
-    })
+    if es_movil(request): 
+        paginator = Paginator(pedidos, 10)   # móvil amigable
+    else:        
+        paginator = Paginator(pedidos, 25)   # PC
+    
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "pedidos/listar_pedidos.html",
+        {
+            "page_obj": page_obj,
+            "q": q,
+            "orden": orden,
+            "dir": direccion,
+        }
+    )
 
 # ==========================================================
 # CANCELAR PEDIDO
@@ -476,14 +491,14 @@ def historial_global(request, pedido_id=None):
         "dir": direccion,
     })
     
-@login_required
+login_required
 def facturar_pedido(request, id):
     #print ("Entro en facturar_pedidos")
     pedido = get_object_or_404(Pedido, id=id)
 
     try:
         factura = pedido.crear_factura_desde_pedido(request.user)
-        messages.success(request, "Factura creada correctamente.")
+        messages.success(request, "Factura creada correctamente. Registre el pago para habilitar preparación.")
 
         return redirect("facturacion:detalle_factura", pk=factura.pk)
 

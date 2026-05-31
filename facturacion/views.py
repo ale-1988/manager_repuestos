@@ -127,12 +127,26 @@ def registrar_pago(request, pk):
                 if hasattr(pago, "_nc_generada"):
                     messages.warning(
                         request,
-                        f"Pago excedente detectado. "
-                        f"Se generó Nota de Crédito Nº {pago._nc_generada.numero} "
-                        f"por ${pago._nc_generada.importe_total}"
+                        "Pago excedente detectado. "
+                        "Se generó Nota de Crédito Nº {pago._nc_generada.numero} "
+                        "por ${pago._nc_generada.importe_total} "
+                        "Factura cancelada completamente. "
+                        "El pedido quedó habilitado para preparación."
                     )
                 else:
-                    messages.success(request, "Pago registrado correctamente.")
+                    factura.refresh_from_db()
+                    if factura.saldo_actual == 0:
+                        messages.success(
+                            request,
+                            "Factura cancelada completamente. "
+                            "El pedido quedó habilitado para preparación."
+                        )
+                    else:
+                        messages.success(
+                            request,
+                            "Pago registrado correctamente. "
+                            "La factura mantiene saldo pendiente."
+                        )
 
             except ValidationError as e:
                 messages.error(request, str(e))

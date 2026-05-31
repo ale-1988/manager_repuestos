@@ -32,19 +32,14 @@
 
         <div class="collapse navbar-collapse" id="navbarNav">
 
-            <!-- MENÚ IZQUIERDO -->
+            <!-- BARRA SUPERIOR==> IZQUIERDA-->
             <ul class="navbar-nav me-auto">
-                <!-- MENÚ PEDIDOS -->
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'pedidos:listar' %}">Listar Pedidos</a>
-                </li>
-    
-                <!-- MENÚ REPUESTOS -->
+                <!-- MENÚ CATALOGO -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'repuestos:listar' %}">Catálogo</a>
                 </li>
 
-                <!-- SOLO GERENTE O ADMINISTRADOR -->
+                <!-- USUARIOS - SOLO GERENTE O ADMINISTRADOR -->
                 {% if request.user.is_authenticated %}
                     {% if request.user.rol == 'admin' or request.user.rol == 'gerente' %}
                         <li class="nav-item">
@@ -58,17 +53,27 @@
                         Historial
                     </a>
                 </li>
+
+                <!-- MENÚ PEDIDOS -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'pedidos:listar' %}">Listar Pedidos</a>
+                </li>
+
+                <!-- MENÚ FACTURACION -->                
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'facturacion:listar_facturas' %}">
                         Facturación
                     </a>
                 </li>
+
+                <!-- MENÚ PREPARACION -->                                
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'logistica:listar_preparacion' %}">
                         Preparación
                     </a>
                 </li>
 
+                <!-- MENÚ ENTREGAS -->                                
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'logistica:listar_entregas' %}">
                         Entregas
@@ -76,7 +81,7 @@
                 </li>
             </ul>
 
-            <!-- MENÚ DERECHO (LOGIN / LOGOUT) -->
+            <!-- BARRA SUPERIOR => DERECHA (LOGIN / LOGOUT) -->
             <ul class="navbar-nav">
 
                 {% if request.user.is_authenticated %}

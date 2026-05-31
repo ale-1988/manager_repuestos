@@ -111,7 +111,7 @@
                             </label>
 
                             <select name="estado"
-                                    class="form-control form-control-sm"
+                                    class="form-select"
                                     style="width:auto; min-width:180px;">
 
                                 {% for estado in todos_estados %}
@@ -226,9 +226,10 @@
     {% endif %}
 </div>
 
-<!-- ========================= -->
-<!-- MODO DIVIDIR ACTIVADO     -->
-<!-- ========================= -->
+<!-- =============================== -->
+<!-- Aca va mostrando algunas cosas  -->
+<!-- y otras no segun modo_dividir   -->
+<!-- ==============================  -->
 
 {% if modo_dividir %}
 <form method="POST">
@@ -281,14 +282,14 @@
                 </td>
                 
                 <td class="text-center align-middle">
-                    {% if pedido.estado == "CREADO" %}
-                        <div class="d-flex justify-content-center">
+                    {% if pedido.estado == "CREADO" and not modo_dividir %}
+                        <div class="cantidad-control d-flex justify-content-center">
 
                             <!-- RESTAR -->
 
                             <button
                                 type="button"
-                                class="btn btn-outline-danger btn-cantidad btn-touch"
+                                class="btn btn-outline-danger btn-cantidad cantidad-menos btn-touch"
                                 data-url="{% url 'pedidos:modificar_cantidad' item.id %}"
                                 data-accion="restar"
                                 title="Quitar unidad"
@@ -303,6 +304,7 @@
                                 class="form-control text-center cantidad-input"
                                 value="{{ item.cantidad|floatformat:'-2' }}"
                                 data-detalle-id="{{ item.id }}"
+                                data-max="999999"
                                 style="max-width: 100px;"
                             >
 
@@ -310,7 +312,7 @@
 
                             <button
                                 type="button"
-                                class="btn btn-outline-success btn-cantidad btn-touch"
+                                class="btn btn-outline-success btn-cantidad cantidad-mas btn-touch"
                                 data-url="{% url 'pedidos:modificar_cantidad' item.id %}"
                                 data-accion="sumar"
                                 title="Agregar unidad">

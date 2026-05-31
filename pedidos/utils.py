@@ -169,3 +169,14 @@ def build_pdf_preliminar(pedido):
     buffer.seek(0)
 
     return buffer.getvalue()
+
+#Me va a indicar si se está accediendo desde un dispositivo movil.
+def es_movil(request):
+    user_agent = request.META.get("HTTP_USER_AGENT", "").lower()
+
+    return any(x in user_agent for x in (
+        "android",
+        "iphone",
+        "ipad",
+        "mobile"
+    ))

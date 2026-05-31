@@ -36,6 +36,19 @@ class PagoForm(forms.ModelForm):
         self.factura = factura
         super().__init__(*args, **kwargs)
 
+        self.fields["medio_pago"].widget.attrs.update({
+            "class": "form-select btn-touch"
+        })
+
+        self.fields["monto"].widget.attrs.update({
+            "class": "form-control btn-touch"
+        })
+
+        self.fields["referencia"].widget.attrs.update({
+            "class": "form-control btn-touch"
+        })
+
+
     def clean(self):
         cleaned_data = super().clean()
 

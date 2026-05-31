@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.conf import settings
 from django.utils import timezone
+from decimal import Decimal
 
 #Modelos
 from pedidos.models import Pedido, DetallePedido
@@ -179,7 +180,7 @@ def api_agregar_item(request):
         return JsonResponse({"ok": False, "error": "Pedido no editable."})
 
     try:
-        cantidad = float(cantidad)
+        cantidad = Decimal(cantidad.replace(",","."))
         if cantidad <= 0:
             raise ValueError()
     except Exception:
@@ -193,7 +194,7 @@ def api_agregar_item(request):
     )
 
     if not created:
-        detalle.cantidad = float(detalle.cantidad) + cantidad
+        detalle.cantidad = detalle.cantidad + cantidad
         detalle.save()
 
     return JsonResponse({

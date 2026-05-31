@@ -84,7 +84,7 @@
 
 
 
-<button class="btn btn-primary mt-2" title="Asignar">
+<button class="btn btn-primary mt-2 btn-touch" title="Asignar">
    <i class="bi bi-truck fs-5"></i>
 </button>
 
@@ -93,19 +93,20 @@
 
 <hr>
 
-<a class="btn btn-secondary"
-   href="{% url 'logistica:listar_entregas' %}" title="Volver"><i class="bi bi-arrow-left fs-5"></i>
+<a class="btn btn-secondary btn-touch"
+   href="{% url 'logistica:listar_entregas' %}" title="Volver">
+   <i class="bi bi-arrow-left fs-5"></i>
 </a>
 
 {% if pedido.estado == pedido.CONSOLIDADO and pedido.cod_transportista %}
-<a class="btn btn-primary"
+<a class="btn btn-primary btn-touch"
    href="{% url 'logistica:enviar_pedido' pedido.id %}" title="Marcar como enviado">
    <i class="bi bi-send fs-5"></i>
 </a>
 {% endif %}
 
 {% if pedido.estado == pedido.ENVIADO %}
-<a class="btn btn-success"
+<a class="btn btn-success btn-touch"
    href="{% url 'logistica:confirmar_entrega' pedido.id %}" title="Confirmar entrega">
    <i class="bi bi-house-check fs-5"></i>
 </a>

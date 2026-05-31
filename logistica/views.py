@@ -2,12 +2,14 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, Subquery, Case, When, Value, IntegerField
 
 from decimal import Decimal
 from pedidos.models import Pedido, DetallePedido, HistorialEstadoPedido
 from repuestos.models import Repuesto
 from usuarios.models import Usuario
+
+from datetime import timedelta
 
 # Create your views here.
 
@@ -105,7 +107,10 @@ def consolidar_pedido(request, id):
             observacion="Pedido consolidado"
         )
 
-        messages.success(request, "El pedido fue CONSOLIDADO.")
+        messages.success(
+            request, 
+            "El pedido fue CONSOLIDADO correctamente, "
+            "está disponible para su gestión en Entregas.")
 
     except ValidationError as e:
         messages.error(request, str(e))
@@ -177,6 +182,7 @@ def actualizar_preparado(request, id):
         valor = request.POST.get("cantidad_preparada")
 
         if valor:
+            valor = valor.replace(",", ".")
             item.cantidad_preparada = Decimal(valor)
             item.save(update_fields=["cantidad_preparada"])
 
@@ -260,35 +266,74 @@ def confirmar_entrega(request, id):
 
 
 def listar_entregas(request):
-    historial = HistorialEstadoPedido.objects.filter(pedido=OuterRef("pk"))
+
+    filtro = request.GET.get("entregados", "ninguno")
+
+    hoy = timezone.now().date()
+
+    # Siempre mostramos los pedidos activos
+    pedidos_activos = Pedido.objects.filter(
+        estado__in=[
+            Pedido.CONSOLIDADO,
+            Pedido.ENVIADO,
+        ]
+    )
+
+    # Armamos el queryset de entregados según el filtro
+    pedidos_entregados = Pedido.objects.none()
+
+    if filtro == "mes":
+        pedidos_entregados = Pedido.objects.filter(
+            estado=Pedido.ENTREGADO,
+            fecha__gte=hoy - timedelta(days=30)
+        )
+
+    elif filtro == "anio":
+        pedidos_entregados = Pedido.objects.filter(
+            estado=Pedido.ENTREGADO,
+            fecha__gte=hoy - timedelta(days=365)
+        )
+
+    elif filtro == "todos":
+        pedidos_entregados = Pedido.objects.filter(
+            estado=Pedido.ENTREGADO
+        )
 
     pedidos = (
-        Pedido.objects
-        .filter(estado__in=[Pedido.CONSOLIDADO, Pedido.ENVIADO, Pedido.ENTREGADO])
-        .annotate(
-            fecha_logistica=Subquery(
-                historial.filter(
-                    estado_nuevo=Pedido.PAGADO
-                ).values("fecha")[:1]
-            ),
-            fecha_consolidado=Subquery(
-                historial.filter(
-                    estado_nuevo=Pedido.CONSOLIDADO
-                ).values("fecha")[:1]
-            ),
-            fecha_enviado=Subquery(
-                historial.filter(
-                    estado_nuevo=Pedido.ENVIADO
-                ).values("fecha")[:1]
-            ),
-            fecha_entregado=Subquery(
-                historial.filter(
-                    estado_nuevo=Pedido.ENTREGADO
-                ).values("fecha")[:1]
-            ),
-            
+        pedidos_activos | pedidos_entregados
+    ).annotate(
+        prioridad=Case(
+            # Sin transportista
+            When(cod_transportista__isnull=True, then=Value(0)),
+
+            # Entregados
+            When(estado=Pedido.ENTREGADO, then=Value(2)),
+
+            # Consolidados y enviados
+            default=Value(1),
+
+            output_field=IntegerField(),
         )
-        .order_by("-fecha_entregado", "-fecha_enviado", "-fecha_consolidado")
+    ).order_by(
+        "prioridad",
+        "-fecha",
+        "-id",
+    )
+
+    for pedido in pedidos:
+        fechas = pedido.fechas_logisticas()
+        pedido.fecha_logistica = fechas["logistica"]
+        pedido.fecha_consolidado = fechas["consolidado"]
+        pedido.fecha_enviado = fechas["enviado"]
+        pedido.fecha_entregado = fechas["entregado"]
+
+    return render(
+        request,
+        "logistica/listar_entregas.html",
+        {
+            "pedidos": pedidos,
+            "filtro_entregados": filtro,
+        }
     )
 
 

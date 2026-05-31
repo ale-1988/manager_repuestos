@@ -118,7 +118,7 @@ document.addEventListener("click", async function(ev) {
 
 // =====================================================
 // EDICIÓN MANUAL DE CANTIDAD
-// =====================================================
+// =====================data-max="999999"================================
 
 document.addEventListener("focusout", async function(ev) {
 
@@ -133,29 +133,16 @@ document.addEventListener("focusout", async function(ev) {
 
     if (!input) return;
 
-    const valor =
-        input.value.trim();
-        alert(
-            "FOCUSOUT valor=" + valor
-        );
-
-    const fila =
-        input.closest("tr");
-
-    const btn =
-        fila.querySelector(".btn-cantidad");
+    const valor = input.value.trim();
+    const fila = input.closest("tr");
+    const btn = fila.querySelector(".btn-cantidad");
 
     if (!btn) return;
 
-    const url =
-        btn.dataset.url;
-
+    const url = btn.dataset.url;
     const formData = new FormData();
-
     formData.append("accion", "setear");
-
     formData.append("cantidad", valor);
-
     formData.append(
         "csrfmiddlewaretoken",
         getCSRFToken()

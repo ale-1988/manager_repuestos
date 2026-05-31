@@ -13,10 +13,38 @@ body {
     color: white !important;
 }
 
-.nav-link:hover {
-    color: #ccc !important;
+.navbar .nav-link {
+    transition: all 0.15s ease;
+    border-radius: 0.25rem;
 }
+
+.navbar .nav-link:hover {
+    background-color: #ff8c00a4;
+    color: white !important;
+}
+
+
+
 
 .contenido {
     padding: 20px;
 }
+
+/* Firefox */
+input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+/* Chrome, Edge, Safari */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.col-monto {
+    text-align: center;
+    white-space: nowrap;
+}
+

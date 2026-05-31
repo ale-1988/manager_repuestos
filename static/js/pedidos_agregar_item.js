@@ -201,8 +201,8 @@ async function buscarEquipos(){
         <li class="list-group-item d-flex justify-content-between align-items-center">
 
             <a href="#"
-               data-id="${e.id_mate}"
-               class="link-equipo">
+                data-id="${e.id_mate}"
+                class="link-equipo">
 
                 ${e.valor}
 
@@ -342,54 +342,43 @@ async function buscarMaterialesLibres(){
     let html = `
     <table class="table table-striped table-bordered">
 
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Descripción</th>
-          <th>Grupo</th>
-          <th style="width:120px">Cantidad</th>
-          <th></th>
-        </tr>
-      </thead>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Descripción</th>
+        <th>Grupo</th>
+        <th style="width:120px">Cantidad</th>
+        <th></th>
+    </tr>
+    </thead>
 
-      <tbody>
+    <tbody>
     `;
 
     data.materiales.forEach(m=>{
 
         html += `
         <tr>
+            <td>${m.id_mate}</td>
+            <td>${m.valor}</td>
+            <td>${m.grupo}</td>
+            <td>
+            <input 
+                type="text"
+                inputmode="decimal"
+                value="1"
+                class="form-control text-center qty"
+                data-id="${m.id_mate}">
+            </td>
 
-          <td>${m.id_mate}</td>
-
-          <td>${m.valor}</td>
-
-          <td>${m.grupo}</td>
-
-          <td>
-
-            <input type="number"
-                   step="1"
-                   value="1"
-                   min="1"
-                   class="form-control form-control-sm qty"
-                   data-id="${m.id_mate}">
-
-          </td>
-
-          <td class="text-center">
-
+            <td class="text-center">
             <button
                 type="button"
-                class="btn btn-success btn-sm agregar-link"
+                class="btn btn-success btn-sm agregar-link btn-touch"
                 data-id="${m.id_mate}">
-
-                <i class="bi bi-plus-circle"></i>
-
+                <i class="bi bi-plus-circle fs-4"></i>
             </button>
-
-          </td>
-
+            </td>
         </tr>
         `;
     });
@@ -441,55 +430,41 @@ function renderListaMateriales(materiales, titulo){
 
     let html = `
     <table class="table table-striped table-bordered">
-
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Descripción</th>
-          <th>Grupo</th>
-          <th style="width:120px">Cantidad</th>
-          <th></th>
-        </tr>
-      </thead>
-
-      <tbody>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Descripción</th>
+                <th>Grupo</th>
+                <th style="width:120px">Cantidad</th>
+                <th></th>
+            </tr>
+        </thead>
+    <tbody>
     `;
 
     materiales.forEach(m=>{
 
         html += `
         <tr>
-
-          <td>${m.id_mate}</td>
-
-          <td>${m.valor}</td>
-
-          <td>${m.grupo || ""}</td>
-
-          <td>
-
-            <input type="number"
-                   step="1"
-                   value="1"
-                   min="1"
-                   class="form-control form-control-sm qty"
-                   data-id="${m.id_mate}">
-
-          </td>
-
-          <td class="text-center">
-
-            <button
-                type="button"
-                class="btn btn-success btn-sm agregar-link"
-                data-id="${m.id_mate}">
-
-                <i class="bi bi-plus-circle"></i>
-
-            </button>
-
-          </td>
-
+            <td>${m.id_mate}</td>
+            <td>${m.valor}</td>
+            <td>${m.grupo || ""}</td>
+            <td>
+                <input 
+                    type="text"
+                    inputmode="decimal"
+                    value="1"
+                    class="form-control text-center qty"
+                    data-id="${m.id_mate}">            
+            </td>
+            <td class="text-center">
+                <button
+                    type="button"
+                    class="btn btn-success btn-sm agregar-link btn-touch"
+                    data-id="${m.id_mate}">
+                    <i class="bi bi-plus-circle fs-4"></i>
+                </button>
+            </td>
         </tr>
         `;
     });

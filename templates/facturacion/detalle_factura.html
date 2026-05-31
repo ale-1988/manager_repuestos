@@ -107,7 +107,7 @@
                 <tr>
                     <th>Fecha</th>
                     <th>Medio</th>
-                    <th>Monto</th>
+                    <th class="col-monto">Monto</th>
                     <th>Referencia</th>
                 </tr>
             </thead>
@@ -116,7 +116,7 @@
                     <tr>
                         <td>{{ pago.fecha }}</td>
                         <td>{{ pago.medio_pago }}</td>
-                        <td>$ {{ pago.monto }}</td>
+                        <td class="col-monto">$ {{ pago.monto }}</td>
                         <td>{{ pago.referencia }}</td>
                     </tr>
                 {% empty %}
