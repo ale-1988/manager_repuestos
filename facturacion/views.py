@@ -324,3 +324,52 @@ def aplicar_credito(request, pk):
         messages.success(request, "Créditos aplicados correctamente.")
     else:
         messages.warning(request, "No hay créditos disponibles para aplicar.")
+
+
+
+@login_required
+def generar_pdf_factura(request, pk):
+    
+    factura = get_object_or_404(Factura, pk=pk)
+
+    pdf_bytes = build_pdf_factura(factura)
+
+    # -----------------------------------------
+    # ENVIO EMAIL OPCIONAL
+    # -----------------------------------------
+
+    enviar_email = request.GET.get("email") == "1"
+    
+    if (
+        enviar_email
+        and factura.cliente
+        and factura.cliente.email
+    ):
+
+        email = EmailMessage(
+            subject=f"Factura Nº {factura.numero}",
+            body=(
+                "Adjuntamos la factura correspondiente.\n\n"
+                "CEC Electrónica SRL"
+            ),
+            to=[factura.cliente.email],
+        )
+
+        email.attach(
+            f"factura_{factura.numero}.pdf",
+            pdf_bytes,
+            "application/pdf",
+        )
+
+        email.send()
+
+    response = HttpResponse(
+        pdf_bytes,
+        content_type="application/pdf"
+    )
+
+    response["Content-Disposition"] = (
+        f'inline; filename="factura_{factura.numero}.pdf"'
+    )
+
+    return response        

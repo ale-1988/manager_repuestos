@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block contenido %}
+{% load static %}
 
 <div class="container mt-4">
 
@@ -89,9 +90,18 @@
             </a>
         {% endif %}
 
-        <a href="{% url 'facturacion:generar_pdf_factura' factura.id %}"
-           class="btn btn-outline-secondary" title="Generar PDF"><i class="bi bi-filetype-pdf fs-5"></i>
-        </a>
+        <button
+            onclick="generarPDF('{% url 'facturacion:generar_pdf_factura' factura.id %}')"
+            class="btn btn-outline-secondary"
+            title="Generar PDF">
+            <i class="bi bi-file-earmark-pdf fs-5"></i>
+        </button>
+
+        <input type="checkbox" class="btn-check" id="chkEmail" autocomplete="off">
+        <label class="btn btn-outline-secondary btn-sm" for="chkEmail" title="Marcar para enviar por email">
+            <i class="bi bi-envelope fs-5"></i>
+        </label>
+            
 
         {% if factura.tipo == "FACTURA" and factura.estado == "EMITIDA" %}
             <a href="{% url 'facturacion:anular_factura' factura.id %}"
@@ -193,5 +203,6 @@
     </table>
 
 </div>
+<script src="{% static 'js/generar_pdf.js' %}"></script>
 
 {% endblock %}

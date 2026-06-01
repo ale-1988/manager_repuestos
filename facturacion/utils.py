@@ -116,10 +116,11 @@ def build_pdf_factura(factura):
 
                 Paragraph(
                     f"""
-                    <b>Factura N°:</b> {factura.numero}<br/>
+                    <b>Factura Original:</b><br/>
+                    <b> {factura.numero}</b><br/>
                     <b>Fecha:</b> {factura.fecha_emision.strftime("%d/%m/%Y")}<br/>
                     <b>CUIT:</b> {settings.EMPRESA_CUIT}<br/>
-                    <b>Ing. Brutos:</b> {settings.EMPRESA_INGRESOS_BRUTOS}<br/>
+                    <b>II.BB.:</b> {settings.EMPRESA_INGRESOS_BRUTOS}<br/>
                     <b>Inicio Activ.:</b> {settings.EMPRESA_INICIO_ACTIVIDADES}
                     """,
                     styles["BodyText"],

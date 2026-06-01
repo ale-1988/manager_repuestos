@@ -133,19 +133,21 @@ $ {{ total|floatformat:2 }}
 <button onclick="window.print()" title="Imprimir"><i class="bi bi-printer fs-5"></i>
 </button>
 
-<button onclick="generarPDF()" title="Generar PDF"><i class="bi bi-file-earmark-pdf fs-5"></i>
+<button onclick="generarPDF('{% url 'pedidos:pdf_preliminar' pedido.id %}')"
+    class="btn btn-outline-secondary"
+    title="Generar PDF">
+    <i class="bi bi-file-earmark-pdf fs-5"></i>
 </button>
 
 <input type="checkbox" class="btn-check" id="chkEmail" autocomplete="off">
-
-<label class="btn btn-outline-secondary btn-sm" for="chkEmail" title="Enviar por email">
+<label class="btn btn-outline-secondary btn-sm" for="chkEmail" title="Marcar para enviar por email">
     <i class="bi bi-envelope fs-5"></i>
 </label>
 
 
 </div>
-
-<script>
+<script src="{% static 'js/generar_pdf.js' %}"></script>
+<!-- <script>
 
 function generarPDF(){
 
@@ -160,7 +162,7 @@ function generarPDF(){
     window.open(url, "_blank")
 }
 
-</script>
+</script> -->
 
 </body>
 </html>
