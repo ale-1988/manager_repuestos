@@ -1,12 +1,9 @@
-function generarPDF(baseUrl, checkboxId="chkEmail") {
+function generarPDF(baseUrl) {
+    window.open(baseUrl, "_blank");
+}
 
-    let url = baseUrl;
-
-    let chk = document.getElementById(checkboxId);
-
-    if (chk && chk.checked) {
-        url += "?email=1";
+function confirmarEnvioFactura(url) {
+    if (confirm("¿Enviar esta factura por email?")) {
+        window.location.href = url;
     }
-
-    window.open(url, "_blank");
 }

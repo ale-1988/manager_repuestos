@@ -200,9 +200,8 @@
 
                         {% if pedido.estado == "CREADO" or pedido.estado == "CONFIRMADO" %}
                             <a href="{% url 'pedidos:comprobante_preliminar' pedido.id %}?volver={% url 'pedidos:editar' pedido.id %}"
-                            class="btn btn-outline-dark btn-sm btn-touch"
-                            target="_blank"
-                            title="Comprobante preliminar">
+                                class="btn btn-outline-dark btn-sm btn-touch"
+                                title="Comprobante preliminar">
                                 <i class="bi bi-printer fs-5"></i>
                             </a>
                         {% endif %}

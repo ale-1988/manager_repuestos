@@ -330,39 +330,10 @@ def aplicar_credito(request, pk):
 
 @login_required
 def generar_pdf_factura(request, pk):
-    
+
     factura = get_object_or_404(Factura, pk=pk)
 
     pdf_bytes = build_pdf_factura(factura)
-
-    # -----------------------------------------
-    # ENVIO EMAIL OPCIONAL
-    # -----------------------------------------
-
-    enviar_email = request.GET.get("email") == "1"
-    
-    if (
-        enviar_email
-        and factura.cliente
-        and factura.cliente.email
-    ):
-
-        email = EmailMessage(
-            subject=f"Factura Nº {factura.numero}",
-            body=(
-                "Adjuntamos la factura correspondiente.\n\n"
-                "CEC Electrónica SRL"
-            ),
-            to=[factura.cliente.email],
-        )
-
-        email.attach(
-            f"factura_{factura.numero}.pdf",
-            pdf_bytes,
-            "application/pdf",
-        )
-
-        email.send()
 
     response = HttpResponse(
         pdf_bytes,
@@ -373,4 +344,59 @@ def generar_pdf_factura(request, pk):
         f'inline; filename="factura_{factura.numero}.pdf"'
     )
 
-    return response        
+    return response
+
+@login_required
+def enviar_factura_email(request, pk):
+
+    factura = get_object_or_404(Factura, pk=pk)
+
+    if not factura.cliente or not factura.cliente.email:
+
+        messages.error(
+            request,
+            "El cliente no tiene una dirección de email registrada."
+        )
+
+        return redirect(
+            "facturacion:detalle_factura",
+            pk=factura.pk
+        )
+
+    pdf_bytes = build_pdf_factura(factura)
+
+    email = EmailMessage(
+        subject=f"Factura Nº {factura.numero}",
+        body=(
+            "Adjuntamos la factura correspondiente.\n\n"
+            "CEC Electrónica SRL"
+        ),
+        to=[factura.cliente.email],
+    )
+
+    email.attach(
+        f"factura_{factura.numero}.pdf",
+        pdf_bytes,
+        "application/pdf",
+    )
+
+    try:
+
+        email.send()
+
+        messages.success(
+            request,
+            f"Factura enviada a {factura.cliente.email}"
+        )
+
+    except Exception as e:
+
+        messages.error(
+            request,
+            f"Error enviando email: {e}"
+        )
+
+    return redirect(
+        "facturacion:detalle_factura",
+        pk=factura.pk
+    )

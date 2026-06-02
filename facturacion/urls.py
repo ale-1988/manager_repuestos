@@ -15,4 +15,5 @@ urlpatterns = [
     path("<int:pk>/pdf/", views.generar_pdf_factura, name="generar_pdf_factura"),
     path("<int:pk>/email/", views.enviar_factura_email, name="enviar_factura_email"),
     path("<int:pk>/aplicar_credito/", views.aplicar_credito, name="aplicar_credito"),
+    path("<int:pk>/enviar_email/",views.enviar_factura_email,name="enviar_factura_email",),
 ]

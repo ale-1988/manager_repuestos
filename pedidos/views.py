@@ -576,32 +576,60 @@ def comprobante_preliminar(request, id):
     )    
 
 @login_required
+def enviar_comprobante_email(request, id):
+
+    pedido = get_object_or_404(Pedido, id=id)
+
+    if not pedido.cliente or not pedido.cliente.email:
+        messages.error(
+            request,
+            "El cliente no tiene una dirección de email registrada."
+        )
+        return redirect(
+            "pedidos:comprobante_preliminar",
+            id=pedido.id
+        )
+
+    pdf_bytes = build_pdf_preliminar(pedido)
+
+    email = EmailMessage(
+        subject=f"Pedido preliminar #{pedido.id}",
+        body="Adjuntamos comprobante preliminar.",
+        to=[pedido.cliente.email],
+    )
+
+    email.attach(
+        f"pedido_preliminar_{pedido.id}.pdf",
+        pdf_bytes,
+        "application/pdf",
+    )
+
+    try:
+        email.send()
+
+        messages.success(
+            request,
+            f"Comprobante enviado a {pedido.cliente.email}"
+        )
+
+    except Exception as e:
+
+        messages.error(
+            request,
+            f"Error enviando email: {e}"
+        )
+
+    return redirect(
+        "pedidos:comprobante_preliminar",
+        id=pedido.id
+    )
+
+@login_required
 def generar_pdf_preliminar(request, id):
 
     pedido = get_object_or_404(Pedido, id=id)
 
     pdf_bytes = build_pdf_preliminar(pedido)
-
-    # -----------------------------------------
-    # ENVIO EMAIL OPCIONAL
-    # -----------------------------------------
-    enviar_email = request.GET.get("email") == "1"
-
-    if enviar_email and pedido.cliente and pedido.cliente.email:
-
-        email = EmailMessage(
-            subject=f"Pedido preliminar #{pedido.id}",
-            body="Adjuntamos comprobante preliminar.",
-            to=[pedido.cliente.email],
-        )
-
-        email.attach(
-            f"pedido_preliminar_{pedido.id}.pdf",
-            pdf_bytes,
-            "application/pdf",
-        )
-
-        email.send()
 
     response = HttpResponse(
         pdf_bytes,

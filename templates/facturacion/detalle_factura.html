@@ -77,7 +77,6 @@
 
     <!-- BOTONES -->
     <div class="mb-3 d-flex gap-2 flex-wrap">
-
         {% if factura.tipo == "FACTURA" and factura.estado == "BORRADOR" %}
             <a href="{% url 'facturacion:emitir_factura' factura.id %}"
                class="btn btn-primary" title="Emitir factura"><i class="bi bi-receipt fs-5"></i>
@@ -97,10 +96,12 @@
             <i class="bi bi-file-earmark-pdf fs-5"></i>
         </button>
 
-        <input type="checkbox" class="btn-check" id="chkEmail" autocomplete="off">
-        <label class="btn btn-outline-secondary btn-sm" for="chkEmail" title="Marcar para enviar por email">
+        <button
+            onclick="confirmarEnvioFactura('{% url 'facturacion:enviar_factura_email' factura.id %}')"
+            class="btn btn-outline-secondary"
+            title="Enviar por email">
             <i class="bi bi-envelope fs-5"></i>
-        </label>
+        </button>
             
 
         {% if factura.tipo == "FACTURA" and factura.estado == "EMITIDA" %}
@@ -108,8 +109,6 @@
                class="btn btn-danger" title="Anular factura"><i class="bi bi-trash fs-5"></i>
             </a>
         {% endif %}
-
-
     </div>
 
     {% if factura.tipo == "FACTURA" %}

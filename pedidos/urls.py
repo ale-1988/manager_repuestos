@@ -42,6 +42,6 @@ urlpatterns = [
     path("<int:id>/comprobante_preliminar/",views.comprobante_preliminar,name="comprobante_preliminar"),
     path("<int:id>/pdf_preliminar/",views.generar_pdf_preliminar,name="pdf_preliminar"),
     path("detalle/<int:detalle_id>/modificar-cantidad/",views.modificar_cantidad,name="modificar_cantidad"),
-
+    path("<int:id>/enviar_comprobante_email/",views.enviar_comprobante_email,name="enviar_comprobante_email"),
 
 ]
