@@ -14,6 +14,7 @@ from datetime import timedelta
 from django.core.paginator import Paginator
 from pedidos.utils import es_movil
 
+from django.conf import settings
 # Create your views here.
 #*****************************
 #*****************************
@@ -48,7 +49,7 @@ def listar_preparacion(request):
     
         
     # Paginación
-    items_por_pagina = 10 if es_movil(request) else 25
+    items_por_pagina = settings.PAGINACION_MOVIL if es_movil(request) else settings.PAGINACION_PC
     paginator = Paginator(pedidos, items_por_pagina)
     page_number = request.GET.get("page")
     pedidos = paginator.get_page(page_number)
@@ -360,7 +361,7 @@ def listar_entregas(request):
         pedido.fecha_entregado = fechas["entregado"]
 
     # Paginación
-    items_por_pagina = 10 if es_movil(request) else 25
+    items_por_pagina = settings.PAGINACION_MOVIL if es_movil(request) else settings.PAGINACION_PC
     paginator = Paginator(pedidos, items_por_pagina)
     page_number = request.GET.get("page")
     pedidos = paginator.get_page(page_number)

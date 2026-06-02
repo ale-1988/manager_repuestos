@@ -27,6 +27,7 @@ from django.core.paginator import Paginator
 
 from pedidos.utils import es_movil
 
+
 # ==========================================================
 # NUEVO PEDIDO — BUSCADOR DE CLIENTE (AJAX + LINKS)
 # ==========================================================
@@ -225,11 +226,12 @@ def listar_pedidos(request):
         total_cantidades=Sum("detalles__cantidad")
     ).order_by(order_by)
 
-    if es_movil(request): 
-        paginator = Paginator(pedidos, 10)   # móvil amigable
-    else:        
-        paginator = Paginator(pedidos, 25)   # PC
-    
+    # if es_movil(request): 
+    #     paginator = Paginator(pedidos, 10)   # móvil amigable
+    # else:        
+    #     paginator = Paginator(pedidos, 25)   # PC
+    items_por_pagina = settings.PAGINACION_MOVIL if es_movil(request) else settings.PAGINACION_PC
+    paginator = Paginator(pedidos, items_por_pagina)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -506,7 +508,7 @@ def historial_global(request, pedido_id=None):
     historial = historial.order_by(order_by)
 
     #Paginacion
-    items_por_pagina = 10 if es_movil(request) else 25
+    items_por_pagina = settings.PAGINACION_MOVIL if es_movil(request) else settings.PAGINACION_PC
     paginator = Paginator(historial, items_por_pagina)
     page_number = request.GET.get("page")
     historial = paginator.get_page(page_number)

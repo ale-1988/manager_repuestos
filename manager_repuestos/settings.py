@@ -226,3 +226,9 @@ EMPRESA_CUIT = "33-56350432-9"
 EMPRESA_INGRESOS_BRUTOS = "9042314732"
 EMPRESA_INICIO_ACTIVIDADES = "23/08/1977"
 EMPRESA_LOGO = BASE_DIR / "static" / "images" / "favicon.png"
+
+# ============================================================
+# LIMITES PAGINADORES
+# ============================================================
+PAGINACION_PC = 25
+PAGINACION_MOVIL = 10

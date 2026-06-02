@@ -13,6 +13,7 @@ from .utils import build_pdf_factura
 
 from django.core.paginator import Paginator
 from pedidos.utils import es_movil
+from django.conf import settings
 
 # ==============================
 # LISTAR FACTURAS
@@ -43,7 +44,7 @@ def listar_facturas(request):
         facturas = [f for f in facturas if f.saldo_actual() > 0]
 
     #Paginacion
-    items_por_pagina = 10 if es_movil(request) else 25
+    items_por_pagina = settings.PAGINACION_MOVIL if es_movil(request) else settings.PAGINACION_PC
     paginator = Paginator(facturas, items_por_pagina)
     page_number = request.GET.get("page")
     facturas = paginator.get_page(page_number)

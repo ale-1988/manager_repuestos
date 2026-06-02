@@ -2,31 +2,57 @@
 
 {% if page_obj.has_other_pages %}
 <nav>
-    <ul class="pagination justify-content-center">
+    <ul class="pagination justify-content-center align-items-center">
 
         {% if page_obj.has_previous %}
+
+        <!-- Primera página -->
         <li class="page-item">
             <a class="page-link"
-               href="?{% querystring page=page_obj.previous_page_number %}">
-                Anterior
+               href="?{% querystring page=1 %}"
+               title="Primera página">
+                <i class="bi bi-chevron-double-left fs-6"></i>
             </a>
         </li>
+
+        <!-- Página anterior -->
+        <li class="page-item">
+            <a class="page-link"
+               href="?{% querystring page=page_obj.previous_page_number %}"
+               title="Página anterior">
+                <i class="bi bi-chevron-left fs-5"></i>
+            </a>
+        </li>
+
         {% endif %}
 
+        <!-- Página actual -->
         <li class="page-item disabled">
             <span class="page-link">
-                Página {{ page_obj.number }}
-                de {{ page_obj.paginator.num_pages }}
+                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
             </span>
         </li>
 
         {% if page_obj.has_next %}
+
+        <!-- Página siguiente -->
         <li class="page-item">
             <a class="page-link"
-               href="?{% querystring page=page_obj.next_page_number %}">
-                Siguiente
+               href="?{% querystring page=page_obj.next_page_number %}"
+               title="Página siguiente">
+                <i class="bi bi-chevron-right fs-5"></i>
             </a>
         </li>
+
+        <!-- Última página -->
+        <li class="page-item">
+            <a class="page-link"
+               href="?{% querystring page=page_obj.paginator.num_pages %}"
+               title="Última página">
+                <i class="bi bi-chevron-double-right fs-6"></i>
+            </a>
+        </li>
+
         {% endif %}
 
     </ul>
