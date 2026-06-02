@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load tz %}
 {% block contenido %}
 {% load static %}
 
@@ -8,10 +9,13 @@
         {{ factura.tipo }} Nº {{ factura.numero }}
 
         <small class="text fs-5">
-            <===
-            <a href="{% url 'pedidos:editar' factura.pedido.id %}">
-                Pedido #{{ factura.pedido.id }}
-            </a>
+            {% if factura.pedido_id %}
+                <a href="{% url 'pedidos:editar' factura.pedido_id %}">
+                Pedido #{{ factura.pedido_id }}
+                </a>
+            {% else %}
+                <span class="text-muted">Sin pedido asociado</span>
+            {% endif %}
         </small>
     </h2>
 
@@ -33,7 +37,7 @@
             </p>
 
             <p><strong>Cliente:</strong> {{ factura.cliente }}</p>
-            <p><strong>Fecha:</strong> {{ factura.fecha_emision }}</p>
+            <p><strong>Fecha:</strong> {{ factura.fecha_emision|localtime|date:"d M Y H:i" }}</p>
         </div>
 
         <div class="col-md-6">
@@ -130,7 +134,7 @@
             <tbody>
                 {% for pago in factura.pagos.all %}
                     <tr>
-                        <td>{{ pago.fecha }}</td>
+                        <td>{{ pago.fecha|localtime|date:"d M Y H:i" }}</td>
                         <td>{{ pago.medio_pago }}</td>
                         <td class="col-monto">$ {{ pago.monto }}</td>
                         <td>{{ pago.referencia }}</td>
@@ -189,7 +193,7 @@
         <tbody>
             {% for h in factura.historial_estados.all %}
                 <tr>
-                    <td>{{ h.fecha }}</td>
+                    <td>{{ h.fecha|localtime|date:"d M Y H:i" }}</td>
                     <td>{{ h.estado }}</td>
                     <td>{{ h.usuario }}</td>
                 </tr>

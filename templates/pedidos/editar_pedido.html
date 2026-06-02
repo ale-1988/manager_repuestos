@@ -115,7 +115,7 @@
 
                     <div>
                         <strong>Fecha:</strong>
-                        {{ pedido.fecha|localtime|date:"d/m/Y H:i" }}
+                        {{ pedido.fecha|localtime|date:"d M Y H:i" }}
                     </div>
 
                     <!-- ESTADO -->
@@ -372,7 +372,7 @@
                 {% if item.info_equipo.equipo_nombre %}
                     <td class="text-center" 
                         style="background-color: {{ item.info_equipo.color_garantia }}"
-                        title="Fecha liberación: {{ item.info_equipo.fecha_liberacion }}">
+                        title="Fecha liberación: {{ item.info_equipo.fecha_liberacion|localtime|date:"d M Y H:i" }}">
 
                     <div><strong>{{ item.info_equipo.equipo_nombre }}</strong></div>
                 {% else %}

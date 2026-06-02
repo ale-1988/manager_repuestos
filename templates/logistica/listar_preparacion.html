@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load tz %}
 {% block contenido %}
 
 <h2>Preparación de pedidos</h2>
@@ -41,7 +41,7 @@ Cantidad de pedidos: {{ cantidad_pedidos }}
             <td class="text-center">{{ pedido.total_items }}</td>
             <td class="text-center">{{ pedido.total_cantidad }}</td>
             <td class="text-center">{{ pedido.estado }}</td>
-            <td class="text-center">{{ pedido.fecha|date:"d/m/Y" }}</td>
+            <td class="text-center">{{ pedido.fecha|localtime|date:"d M Y H:i" }}</td>
             <td class="text-end">
 
                 <a class="btn btn-sm btn-primary btn-touch"

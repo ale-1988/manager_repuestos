@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load tz %}
 {% block contenido %}
 
 <h2>Entregas</h2>
@@ -61,18 +61,18 @@
             
             <td class="text-center">
             {% if pedido.fecha_logistica %}
-            {{ pedido.fecha_logistica|date:"d/m/Y H:i" }}
+            {{ pedido.fecha_logistica|localtime|date:"d M Y H:i" }}
             {% endif %}
             </td>
             <td class="text-center">
             {% if pedido.fecha_consolidado %}
-            {{ pedido.fecha_consolidado|date:"d/m/Y H:i" }}
+            {{ pedido.fecha_consolidado|localtime|date:"d M Y H:i" }}
             {% endif %}
             </td>
 
             <td class="text-center">
             {% if pedido.fecha_enviado %}
-            {{ pedido.fecha_enviado|date:"d/m/Y H:i" }}
+            {{ pedido.fecha_enviado|localtime|date:"d M Y H:i" }}
             {% else %}
             —
             {% endif %}
@@ -86,7 +86,7 @@
             </td>
             <td class="text-center">
             {% if pedido.fecha_entregado %}
-            {{ pedido.fecha_entregado|date:"d/m/Y H:i" }}
+            {{ pedido.fecha_entregado|localtime|date:"d M Y H:i" }}
             {% else %}
             —
             {% endif %}

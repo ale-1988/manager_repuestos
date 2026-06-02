@@ -110,13 +110,13 @@ def build_pdf_factura(factura):
                 columna_empresa,
 
                 Paragraph(
-                    "<b>FACTURA</b>",
+                    f"<b>{factura.get_tipo_display().upper()}</b>",
                     style_titulo,
                 ),
 
                 Paragraph(
                     f"""
-                    <b>Factura Original:</b><br/>
+                    <b>Número:</b><br/>
                     <b> {factura.numero}</b><br/>
                     <b>Fecha:</b> {factura.fecha_emision.strftime("%d/%m/%Y")}<br/>
                     <b>CUIT:</b> {settings.EMPRESA_CUIT}<br/>
@@ -202,24 +202,49 @@ def build_pdf_factura(factura):
         ]
     ]
 
+
     subtotal = 0
 
-    for detalle in factura.pedido.detalles.all():
+    if factura.tipo == "FACTURA":
 
-        material = detalle.material
+        for detalle in factura.pedido.detalles.all():
 
-        precio = material.precio
-        importe = detalle.cantidad * precio
+            material = detalle.material
 
-        subtotal += importe
+            precio = material.precio
+            importe = detalle.cantidad * precio
+
+            subtotal += importe
+
+            data_items.append(
+                [
+                    str(detalle.cod_repuesto),
+                    fmt_cantidad(detalle.cantidad),
+                    material.valor,
+                    f"$ {precio:,.2f}",
+                    f"$ {importe:,.2f}",
+                ]
+            )
+
+    else:  # NOTA_CREDITO
+
+        subtotal = factura.importe_total
+
+        descripcion = "Nota de crédito"
+
+        if factura.factura_referencia:
+            descripcion = (
+                f"Nota de crédito sobre Factura Nº "
+                f"{factura.factura_referencia.numero}"
+            )
 
         data_items.append(
             [
-                str(detalle.cod_repuesto),
-                fmt_cantidad(detalle.cantidad),
-                material.valor,
-                f"$ {precio:,.2f}",
-                f"$ {importe:,.2f}",
+                "",
+                "1",
+                descripcion,
+                f"$ {factura.importe_total:,.2f}",
+                f"$ {factura.importe_total:,.2f}",
             ]
         )
 

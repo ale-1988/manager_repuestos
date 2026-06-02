@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load tz %}
 {% block contenido %}
 
 <h2>Lista de Pedidos</h2>
@@ -101,7 +102,7 @@
                 {% endif %}
             </td>
             <td class="text-center">{{ p.estado }}</td>
-            <td class="text-center">{{ p.fecha }}</td>
+            <td class="text-center">{{ p.fecha|localtime|date:"d M Y H:i" }}</td>
             <td class="text-center">
                 <a href="{% url 'pedidos:editar' p.id %}" class="btn btn-sm btn-primary btn-touch" title="Editar"><i class="bi bi-pencil-square fs-5"></i></a>
             </td>

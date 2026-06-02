@@ -1,5 +1,7 @@
 {% extends "base.html" %}
+{% load tz %}
 {% block contenido %}
+
 <h2>Listado de Facturas</h2>
 <div class="container mt-4">
     <hr>
@@ -136,7 +138,7 @@
                     {% endif %}
                 </td>
 
-                <td class="text-center">{{ factura.fecha_emision|date:"d/m/Y H:i" }}</td>
+                <td class="text-center">{{ factura.fecha_emision|localtime|date:"d M Y H:i" }}</td>
 
             </tr>
         {% empty %}

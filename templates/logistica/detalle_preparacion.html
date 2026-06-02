@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load tz %}
 {% block contenido %}
 
 <h2>
@@ -11,7 +12,7 @@
 
 <p><b>Cliente:</b> {{ pedido.cliente }}</p>
 <p><b>Estado:</b> {{ pedido.estado }}</p>
-<p><b>Fecha:</b> {{ pedido.fecha }}</p>
+<p><b>Fecha:</b> {{ pedido.fecha|localtime|date:"d M Y H:i" }}</p>
 
 <hr>
 

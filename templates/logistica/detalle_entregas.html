@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load tz %}
 {% block contenido %}
 
 <h2>
@@ -23,7 +23,7 @@
 <p>
 <b>Ingreso a logística:</b>
 {% if fechas.logistica %}
-{{ fechas.logistica|date:"d/m/Y H:i" }}
+{{ fechas.logistica|localtime|date:"d M Y H:i" }}
 {% else %}
 —
 {% endif %}
@@ -32,7 +32,7 @@
 <p>
 <b>Consolidado:</b>
 {% if fechas.consolidado %}
-{{ fecha.consolidado|date:"d/m/Y H:i" }}
+{{ fecha.consolidado|localtime|date:"d M Y H:i" }}
 {% else %}
 —
 {% endif %}
@@ -41,7 +41,7 @@
 <p>
 <b>Enviado:</b>
 {% if fechas.enviado %}
-{{ fechas.enviado|date:"d/m/Y H:i" }}
+{{ fechas.enviado|localtime|date:"d M Y H:i" }}
 {% else %}
 —
 {% endif %}
@@ -50,7 +50,7 @@
 <p>
 <b>Entregado:</b>
 {% if fechas.entregado %}
-{{ fechas.entregado|date:"d/m/Y H:i" }}
+{{ fechas.entregado|localtime|date:"d M Y H:i" }}
 {% else %}
 —
 {% endif %}
