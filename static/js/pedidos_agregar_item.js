@@ -566,8 +566,23 @@ async function agregarItem(ev){
         msg += ` — NS: ${data.numero_serie}`;
 
     }
+    mostrarToast(msg);
 
-    alert(msg);
 
 }
 
+function mostrarToast(mensaje) {
+
+    document.getElementById("toastTexto").innerText =
+        mensaje;
+
+    const toast =
+        new bootstrap.Toast(
+            document.getElementById("toastExito"),
+            {
+                delay: 4000
+            }
+        );
+
+    toast.show();
+}

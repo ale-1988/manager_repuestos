@@ -48,3 +48,11 @@ input[type="number"]::-webkit-inner-spin-button {
     white-space: nowrap;
 }
 
+.toast-cec {
+    width: 250px;
+    max-width: 250px;
+    background-color: #343a40;
+    color: white;
+    border: 4px solid #ff8c00;
+    font-size: 1.1rem;
+}
