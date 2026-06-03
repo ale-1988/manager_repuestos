@@ -3,23 +3,20 @@
 {% block contenido %}
 {% load static %}
 
-<div class="container mt-4">
-
-    <h2>
-        {{ factura.tipo }} Nº {{ factura.numero }}
-
-        <small class="text fs-5">
-            {% if factura.pedido_id %}
-                <a href="{% url 'pedidos:editar' factura.pedido_id %}">
-                Pedido #{{ factura.pedido_id }}
-                </a>
-            {% else %}
-                <span class="text-muted">Sin pedido asociado</span>
-            {% endif %}
-        </small>
-    </h2>
-
-    <hr>
+<h3 class="mb-1">
+    {{ factura.tipo }} Nº {{ factura.numero }}
+</h3>
+<div class="d-flex gap-2 flex-wrap mb-2">
+    {% if factura.pedido_id %}
+        <a href="{% url 'pedidos:editar' factura.pedido_id %}"
+        class="btn btn-outline-primary btn-sm">
+        Pedido Nº {{ factura.pedido_id }}
+        </a>
+    {% else %}
+        <span class="text-muted">Sin pedido asociado</span>
+    {% endif %}
+</div>
+<hr>
 
     <div class="row">
         <div class="col-md-6">
@@ -81,37 +78,28 @@
 
     <!-- BOTONES -->
     <div class="mb-3 d-flex gap-2 flex-wrap">
-        {% if factura.tipo == "FACTURA" and factura.estado == "BORRADOR" %}
-            <a href="{% url 'facturacion:emitir_factura' factura.id %}"
-               class="btn btn-primary" title="Emitir factura"><i class="bi bi-receipt fs-5"></i>
-            </a>
-        {% endif %}
+        <div class="d-flex gap-2">  
+            <button
+                onclick="generarPDF('{% url 'facturacion:generar_pdf_factura' factura.id %}')"
+                class="btn btn-outline-secondary"
+                title="Generar PDF">
+                <i class="bi bi-file-earmark-pdf fs-5"></i>
+            </button>
 
-        {% if factura.tipo == "FACTURA" and factura.estado != "ANULADA" %}
-            <a href="{% url 'facturacion:editar_factura' factura.id %}"
-               class="btn btn-secondary" title="Editar factura"><i class="bi bi-pencil-square fs-5"></i>
-            </a>
-        {% endif %}
-
-        <button
-            onclick="generarPDF('{% url 'facturacion:generar_pdf_factura' factura.id %}')"
-            class="btn btn-outline-secondary"
-            title="Generar PDF">
-            <i class="bi bi-file-earmark-pdf fs-5"></i>
-        </button>
-
-        <button
-            onclick="confirmarEnvioFactura('{% url 'facturacion:enviar_factura_email' factura.id %}')"
-            class="btn btn-outline-secondary"
-            title="Enviar por email">
-            <i class="bi bi-envelope fs-5"></i>
-        </button>
-            
+            <button
+                onclick="confirmarEnvioFactura('{% url 'facturacion:enviar_factura_email' factura.id %}')"
+                class="btn btn-outline-secondary"
+                title="Enviar por email">
+                <i class="bi bi-envelope fs-5"></i>
+            </button>
+        </div>            
 
         {% if factura.tipo == "FACTURA" and factura.estado == "EMITIDA" %}
-            <a href="{% url 'facturacion:anular_factura' factura.id %}"
-               class="btn btn-danger" title="Anular factura"><i class="bi bi-trash fs-5"></i>
-            </a>
+            <div class="ms-auto">
+                <a href="{% url 'facturacion:anular_factura' factura.id %}"
+                class="btn btn-danger" title="Anular factura"><i class="bi bi-trash fs-5"></i>
+                </a>
+            </div>
         {% endif %}
     </div>
 
@@ -205,7 +193,7 @@
         </tbody>
     </table>
 
-</div>
+
 <script src="{% static 'js/generar_pdf.js' %}"></script>
 
 {% endblock %}

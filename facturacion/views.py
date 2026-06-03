@@ -58,20 +58,20 @@ def listar_facturas(request):
 # ==============================
 # CREAR FACTURA
 # ==============================
-@login_required
-def crear_factura(request):
+# @login_required
+# def crear_factura(request):
 
-    form = FacturaForm(request.POST or None)
+#     form = FacturaForm(request.POST or None)
 
-    if request.method == "POST":
-        if form.is_valid():
-            factura = form.save()
-            messages.success(request, "Factura creada correctamente.")
-            return redirect("facturacion:detalle_factura", pk=factura.pk)
+#     if request.method == "POST":
+#         if form.is_valid():
+#             factura = form.save()
+#             messages.success(request, "Factura creada correctamente.")
+#             return redirect("facturacion:detalle_factura", pk=factura.pk)
 
-    return render(request, "facturacion/editar_factura.html", {
-        "form": form
-    })
+#     return render(request, "facturacion/editar_factura.html", {
+#         "form": form
+#     })
 
 
 # ==============================

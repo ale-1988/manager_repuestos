@@ -42,7 +42,7 @@ class Pedido(models.Model):
         "CREADO": ["CONFIRMADO", "CANCELADO"],
         "CONFIRMADO": ["CREADO", "CERRADO", "CANCELADO"],
         "CERRADO": ["FACTURADO"],
-        "FACTURADO": ["PAGADO"],
+        "FACTURADO": ["PAGADO","CANCELADO"],
         "PAGADO": ["PREPARANDO"],
         "PREPARANDO": ["CONSOLIDADO"],
         "CONSOLIDADO": ["ENVIADO"],
@@ -225,7 +225,7 @@ class Pedido(models.Model):
                 raise ValidationError(
                     "El total del pedido debe ser mayor a cero."
                 )
-            #print("COD_CLIENTE:", pedido.cod_cliente)
+            
             factura = Factura.objects.create(
                 pedido=pedido,
                 cod_cliente=pedido.cod_cliente,
@@ -234,7 +234,12 @@ class Pedido(models.Model):
                 estado="BORRADOR",
             )
 
-        return factura
+            factura.cambiar_estado(
+                "EMITIDA",
+                usuario
+            )
+            
+            return factura
     
     @property
     def permite_ver_preparacion(self):

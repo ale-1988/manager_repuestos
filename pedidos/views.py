@@ -520,14 +520,14 @@ def historial_global(request, pedido_id=None):
         "dir": direccion,
     })
     
-login_required
+@login_required
 def facturar_pedido(request, id):
 
     pedido = get_object_or_404(Pedido, id=id)
 
     try:
         factura = pedido.crear_factura_desde_pedido(request.user)
-        messages.success(request, "Factura creada correctamente. Emita la factura y registre el pago para habilitar preparación.")
+        messages.success(request, "Factura generada. Registre el pago para habilitar preparación.")
 
         return redirect("facturacion:detalle_factura", pk=factura.pk)
 

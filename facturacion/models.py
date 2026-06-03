@@ -233,6 +233,11 @@ class Factura(models.Model):
                         estado="EMITIDA",
                         observaciones="Nota de crédito generada por anulación de factura.",
                     )
+                # Cancelar también el pedido asociado
+                if self.pedido:
+                    self.pedido.estado = "CANCELADO"
+                    self.pedido.save()       
+                    
 
             # ======================================
             # CAMBIO DE ESTADO

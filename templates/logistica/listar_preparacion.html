@@ -39,7 +39,7 @@ Cantidad de pedidos: {{ cantidad_pedidos }}
             </td>
 
             <td class="text-center">{{ pedido.total_items }}</td>
-            <td class="text-center">{{ pedido.total_cantidad }}</td>
+            <td class="text-center">{{ pedido.total_cantidad|floatformat:"-2" }}</td>
             <td class="text-center">{{ pedido.estado }}</td>
             <td class="text-center">{{ pedido.fecha|localtime|date:"d M Y H:i" }}</td>
             <td class="text-end">

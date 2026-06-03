@@ -3,12 +3,12 @@
 {% load tz %}
 {% block contenido %}
 
-<h2>
-    Preparación del
-    <a href="{% url 'pedidos:editar' pedido.id %}">
-        pedido #{{ pedido.id }}
-    </a>
-</h2>
+<h3>Preparación</h3>
+<a href="{% url 'pedidos:editar' pedido.id %}"
+    class="btn btn-outline-primary btn-sm">
+    Pedido Nº {{ pedido.id }}
+</a>
+<hr>
 
 <p><b>Cliente:</b> {{ pedido.cliente }}</p>
 <p><b>Estado:</b> {{ pedido.estado }}</p>
@@ -79,7 +79,7 @@
 
     </form>
 {% else %}
-    {{ item.cantidad_preparada }}
+    {{ item.cantidad_preparada |floatformat:"-2"}}
 {% endif %}
 </td>
 

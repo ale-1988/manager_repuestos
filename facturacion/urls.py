@@ -5,7 +5,7 @@ app_name = "facturacion"
 
 urlpatterns = [
     path("", views.listar_facturas, name="listar_facturas"),
-    path("crear/", views.crear_factura, name="crear_factura"),
+    #path("crear/", views.crear_factura, name="crear_factura"),
     path("<int:pk>/", views.detalle_factura, name="detalle_factura"),
     path("<int:pk>/editar/", views.editar_factura, name="editar_factura"),
     path("<int:pk>/pago/", views.registrar_pago, name="registrar_pago"),

@@ -3,33 +3,36 @@
 {% load tz %}
 {% block contenido %}
 <form id="csrf-form" style="display:none;"> {% csrf_token %} </form>
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>
-        Editar pedido #{{ pedido.id }}
+    <h3 class="mb-1">
+        Editar pedido Nº {{ pedido.id }}
+    </h3>
+    <div class="d-flex gap-2 flex-wrap mb-2">
+        <a href="{% url 'pedidos:editar' pedido.id %}"
+        class="btn btn-primary btn-sm">
+            Pedido Nº {{ pedido.id }}
+        </a>
 
         {% if pedido.factura %}
-            <small class="text fs-5">
-                ===>
-                <a href="{% url 'facturacion:detalle_factura' pedido.factura.id %}">
-                    {{ pedido.factura.tipo }} Nº {{ pedido.factura.numero }}
-                </a>
-            
+            <a href="{% url 'facturacion:detalle_factura' pedido.factura.id %}"
+            class="btn btn-outline-primary btn-sm">
+                {{ pedido.factura.tipo }} Nº {{ pedido.factura.numero }}
+            </a>
+
             {% if pedido.permite_ver_preparacion %}
-                ===>
-                <a href="{% url 'logistica:detalle_preparacion' pedido.id %}">
+                <a href="{% url 'logistica:detalle_preparacion' pedido.id %}"
+                class="btn btn-outline-primary btn-sm">
                     Preparación
                 </a>
+
                 {% if pedido.permite_ver_entrega %}
-                    ===>
-                    <a href="{% url 'logistica:detalle_entregas' pedido.id %}">
+                    <a href="{% url 'logistica:detalle_entregas' pedido.id %}"
+                    class="btn btn-outline-primary btn-sm">
                         Entrega
                     </a>
-                {% endif %}                
+                {% endif %}
             {% endif %}
-            </small>
         {% endif %}
-    </h2>
-</div>
+    </div>
 <hr>
 
 <!-- ===================================================== -->

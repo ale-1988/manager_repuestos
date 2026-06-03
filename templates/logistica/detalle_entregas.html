@@ -2,12 +2,12 @@
 {% load tz %}
 {% block contenido %}
 
-<h2>
-    Entrega del
-    <a href="{% url 'pedidos:editar' pedido.id %}">
-        pedido {{ pedido.id }}
-    </a>
-</h2>
+<h3>Entrega</h3>
+<a href="{% url 'pedidos:editar' pedido.id %}"
+   class="btn btn-outline-primary btn-sm">
+   Pedido Nº {{ pedido.id }}
+</a>
+<hr>
 
 <p><b>Cliente:</b> {{ pedido.cliente }}</p>
 

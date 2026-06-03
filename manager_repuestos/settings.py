@@ -232,3 +232,13 @@ EMPRESA_LOGO = BASE_DIR / "static" / "images" / "favicon.png"
 # ============================================================
 PAGINACION_PC = 25
 PAGINACION_MOVIL = 10
+
+# ============================================================
+# LIMITES DE SESION
+# ============================================================
+# 1 horas
+SESSION_COOKIE_AGE = 3600 
+# Reinicia el contador con actividad del usuario
+SESSION_SAVE_EVERY_REQUEST = False
+# No cerrar al cerrar el navegador
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
