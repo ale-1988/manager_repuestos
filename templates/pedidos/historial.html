@@ -2,16 +2,16 @@
 {% load tz %}
 {% block contenido %}
 
-<h2>
-    {% if pedido_actual %}
-        Historial del 
-        <a href="{% url 'pedidos:editar' pedido_actual.id %}">
-            Pedido #{{ pedido_actual.id }}
-        </a>
-    {% else %}
-        Historial Global de Pedidos
-    {% endif %}
-</h2>
+{% if pedido_actual %}
+    <h3>HISTORIAL</h3>
+    <a href="{% url 'pedidos:editar' pedido_actual.id %}"
+    class="btn btn-outline-primary btn-sm">
+    Pedido Nº {{ pedido_actual.id }}
+    </a>
+{% else %}
+    <h3>Historial Global de Pedidos</h3>
+{% endif %}
+<hr>
 
 <form method="get" class="row g-2 mb-3">
 
