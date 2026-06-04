@@ -23,8 +23,33 @@ def requiere_rol(*roles_permitidos):
 # ============================================
 @requiere_rol('admin', 'gerente')
 def listar_usuarios(request):
-    usuarios = Usuario.objects.all().order_by('username')
-    return render(request, 'usuarios/listar.html', {'usuarios': usuarios})
+
+    orden = request.GET.get("orden", "username")
+    dir = request.GET.get("dir", "asc")
+
+    campos_ordenables = {
+        "id": "id",
+        "username": "username",
+        "email": "email",
+        "rol": "rol",
+    }
+
+    campo = campos_ordenables.get(orden, "username")
+
+    if dir == "desc":
+        campo = f"-{campo}"
+
+    usuarios = Usuario.objects.all().order_by(campo)
+
+    return render(
+        request,
+        'usuarios/listar.html',
+        {
+            'usuarios': usuarios,
+            'orden': orden,
+            'dir': dir,
+        }
+    )
 
 
 # ============================================

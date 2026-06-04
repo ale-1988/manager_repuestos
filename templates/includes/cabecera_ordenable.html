@@ -1,0 +1,20 @@
+{% load querystring %}
+
+<th class="{{ th_class|default:'' }}">
+    <a href="?{% if orden == campo and dir == 'asc' %}{% querystring orden=campo dir='desc' %}{% else %}{% querystring orden=campo dir='asc' %}{% endif %}"
+       class="text-decoration-none {% if orden == campo %}fw-bold text-primary{% else %}text-secondary{% endif %}">
+
+        {{ titulo }}
+
+        {% if orden == campo %}
+            {% if dir == "asc" %}
+                <i class="bi bi-sort-up-alt fs-5 ms-1"></i>
+            {% else %}
+                <i class="bi bi-sort-down fs-5 ms-1"></i>
+            {% endif %}
+        {% else %}
+            <i class="bi bi-arrow-down-up fs-6 ms-1"></i>
+        {% endif %}
+
+    </a>
+</th>

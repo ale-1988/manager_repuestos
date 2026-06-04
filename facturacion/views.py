@@ -29,6 +29,10 @@ def listar_facturas(request):
     cliente = request.GET.get("cliente")
     solo_saldo = request.GET.get("solo_saldo")
 
+    # Ordenamiento
+    orden = request.GET.get("orden", "numero")
+    dir = request.GET.get("dir", "asc")
+
     facturas = Factura.objects.all()
 
     if estado:
@@ -38,24 +42,63 @@ def listar_facturas(request):
         facturas = facturas.filter(tipo=tipo)
 
     if cliente:
-        facturas = [
+        facturas = list(
             f for f in facturas
             if cliente.lower() in str(f.cliente).lower()
-        ]
+        )
 
     if solo_saldo:
         facturas = [f for f in facturas if f.saldo_actual() > 0]
 
-    #Paginacion
-    items_por_pagina = settings.PAGINACION_MOVIL if es_movil(request) else settings.PAGINACION_PC
+    # Ordenamiento
+    campos_ordenables = {
+        "numero": "numero",
+        "tipo": "tipo",
+        "estado": "estado",
+        "fecha": "fecha_emision",
+    }
+    if isinstance(facturas, list):
+        reverse = (dir == "desc")
+        if orden == "numero":
+            facturas.sort(key=lambda x: x.numero or 0, reverse=reverse)
+        elif orden == "tipo":
+            facturas.sort(key=lambda x: x.tipo or "", reverse=reverse)
+        elif orden == "estado":
+            facturas.sort(key=lambda x: x.estado or "", reverse=reverse)
+        elif orden == "fecha":
+            facturas.sort(
+                key=lambda x: x.fecha_emision,
+                reverse=reverse
+            )
+        
+    if orden in campos_ordenables and hasattr(facturas, "order_by"):
+        campo = campos_ordenables[orden]
+
+        if dir == "desc":
+            campo = f"-{campo}"
+
+        facturas = facturas.order_by(campo)
+
+    # Paginación
+    items_por_pagina = (
+        settings.PAGINACION_MOVIL
+        if es_movil(request)
+        else settings.PAGINACION_PC
+    )
+
     paginator = Paginator(facturas, items_por_pagina)
     page_number = request.GET.get("page")
     facturas = paginator.get_page(page_number)
-    
-    return render(request, "facturacion/listar_facturas.html", {
-        "facturas": facturas,
-    })
 
+    return render(
+        request,
+        "facturacion/listar_facturas.html",
+        {
+            "facturas": facturas,
+            "orden": orden,
+            "dir": dir,
+        },
+    )
 
 
 # ==============================
