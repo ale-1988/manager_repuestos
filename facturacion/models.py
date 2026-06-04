@@ -81,6 +81,15 @@ class Factura(models.Model):
 
     observaciones = models.TextField(blank=True)
 
+    fecha_ultimo_email = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Último envío por email"
+    )
+
+
+
+
     class Meta:
         ordering = ["-numero"]
 

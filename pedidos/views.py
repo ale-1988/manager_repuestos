@@ -27,6 +27,8 @@ from django.core.paginator import Paginator
 
 from pedidos.utils import es_movil
 
+from django.utils import timezone
+from datetime import timedelta
 
 # ==========================================================
 # NUEVO PEDIDO — BUSCADOR DE CLIENTE (AJAX + LINKS)
@@ -577,8 +579,19 @@ def comprobante_preliminar(request, id):
 
 @login_required
 def enviar_comprobante_email(request, id):
-
+    
     pedido = get_object_or_404(Pedido, id=id)
+
+    if (pedido.fecha_ultimo_email and timezone.now() - pedido.fecha_ultimo_email < timedelta(seconds=30)):
+        messages.warning(
+            request,
+            "Debe esperar 30 segundos antes de reenviar el comprobante."
+        )
+        return redirect(
+            "pedidos:comprobante_preliminar",
+            id=pedido.id
+        )
+    
 
     if not pedido.cliente or not pedido.cliente.email:
         messages.error(
@@ -606,10 +619,13 @@ def enviar_comprobante_email(request, id):
 
     try:
         email.send()
-
+        
+        pedido.fecha_ultimo_email = timezone.now()
+        pedido.save(update_fields=["fecha_ultimo_email"])
+        
         messages.success(
             request,
-            f"Comprobante enviado a {pedido.cliente.email}"
+            f"Comprobante preliminar enviado a {pedido.cliente.email}"
         )
 
     except Exception as e:

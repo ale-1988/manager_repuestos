@@ -1,149 +1,143 @@
+{% extends "base.html" %}
 {% load tz %}
 {% load static %}
-
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
 <link rel="stylesheet" href="{% static 'css/comprobante_preliminar.css' %}">
-
-<!-- Bootstrap CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<!-- Bootstrap Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
-<title>
+{% block title %}
 Comprobante preliminar pedido {{ pedido.id }}
-</title>
+{% endblock %}
+{% block contenido %}
 
-</head>
+    <div class="mx-0">
+    <!--     <div class="watermark">
+        PRELIMINAR
+        </div>
+    -->
+        <div class="header">
 
-<body>
+        <div style="display:flex; align-items:center; gap:15px;">
 
-<div class="watermark">
-PRELIMINAR
-</div>
+            <img
+                src="{% static 'images/favicon.png' %}"
+                style="height:48px;"
+            >
 
-<div class="header">
+            <h1 style="margin:0;">
+                Comprobante preliminar
+            </h1>
 
-<div style="display:flex; align-items:center; gap:15px;">
+        </div>
 
-    <img
-        src="{% static 'images/favicon.png' %}"
-        style="height:48px;"
-    >
+        <p>
+        <strong>Pedido:</strong>
+        #{{ pedido.id }}
+        </p>
 
-    <h1 style="margin:0;">
-        Comprobante preliminar
-    </h1>
+        <p>
+        <strong>Fecha:</strong>
+        {{ fecha|localtime|date:"d M Y H:i" }}
+        </p>
 
-</div>
+        <p>
+        <strong>Estado:</strong>
 
-<p>
-<strong>Pedido:</strong>
-#{{ pedido.id }}
-</p>
+        <span class="estado">
+            {{ pedido.estado }}
+        </span>
+        </p>
 
-<p>
-<strong>Fecha:</strong>
-{{ fecha|localtime|date:"d M Y H:i" }}
-</p>
+        <p>
+        <strong>Cliente:</strong>
 
-<p>
-<strong>Estado:</strong>
+        {% if pedido.cliente %}
+            {{ pedido.cliente }}
+        {% else %}
+            Sin cliente
+        {% endif %}
+        </p>
+        </div>
 
-<span class="estado">
-    {{ pedido.estado }}
-</span>
-</p>
-
-<p>
-<strong>Cliente:</strong>
-
-{% if pedido.cliente %}
-    {{ pedido.cliente }}
-{% else %}
-    Sin cliente
-{% endif %}
-</p>
-
-</div>
-
-<table>
-
-<thead>
-<tr>
-    <th class="centrado">ID</th>
-    <th>Descripción</th>
-    <th class="numero">Cantidad</th>
-    <th class="numero">Precio</th>
-    <th class="numero">Subtotal</th>
-</tr>
-</thead>
-
-<tbody>
-
-{% for d in detalles %}
-
-<tr>
-
-<td class="centrado">
-{{ d.cod_repuesto }}
-</td>
-
-<td>
-{{ d.material.valor }}
-</td>
-
-<td class="numero">
-{{ d.cantidad|floatformat:"-3" }}
-</td>
-
-<td class="numero">
-${{ d.material.precio|floatformat:"-2" }}
-</td>
-
-<td class="numero">
-${{ d.subtotal|floatformat:2 }}
-</td>
-
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-</table>
-
-<div class="total">
-TOTAL APROX:
-$ {{ total|floatformat:2 }}
-</div>
-
-<br>
-
-<div class="no-print">
-    <a href="{{ request.GET.volver }}"
-    class="btn btn-secondary"
-    title="Volver">
-        <i class="bi bi-arrow-left fs-5"></i>
-    </a>
-    <button onclick="window.print()"
+        <div class="no-print">
+            <a href="{{ request.GET.volver }}"
+            class="btn btn-secondary"
+            title="Volver">
+                <i class="bi bi-arrow-left fs-5"></i>
+            </a>
+            <button onclick="window.print()"
+                    class="btn btn-outline-secondary"
+                    title="Imprimir">
+                <i class="bi bi-printer fs-5"></i>
+            </button>
+            <button onclick="generarPDF('{% url 'pedidos:pdf_preliminar' pedido.id %}')"
+                    class="btn btn-outline-secondary"
+                    title="Generar PDF">
+                <i class="bi bi-file-earmark-pdf fs-5"></i>
+            </button>
+            <button
+                class="btn btn-outline-secondary btn-email"
+                data-url="{% url 'pedidos:enviar_comprobante_email' pedido.id %}"
+                title="Enviar por email">
+                <i class="bi bi-envelope fs-5"></i>
+            </button>
+            <!-- <a href="{% url 'pedidos:enviar_comprobante_email' pedido.id %}"
             class="btn btn-outline-secondary"
-            title="Imprimir">
-        <i class="bi bi-printer fs-5"></i>
-    </button>
-    <button onclick="generarPDF('{% url 'pedidos:pdf_preliminar' pedido.id %}')"
-            class="btn btn-outline-secondary"
-            title="Generar PDF">
-        <i class="bi bi-file-earmark-pdf fs-5"></i>
-    </button>
-    <a href="{% url 'pedidos:enviar_comprobante_email' pedido.id %}"
-    class="btn btn-outline-secondary"
-    title="Enviar por email">
-        <i class="bi bi-envelope fs-5"></i>
-    </a>
-</div>
+            title="Enviar por email">
+                <i class="bi bi-envelope fs-5"></i>
+            </a> -->
+            <hr>
+        </div>
 
-</body>
-</html>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-sm">
+            <thead>
+                <tr>
+                    <th class="text-center" width="15%">ID</th>
+                    <th width="50%">Descripción</th>
+                    <th class="text-center" width="10%">Cantidad</th>
+                    <th class="text-end" width="10%">Precio</th>
+                    <th class="text-end" width="15%">Subtotal</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for d in detalles %}
+
+                    <tr>
+
+                        <td class="text-center">
+                            {{ d.cod_repuesto }}
+                        </td>
+
+                        <td>
+                            {{ d.material.valor }}
+                        </td>
+
+                        <td class="text-center">
+                            {{ d.cantidad|floatformat:"-3" }}
+                        </td>
+
+                        <td class="text-end">
+                            ${{ d.material.precio|floatformat:"-2" }}
+                        </td>
+
+                        <td class="text-end">
+                            ${{ d.subtotal|floatformat:2 }}
+                        </td>
+
+                    </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+            </table>
+        </div>
+        <div class="d-flex justify-content-end mt-3">
+            <div class="border rounded p-2 fw-bold fs-4">
+                TOTAL APROX: $ {{ total|floatformat:2 }}
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/generar_pdf.js' %}"></script>
+    <script src="{% static 'js/chequeo_email.js' %}"></script>
+{% endblock %}

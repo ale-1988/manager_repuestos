@@ -38,7 +38,7 @@ def build_pdf_preliminar(pedido):
 
         logo = Image(logo_path)
 
-        logo.drawHeight = 0.45 * inch
+        logo.drawHeight = 0.23 * inch
         logo.drawWidth = 0.45 * inch
 
         tabla_titulo = Table([
@@ -49,7 +49,7 @@ def build_pdf_preliminar(pedido):
                     styles["Heading1"]
                 )
             ]
-        ], colWidths=[40, 500])
+        ], colWidths=[40, 390])
 
         tabla_titulo.setStyle(TableStyle([
             ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
@@ -79,7 +79,7 @@ def build_pdf_preliminar(pedido):
         ["Fecha", pedido.fecha.strftime("%d/%m/%Y %H:%M")],
     ]
 
-    tabla_encabezado = Table(encabezado, colWidths=[120, 350])
+    tabla_encabezado = Table(encabezado, colWidths=[70, 360])
 
     tabla_encabezado.setStyle(TableStyle([
         ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
@@ -134,10 +134,11 @@ def build_pdf_preliminar(pedido):
 
     tabla = Table(
         data,
-        colWidths=[60, 260, 70, 90, 90]
+        colWidths=[50, 200, 50, 60, 70]
     )
 
     tabla.setStyle(TableStyle([
+        ("ALIGN", (0,0), (-1,0), "CENTER"),
 
         ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
 
@@ -145,7 +146,9 @@ def build_pdf_preliminar(pedido):
 
         ("ALIGN", (0,0), (0,-1), "CENTER"),
 
-        ("ALIGN", (2,1), (4,-1), "RIGHT"),
+        ("ALIGN", (2,1), (2,-1), "CENTER"),
+        
+        ("ALIGN", (3,1), (4,-1), "RIGHT"),
 
         ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
 

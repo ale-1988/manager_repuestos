@@ -405,7 +405,7 @@
     {% endif %}
 
 
-{% if pedido.estado == "CREADO" %}
-    <script src="{% static 'js/editar_pedido.js' %}"></script>
-{% endif %}
+    {% if pedido.estado == "CREADO" %}
+        <script src="{% static 'js/editar_pedido.js' %}"></script>
+    {% endif %}
 {% endblock %}

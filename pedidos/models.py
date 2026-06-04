@@ -59,6 +59,9 @@ class Pedido(models.Model):
     observaciones = models.TextField(blank=True)
     fecha_envio = models.DateTimeField(null=True,blank=True)
     fecha_entrega = models.DateTimeField(null=True, blank=True)
+    fecha_ultimo_email = models.DateTimeField(null=True,blank=True,verbose_name="Último envío por email")
+    
+    
     
     def estados_disponibles(self):
         """

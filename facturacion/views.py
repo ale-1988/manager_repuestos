@@ -15,6 +15,9 @@ from django.core.paginator import Paginator
 from pedidos.utils import es_movil
 from django.conf import settings
 
+from django.utils import timezone
+from datetime import timedelta
+
 # ==============================
 # LISTAR FACTURAS
 # ==============================
@@ -248,9 +251,20 @@ def generar_pdf_factura(request, pk):
 # ==============================
 @login_required
 def enviar_factura_email(request, pk):
-
+    
     factura = get_object_or_404(Factura, pk=pk)
 
+    if (factura.fecha_ultimo_email and timezone.now() - factura.fecha_ultimo_email < timedelta(seconds=30)):
+        messages.warning(
+            request,
+            "Debe esperar 30 segundos antes de reenviar la factura."
+        )
+        return redirect(
+            "facturacion:detalle_factura",
+            pk=pk
+        )
+
+    
     pdf_bytes = build_pdf_factura(factura)
 
     email = EmailMessage(
@@ -264,10 +278,18 @@ def enviar_factura_email(request, pk):
         pdf_bytes,
         "application/pdf",
     )
-
-    email.send()
-
-    messages.success(request, "Factura enviada por email.")
+    try:
+        email.send()
+    
+        factura.fecha_ultimo_email = timezone.now()
+        factura.save(update_fields=["fecha_ultimo_email"])
+        messages.success(request, f"Factura enviada a {factura.cliente.email}"
+)
+        
+    except Exception as e:
+        messages.error(request,f"Error enviando email: {e}"
+    )
+        
     return redirect("facturacion:detalle_factura", pk=pk)
 
 
@@ -345,58 +367,3 @@ def generar_pdf_factura(request, pk):
     )
 
     return response
-
-@login_required
-def enviar_factura_email(request, pk):
-
-    factura = get_object_or_404(Factura, pk=pk)
-
-    if not factura.cliente or not factura.cliente.email:
-
-        messages.error(
-            request,
-            "El cliente no tiene una dirección de email registrada."
-        )
-
-        return redirect(
-            "facturacion:detalle_factura",
-            pk=factura.pk
-        )
-
-    pdf_bytes = build_pdf_factura(factura)
-
-    email = EmailMessage(
-        subject=f"Factura Nº {factura.numero}",
-        body=(
-            "Adjuntamos la factura correspondiente.\n\n"
-            "CEC Electrónica SRL"
-        ),
-        to=[factura.cliente.email],
-    )
-
-    email.attach(
-        f"factura_{factura.numero}.pdf",
-        pdf_bytes,
-        "application/pdf",
-    )
-
-    try:
-
-        email.send()
-
-        messages.success(
-            request,
-            f"Factura enviada a {factura.cliente.email}"
-        )
-
-    except Exception as e:
-
-        messages.error(
-            request,
-            f"Error enviando email: {e}"
-        )
-
-    return redirect(
-        "facturacion:detalle_factura",
-        pk=factura.pk
-    )

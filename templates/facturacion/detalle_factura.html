@@ -86,12 +86,18 @@
                 <i class="bi bi-file-earmark-pdf fs-5"></i>
             </button>
 
+            <!-- <a href="{% url 'facturacion:enviar_factura_email' factura.id %}"
+            class="btn btn-outline-secondary"
+            title="Enviar por email">
+                <i class="bi bi-envelope fs-5"></i>
+            </a> -->
             <button
-                onclick="confirmarEnvioFactura('{% url 'facturacion:enviar_factura_email' factura.id %}')"
-                class="btn btn-outline-secondary"
+                class="btn btn-outline-secondary btn-email"
+                data-url="{% url 'facturacion:enviar_factura_email' factura.id %}"
                 title="Enviar por email">
                 <i class="bi bi-envelope fs-5"></i>
             </button>
+
         </div>            
 
         {% if factura.tipo == "FACTURA" and factura.estado == "EMITIDA" %}
@@ -195,5 +201,5 @@
 
 
 <script src="{% static 'js/generar_pdf.js' %}"></script>
-
+<script src="{% static 'js/chequeo_email.js' %}"></script>
 {% endblock %}
