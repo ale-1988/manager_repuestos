@@ -2,8 +2,16 @@ function generarPDF(baseUrl) {
     window.open(baseUrl, "_blank");
 }
 
-function confirmarEnvioFactura(url) {
-    if (confirm("¿Enviar esta factura por email?")) {
-        window.location.href = url;
+async function confirmarEnvioFactura(url) {
+
+    const ok =
+        await confirmar(
+            "¿Enviar esta factura por email?"
+        );
+
+    if (!ok) {
+        return;
     }
+
+    window.location.href = url;
 }

@@ -571,18 +571,3 @@ async function agregarItem(ev){
 
 }
 
-function mostrarToast(mensaje) {
-
-    document.getElementById("toastTexto").innerText =
-        mensaje;
-
-    const toast =
-        new bootstrap.Toast(
-            document.getElementById("toastExito"),
-            {
-                delay: 4000
-            }
-        );
-
-    toast.show();
-}

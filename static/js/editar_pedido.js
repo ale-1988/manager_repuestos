@@ -45,20 +45,20 @@ document.addEventListener("click", async function(ev) {
 
     const data = await r.json();
 
-    
-
     if (!data.ok) {
-        alert(data.error || "Error");
+        mostrarToast(data.error || "Error al modificar cantidad");
         return;
     }
 
-    const input = document.querySelector(`.cantidad-input[data-detalle-id="${data.detalle_id}"]`);
-    
+    const input = document.querySelector(
+        `.cantidad-input[data-detalle-id="${data.detalle_id}"]`
+    );
+
     if (input) {
         input.value =
             parseFloat(data.cantidad).toString();
     }
-    
+
 });
 
 // =====================================================
@@ -74,7 +74,12 @@ document.addEventListener("click", async function(ev) {
 
     if (!btnEliminar) return;
 
-    if (!confirm("¿Eliminar ítem del pedido?")) {
+    const ok =
+        await confirmar(
+            "¿Eliminar ítem del pedido?"
+        );
+
+    if (!ok) {
         return;
     }
 
@@ -101,7 +106,9 @@ document.addEventListener("click", async function(ev) {
     const data = await r.json();
 
     if (!data.ok) {
-        alert(data.error || "Error");
+        mostrarToast(
+            data.error || "Error al eliminar"
+        );
         return;
     }
 
@@ -113,6 +120,36 @@ document.addEventListener("click", async function(ev) {
     if (fila) {
         fila.remove();
     }
+
+    mostrarToast("Ítem eliminado");
+
+});
+
+// =====================================================
+// CANCELAR PEDIDO
+// =====================================================
+
+document.addEventListener("click", async function(ev) {
+
+    if (!(ev.target instanceof Element)) return;
+
+    const btn =
+        ev.target.closest(".btn-cancelar-pedido");
+
+    if (!btn) return;
+
+    ev.preventDefault();
+
+    const ok =
+        await confirmar(
+            "¿Seguro desea cancelar este pedido?"
+        );
+
+    if (!ok) {
+        return;
+    }
+
+    window.location = btn.href;
 
 });
 
@@ -160,7 +197,7 @@ document.addEventListener("focusout", async function(ev) {
 
     if (!data.ok) {
 
-        alert(data.error || "Error");
+        mostrarToast(data.error || "Error al eliminar");
 
         return;
     }

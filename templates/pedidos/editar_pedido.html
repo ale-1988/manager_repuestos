@@ -4,7 +4,7 @@
 {% block contenido %}
 <form id="csrf-form" style="display:none;"> {% csrf_token %} </form>
     <h3 class="mb-1">
-        Editar pedido Nº {{ pedido.id }}
+        Editar pedido
     </h3>
     <div class="d-flex gap-2 flex-wrap mb-2">
         <a href="{% url 'pedidos:editar' pedido.id %}"
@@ -225,8 +225,7 @@
                     {% if request.user.rol == "admin" or request.user.rol == "gerente" %}
                         {% if pedido.estado not in "ENVIADO,ENTREGADO" %}
                             <a href="{% url 'pedidos:cancelar' pedido.id %}"
-                            class="btn btn-danger btn-sm ms-auto btn-touch"
-                            onclick="return confirm('¿Seguro desea cancelar este pedido?');"
+                            class="btn btn-danger btn-sm ms-auto btn-touch btn-cancelar-pedido"
                             title="Cancelar pedido">
                                 <i class="bi bi-x-circle fs-5"></i>
                             </a>

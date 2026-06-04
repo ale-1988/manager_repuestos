@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block title %}Usuarios{% endblock %}
 
 {% block contenido %}
@@ -41,7 +41,7 @@
                 </a>
 
                 <a href="{% url 'usuarios:eliminar' u.id %}"
-                   class="btn btn-outline-danger btn-sm"
+                   class="btn btn-outline-danger btn-sm btn-eliminar-usuario"
                    title="Eliminar">
                     <i class="bi bi-trash fs-5"></i>
                 </a>
@@ -52,4 +52,5 @@
     </tbody>
 </table>
 
+<script src="{% static 'js/usuarios.js' %}"></script>
 {% endblock %}

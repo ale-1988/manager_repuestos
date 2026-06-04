@@ -57,11 +57,11 @@ Comprobante preliminar pedido {{ pedido.id }}
         </div>
 
         <div class="no-print">
-            <a href="{{ request.GET.volver }}"
+            <a href="{% url 'pedidos:editar' pedido.id %}"
             class="btn btn-secondary"
             title="Volver">
                 <i class="bi bi-arrow-left fs-5"></i>
-            </a>
+            </a>            
             <button onclick="window.print()"
                     class="btn btn-outline-secondary"
                     title="Imprimir">
@@ -138,6 +138,7 @@ Comprobante preliminar pedido {{ pedido.id }}
             </div>
         </div>
     </div>
+
     <script src="{% static 'js/generar_pdf.js' %}"></script>
     <script src="{% static 'js/chequeo_email.js' %}"></script>
 {% endblock %}
