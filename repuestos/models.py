@@ -1,6 +1,4 @@
 from django.db import models
-
-
 # ===============================
 #   TABLA LEGACY: grupos
 # ===============================

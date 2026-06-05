@@ -13,6 +13,8 @@ import environ
 import os
 from pathlib import Path
 
+#App version
+APP_VERSION = "1.0.0"
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -56,6 +58,7 @@ INSTALLED_APPS = [
     'sesiones',
     'clientes',
     'pedidos.apps.PedidosConfig',
+    'axes',
 
 ]
 
@@ -67,6 +70,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "manager_repuestos.urls"
@@ -242,3 +246,18 @@ SESSION_COOKIE_AGE = 3600
 SESSION_SAVE_EVERY_REQUEST = False
 # No cerrar al cerrar el navegador
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+# ==================================================
+# PROTECCIÓN CONTRA FUERZA BRUTA (django-axes)
+# ==================================================
+
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1
+AXES_RESET_ON_SUCCESS = True
+AXES_LOCK_OUT_BY_COMBINATION_USER_AND_IP = True
+AXES_LOCKOUT_TEMPLATE = "sesiones/bloqueado.html"

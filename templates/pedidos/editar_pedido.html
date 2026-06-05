@@ -265,137 +265,138 @@
         <strong>División del pedido:</strong> seleccione los ítems que pasarán al nuevo pedido.
     </div>
 {% endif %}
-    <table class="table table-striped table-bordered">
-        <thead>
-            <tr>
-                {% if modo_dividir %}
-                    <th class="text-center">Selec.</th>
-                {% endif %}
-                <th class="text-center">ID</th>
-                <th class="text-center">En Stock</th>
-                <th class="text-center">Cant</th>
-                <th>Nombre</th>
-                <th>Grupo</th>
-                <th class="text-center">NS</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in items %}
-            <tr id="fila-item-{{ item.id }}">
-                {% if modo_dividir %}
-                    <td class="text-center align-middle">
-                        <input type="checkbox" name="item_dividir" value="{{ item.id }}">
+    <div class="table-responsive">
+        <table class="table table-sm table-striped table-bordered table-hover">
+            <thead class="table-info">
+                <tr>
+                    {% if modo_dividir %}
+                        <th class="text-center">Selec.</th>
+                    {% endif %}
+                    <th class="text-center">ID</th>
+                    <th class="text-center">En Stock</th>
+                    <th class="text-center">Cant</th>
+                    <th>Nombre</th>
+                    <th>Grupo</th>
+                    <th class="text-center">NS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr id="fila-item-{{ item.id }}">
+                    {% if modo_dividir %}
+                        <td class="text-center align-middle">
+                            <input type="checkbox" name="item_dividir" value="{{ item.id }}">
+                        </td>
+                    {% endif %}
+                    <td class="text-center align-middle">{{ item.cod_repuesto }}</td>
+
+                    <td class="text-center align-middle"
+                    {% if not modo_dividir %}
+                        
+                        {% if item.material.stock > item.material.pila %}
+                            style="background-color: #b7ffb7;"
+
+                        {% elif item.material.stock > item.stock_critico %}
+                            style="background-color: #fff3b0;"
+
+                        {% else %}
+                            style="background-color: #ffb3b3;"
+
+                        {% endif %}"
+                    {% endif %}>
+                    {{ item.material.stock|floatformat:'-2' }}
                     </td>
-                {% endif %}
-                <td class="text-center align-middle">{{ item.cod_repuesto }}</td>
-
-                <td class="text-center align-middle"
-                {% if not modo_dividir %}
                     
-                    {% if item.material.stock > item.material.pila %}
-                        style="background-color: #b7ffb7;"
+                    <td class="text-center align-middle">
+                        {% if pedido.estado == "CREADO" and not modo_dividir %}
+                            <div class="cantidad-control d-flex justify-content-center">
 
-                    {% elif item.material.stock > item.stock_critico %}
-                        style="background-color: #fff3b0;"
+                                <!-- RESTAR -->
 
-                    {% else %}
-                        style="background-color: #ffb3b3;"
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-danger btn-cantidad cantidad-menos btn-touch"
+                                    data-url="{% url 'pedidos:modificar_cantidad' item.id %}"
+                                    data-accion="restar"
+                                    title="Quitar unidad"
+                                    {% if item.cantidad <= 1 %}disabled{% endif %}>
+                                    <i class="bi bi-dash-lg fs-5"></i>
+                                </button>
 
-                    {% endif %}"
-                {% endif %}>
-                {{ item.material.stock|floatformat:'-2' }}
-                </td>
-                
-                <td class="text-center align-middle">
-                    {% if pedido.estado == "CREADO" and not modo_dividir %}
-                        <div class="cantidad-control d-flex justify-content-center">
+                                <!-- CANTIDAD -->
 
-                            <!-- RESTAR -->
+                                <input
+                                    type="text"
+                                    class="form-control text-center cantidad-input"
+                                    value="{{ item.cantidad|floatformat:'-2' }}"
+                                    data-detalle-id="{{ item.id }}"
+                                    data-max="999999"
+                                    style="max-width: 100px;"
+                                >
 
-                            <button
-                                type="button"
-                                class="btn btn-outline-danger btn-cantidad cantidad-menos btn-touch"
-                                data-url="{% url 'pedidos:modificar_cantidad' item.id %}"
-                                data-accion="restar"
-                                title="Quitar unidad"
-                                {% if item.cantidad <= 1 %}disabled{% endif %}>
-                                <i class="bi bi-dash-lg fs-5"></i>
-                            </button>
+                                <!-- SUMAR -->
 
-                            <!-- CANTIDAD -->
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-success btn-cantidad cantidad-mas btn-touch"
+                                    data-url="{% url 'pedidos:modificar_cantidad' item.id %}"
+                                    data-accion="sumar"
+                                    title="Agregar unidad">
+                                    <i class="bi bi-plus-lg fs-5"></i>
+                                </button>
 
-                            <input
-                                type="text"
-                                class="form-control text-center cantidad-input"
-                                value="{{ item.cantidad|floatformat:'-2' }}"
-                                data-detalle-id="{{ item.id }}"
-                                data-max="999999"
-                                style="max-width: 100px;"
-                            >
+                            </div>
+                        {% else %}
+                            {{ item.cantidad|floatformat:'-2' }}
+                        {% endif %}
+                    </td>
 
-                            <!-- SUMAR -->
 
-                            <button
-                                type="button"
-                                class="btn btn-outline-success btn-cantidad cantidad-mas btn-touch"
-                                data-url="{% url 'pedidos:modificar_cantidad' item.id %}"
-                                data-accion="sumar"
-                                title="Agregar unidad">
-                                <i class="bi bi-plus-lg fs-5"></i>
-                            </button>
+
+                    <td>
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <span>{{ item.material.valor }}</span>
+
+                            {% if pedido.estado == "CREADO" and not modo_dividir %}
+                                <button type="button" 
+                                    class="btn btn-sm btn-outline-secondary btn-eliminar btn-touch" 
+                                    data-url="{% url 'pedidos:modificar_cantidad' item.id %}" 
+                                    title="Eliminar item" > 
+                                    <i class="bi bi-trash fs-5"></i> 
+                                </button>
+                            {% endif %}
 
                         </div>
+
+                    </td>
+                    <td class="align-middle">{{ item.material.grupo_nombre }}</td>
+
+                    {% if item.info_equipo.equipo_nombre %}
+                        <td class="text-center" 
+                            style="background-color: {{ item.info_equipo.color_garantia }}"
+                            title="Fecha liberación: {{ item.info_equipo.fecha_liberacion|localtime|date:"d M Y H:i" }}">
+
+                        <div><strong>{{ item.info_equipo.equipo_nombre }}</strong></div>
                     {% else %}
-                        {{ item.cantidad|floatformat:'-2' }}
+                        <td class="text-center">
                     {% endif %}
-                </td>
-
-
-
-                <td>
-                    <div class="d-flex justify-content-between align-items-center">
-
-                        <span>{{ item.material.valor }}</span>
-
-                        {% if pedido.estado == "CREADO" and not modo_dividir %}
-                            <button type="button" 
-                                class="btn btn-sm btn-outline-secondary btn-eliminar btn-touch" 
-                                data-url="{% url 'pedidos:modificar_cantidad' item.id %}" 
-                                title="Eliminar item" > 
-                                <i class="bi bi-trash fs-5"></i> 
-                            </button>
-                        {% endif %}
-
-                    </div>
-
-                </td>
-                <td class="align-middle">{{ item.material.grupo_nombre }}</td>
-
-                {% if item.info_equipo.equipo_nombre %}
-                    <td class="text-center" 
-                        style="background-color: {{ item.info_equipo.color_garantia }}"
-                        title="Fecha liberación: {{ item.info_equipo.fecha_liberacion|localtime|date:"d M Y H:i" }}">
-
-                    <div><strong>{{ item.info_equipo.equipo_nombre }}</strong></div>
-                {% else %}
-                    <td class="text-center">
-                {% endif %}
-                
-                {% if item.info_equipo.numero_serie %}
-                    {{ item.info_equipo.numero_serie }}
-                {% else %}
-                    <span class="text-muted align-middle">—</span>
-                {% endif %}
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="{% if modo_dividir %}7{% else %}6{% endif %}" class="text-center">No hay ítems.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
+                    
+                    {% if item.info_equipo.numero_serie %}
+                        {{ item.info_equipo.numero_serie }}
+                    {% else %}
+                        <span class="text-muted align-middle">—</span>
+                    {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{% if modo_dividir %}7{% else %}6{% endif %}" class="text-center">No hay ítems.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>    
     <a href="{% url 'pedidos:listar' %}" class="btn btn-secondary mt-3 btn-touch" title="Volver al listado"><i class="bi bi-arrow-left fs-5"></i></a>
     {% if modo_dividir %}    
         <button id="btn-dividir-confirmar" class="btn btn-primary mt-3 btn-touch" title="Confirmar división"><i class="bi bi-scissors fs-5"></i></button>

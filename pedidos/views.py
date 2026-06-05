@@ -77,26 +77,42 @@ def editar_pedido(request, id):
         items_seleccionados = request.POST.getlist("item_dividir")
 
         if not items_seleccionados:
-            messages.error(request, "Debe seleccionar al menos un item para dividir.")
+            messages.error(
+                request,
+                "Debe seleccionar al menos un item para dividir."
+            )
             return redirect(f"/pedidos/{id}/editar?dividir=1")
 
         request.session["items_a_dividir"] = items_seleccionados
         return redirect("pedidos:confirmar_division", id=id)
+
+    # --------------------------------------------------
+    # Ordenamiento de ítems
+    # --------------------------------------------------
+
     items = pedido.detalles.all()
-    
+        
     for item in items:
-        #Mitad de la pila minima
+        # Mitad de la pila mínima
         item.stock_critico = item.material.pila / 2
-    puede_dividir = (items.count() > 1) and (pedido.estado == "CREADO")
-    
-    return render(request, "pedidos/editar_pedido.html", {
-        "pedido": pedido,
-        "modo_dividir": modo_dividir,
-        "items": items,
-        "puede_dividir": puede_dividir,
-        "estados_posibles": pedido.estados_disponibles(),
-        "todos_estados": [e[0] for e in Pedido.ESTADOS],
-    })
+
+    puede_dividir = (
+        items.count() > 1
+        and pedido.estado == "CREADO"
+    )
+
+    return render(
+        request,
+        "pedidos/editar_pedido.html",
+        {
+            "pedido": pedido,
+            "modo_dividir": modo_dividir,
+            "items": items,
+            "puede_dividir": puede_dividir,
+            "estados_posibles": pedido.estados_disponibles(),
+            "todos_estados": [e[0] for e in Pedido.ESTADOS],
+        }
+    )
 
 # ==========================================================
 # CONFIRMAR DIVISIÓN DEL PEDIDO
