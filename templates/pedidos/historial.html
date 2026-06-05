@@ -45,28 +45,28 @@
 
 <div class="table-responsive">
     <table class="table table-sm table-striped table-bordered table-hover">
-    <thead class="table-light">
+    <thead class="table-info">
         <tr>
-            {% include "includes/cabecera_ordenable.html" with campo="fecha" titulo="Fecha" %}
+            {% include "includes/cabecera_ordenable.html" with campo="fecha" titulo="Fecha" th_class="text-center" %}
             {% if not pedido_actual %}
-                {% include "includes/cabecera_ordenable.html" with campo="pedido" titulo="Pedido" %}
+                {% include "includes/cabecera_ordenable.html" with campo="pedido" titulo="Pedido" th_class="text-center" %}
             {% endif %}
-            {% include "includes/cabecera_ordenable.html" with campo="usuario" titulo="Usuario" %}
-            {% include "includes/cabecera_ordenable.html" with campo="estado_anterior" titulo="Estado anterior" %}
-            {% include "includes/cabecera_ordenable.html" with campo="estado_nuevo" titulo="Estado nuevo" %}
+            {% include "includes/cabecera_ordenable.html" with campo="usuario" titulo="Usuario" th_class="text-center" %}
+            {% include "includes/cabecera_ordenable.html" with campo="estado_anterior" titulo="Estado anterior" th_class="text-center" %}
+            {% include "includes/cabecera_ordenable.html" with campo="estado_nuevo" titulo="Estado nuevo" th_class="text-center" %}
             <th>Observación</th>
         </tr>
     </thead>
     <tbody>
         {% for h in historial %}
             <tr>
-                <td>{{ h.fecha|localtime|date:"d M Y H:i" }}</td>
+                <td class="text-center">{{ h.fecha|localtime|date:"d M Y H:i" }}</td>
 
                 {% if not pedido_actual %}
-                    <td>#{{ h.pedido.id }}</td>
+                    <td class="text-center">#{{ h.pedido.id }}</td>
                 {% endif %}
 
-                <td>
+                <td class="text-center">
                     {% if h.usuario.username == "sistema" %}
                         <span class="badge bg-secondary">Sistema</span>
                     {% else %}
@@ -74,8 +74,8 @@
                     {% endif %}
                 </td>
 
-                <td>{{ h.estado_anterior }}</td>
-                <td><strong>{{ h.estado_nuevo }}</strong></td>
+                <td class="text-center">{{ h.estado_anterior }}</td>
+                <td class="text-center"><strong>{{ h.estado_nuevo }}</strong></td>
                 <td>
                     {{ h.observacion }}
                     {% if h.pedido_relacionado %}

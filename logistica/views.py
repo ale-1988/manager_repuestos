@@ -15,18 +15,33 @@ from django.core.paginator import Paginator
 from pedidos.utils import es_movil
 
 from django.conf import settings
-# Create your views here.
+
+
 #*****************************
 #*****************************
 #*****************************
 def listar_preparacion(request):
 
+    orden = request.GET.get("orden", "fecha")
+    dir = request.GET.get("dir", "desc")
+
+    campos_ordenables = {
+        "id": "id",
+        "estado": "estado",
+        "fecha": "fecha",
+    }
+
+    campo_orden = campos_ordenables.get(orden, "fecha")
+
+    if dir == "desc":
+        campo_orden = f"-{campo_orden}"
+
     pedidos = Pedido.objects.filter(
-        estado__in=["PAGADO","PREPARANDO"]
-    ).order_by("-fecha", "-id")
-    
+        estado__in=["PAGADO", "PREPARANDO"]
+    ).order_by(campo_orden)
+
     cantidad_pedidos = pedidos.count()
-    
+
     for pedido in pedidos:
 
         total = 0
@@ -34,7 +49,7 @@ def listar_preparacion(request):
         items = 0
 
         for item in pedido.detalles.all():
-            items +=1
+            items += 1
             total += item.cantidad
             preparado += item.cantidad_preparada
 
@@ -43,24 +58,31 @@ def listar_preparacion(request):
         pedido.total_preparado = preparado
 
         if total > 0:
-            pedido.progreso_preparacion = int((preparado / total) * 100)
+            pedido.progreso_preparacion = int(
+                (preparado / total) * 100
+            )
         else:
-            pedido.progreso_preparacion = 0    
-    
-        
+            pedido.progreso_preparacion = 0
+
     # Paginación
-    items_por_pagina = settings.PAGINACION_MOVIL if es_movil(request) else settings.PAGINACION_PC
+    items_por_pagina = (
+        settings.PAGINACION_MOVIL
+        if es_movil(request)
+        else settings.PAGINACION_PC
+    )
+
     paginator = Paginator(pedidos, items_por_pagina)
     page_number = request.GET.get("page")
     pedidos = paginator.get_page(page_number)
 
-    
     return render(
         request,
         "logistica/listar_preparacion.html",
         {
             "pedidos": pedidos,
             "cantidad_pedidos": cantidad_pedidos,
+            "orden": orden,
+            "dir": dir,
         }
     )
     
@@ -302,6 +324,9 @@ def listar_entregas(request):
 
     filtro = request.GET.get("entregados", "ninguno")
 
+    orden = request.GET.get("orden", "fecha")
+    dir = request.GET.get("dir", "desc")
+
     hoy = timezone.now().date()
 
     # Siempre mostramos los pedidos activos
@@ -332,6 +357,15 @@ def listar_entregas(request):
             estado=Pedido.ENTREGADO
         )
 
+    # Campo de ordenamiento
+    if orden == "id":
+        campo_orden = "id"
+    else:
+        campo_orden = "fecha"
+
+    if dir == "desc":
+        campo_orden = f"-{campo_orden}"
+
     pedidos = (
         pedidos_activos | pedidos_entregados
     ).annotate(
@@ -349,8 +383,7 @@ def listar_entregas(request):
         )
     ).order_by(
         "prioridad",
-        "-fecha",
-        "-id",
+        campo_orden,
     )
 
     for pedido in pedidos:
@@ -361,7 +394,12 @@ def listar_entregas(request):
         pedido.fecha_entregado = fechas["entregado"]
 
     # Paginación
-    items_por_pagina = settings.PAGINACION_MOVIL if es_movil(request) else settings.PAGINACION_PC
+    items_por_pagina = (
+        settings.PAGINACION_MOVIL
+        if es_movil(request)
+        else settings.PAGINACION_PC
+    )
+
     paginator = Paginator(pedidos, items_por_pagina)
     page_number = request.GET.get("page")
     pedidos = paginator.get_page(page_number)
@@ -372,6 +410,7 @@ def listar_entregas(request):
         {
             "pedidos": pedidos,
             "filtro_entregados": filtro,
+            "orden": orden,
+            "dir": dir,
         }
     )
-    
