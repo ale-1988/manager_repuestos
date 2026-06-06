@@ -19,7 +19,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 # ==============================
-# LISTAR FACTURAS
+# Listar facturas
 # ==============================
 @login_required
 def listar_facturas(request):
@@ -100,28 +100,8 @@ def listar_facturas(request):
         },
     )
 
-
 # ==============================
-# CREAR FACTURA
-# ==============================
-# @login_required
-# def crear_factura(request):
-
-#     form = FacturaForm(request.POST or None)
-
-#     if request.method == "POST":
-#         if form.is_valid():
-#             factura = form.save()
-#             messages.success(request, "Factura creada correctamente.")
-#             return redirect("facturacion:detalle_factura", pk=factura.pk)
-
-#     return render(request, "facturacion/editar_factura.html", {
-#         "form": form
-#     })
-
-
-# ==============================
-# EDITAR FACTURA
+# Editar factura
 # ==============================
 @login_required
 def editar_factura(request, pk):
@@ -143,7 +123,7 @@ def editar_factura(request, pk):
 
 
 # ==============================
-# DETALLE FACTURA
+# Detalle factura
 # ==============================
 @login_required
 def detalle_factura(request, pk):
@@ -162,7 +142,7 @@ def detalle_factura(request, pk):
 
 
 # ==============================
-# REGISTRAR PAGO
+# Registrar Pago
 # ==============================
 @login_required
 def registrar_pago(request, pk):
@@ -213,7 +193,7 @@ def registrar_pago(request, pk):
     return redirect("facturacion:detalle_factura", pk=pk)
 
 # ==============================
-# EMITIR FACTURA
+# Emitir factura
 # ==============================
 @login_required
 def emitir_factura(request, pk):
@@ -229,9 +209,9 @@ def emitir_factura(request, pk):
 
     return redirect("facturacion:detalle_factura", pk=pk)
 
-# ==============================
-# ANULAR FACTURA
-# ==============================
+# ==============
+# Anular factura
+# ==============
 @login_required
 def anular_factura(request, pk):
 
@@ -245,9 +225,9 @@ def anular_factura(request, pk):
 
     return redirect("facturacion:detalle_factura", pk=pk)
 
-# ==============================
-# CREAR NOTA DE CREDITO DESDE FACTURA
-# ==============================
+# ===================================
+# Crear nota de credito desde factura
+# ===================================
 @login_required
 def crear_nota_credito(request, pk):
 
@@ -272,25 +252,9 @@ def crear_nota_credito(request, pk):
     messages.success(request, "Nota de crédito creada en BORRADOR.")
     return redirect("facturacion:editar_factura", pk=nc.pk)
 
-# ==============================
-# GENERAR PDF FACTURA
-# ==============================
-@login_required
-def generar_pdf_factura(request, pk):
-
-    factura = get_object_or_404(Factura, pk=pk)
-
-    pdf_bytes = build_pdf_factura(factura)
-
-    response = HttpResponse(pdf_bytes, content_type="application/pdf")
-    response["Content-Disposition"] = (
-        f'inline; filename="factura_{factura.numero}.pdf"'
-    )
-
-    return response
 
 # ==============================
-# ENVIAR PDF FACTURA X EMAIL
+# Enviar factura por email
 # ==============================
 @login_required
 def enviar_factura_email(request, pk):
@@ -335,7 +299,9 @@ def enviar_factura_email(request, pk):
         
     return redirect("facturacion:detalle_factura", pk=pk)
 
-
+# ==============================
+# Aplicar credito
+# ==============================
 @login_required
 def aplicar_credito(request, pk):
 
@@ -392,7 +358,9 @@ def aplicar_credito(request, pk):
         messages.warning(request, "No hay créditos disponibles para aplicar.")
 
 
-
+# ==============================
+# Generar pdf factura
+# ==============================
 @login_required
 def generar_pdf_factura(request, pk):
 

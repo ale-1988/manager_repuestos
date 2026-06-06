@@ -30,9 +30,9 @@ from pedidos.utils import es_movil
 from django.utils import timezone
 from datetime import timedelta
 
-# ==========================================================
-# NUEVO PEDIDO — BUSCADOR DE CLIENTE (AJAX + LINKS)
-# ==========================================================
+# ==================================
+# Nuevo pedido — Buscador de cliente
+# ==================================
 @login_required
 def nuevo_pedido_cliente(request):
     """
@@ -64,9 +64,9 @@ def nuevo_pedido_cliente(request):
 
 
 
-# ==========================================================
-# EDITAR PEDIDO
-# ==========================================================
+# =============
+# Editar pedido
+# =============
 @login_required
 def editar_pedido(request, id):
     pedido = get_object_or_404(Pedido, id=id)
@@ -114,9 +114,9 @@ def editar_pedido(request, id):
         }
     )
 
-# ==========================================================
-# CONFIRMAR DIVISIÓN DEL PEDIDO
-# ==========================================================
+# =============================
+# Confirmar división del pedido
+# =============================
 @login_required
 def confirmar_division(request, id):
     pedido = get_object_or_404(Pedido, id=id)
@@ -200,9 +200,9 @@ def confirmar_division(request, id):
     })
 
 
-# ==========================================================
-# LISTAR PEDIDOS
-# ==========================================================
+# ==============
+# Listar pedidos
+# ==============
 @login_required
 def listar_pedidos(request):
 
@@ -264,9 +264,9 @@ def listar_pedidos(request):
         }
     )
 
-# ==========================================================
-# CANCELAR PEDIDO
-# ==========================================================
+# ===============
+# Cancelar pedido
+# ===============
 @login_required
 def cancelar_pedido(request, id):
     """
@@ -294,9 +294,9 @@ def cancelar_pedido(request, id):
         messages.error(request,str(e))
     return redirect("pedidos:listar")            
 
-# ==========================================================
-# ACTUALIZAR ESTADO
-# ==========================================================
+# =================
+# Actualizar estado
+# =================
 @login_required
 def actualizar_estado(request, id):
     """
@@ -344,12 +344,16 @@ def actualizar_estado(request, id):
 
     return redirect("pedidos:editar", id)
 
-# ============================================================
-#   AGREGAR ITEMS — Pantalla principal
-# ============================================================
+# ===========================
+#   Cambio de estado a CREADO
+# ===========================
+@login_required
 def _pedido_editable(pedido: Pedido) -> bool:
     return pedido.estado == "CREADO"
 
+# ====================================
+#   Agregar items - pantalla principal
+# ====================================
 @login_required
 def agregar_items(request, pedido_id):
     pedido = get_object_or_404(Pedido, id=pedido_id)
@@ -365,10 +369,9 @@ def agregar_items(request, pedido_id):
     })
 
 
-# ============================================================
-# MODIFICAR CANTIDAD DE ITEM
-# ============================================================
-
+# ====================
+# Modificar cantidades
+# ====================
 @login_required
 @require_POST
 def modificar_cantidad(request, detalle_id):
@@ -446,6 +449,9 @@ def modificar_cantidad(request, detalle_id):
     return redirect("pedidos:editar", pedido.id)
 
 
+#==============
+# Buscar equipo
+#==============
 @login_required
 def buscar_equipo(request):
     """
@@ -466,6 +472,9 @@ def buscar_equipo(request):
         "texto": texto,
     })
 
+#=================
+# Historial global
+#=================
 @login_required
 def historial_global(request, pedido_id=None):
 
@@ -537,7 +546,10 @@ def historial_global(request, pedido_id=None):
         "orden": orden,
         "dir": direccion,
     })
-    
+
+#================
+# Facturar pedido
+#================
 @login_required
 def facturar_pedido(request, id):
 
@@ -552,7 +564,11 @@ def facturar_pedido(request, id):
     except ValidationError as e:
         messages.error(request, str(e))
         return redirect("pedidos:editar", id=pedido.id)
-    
+
+
+#=======================
+# Comprobante preliminar
+#=======================
 @login_required
 def comprobante_preliminar(request, id):
 
@@ -591,8 +607,11 @@ def comprobante_preliminar(request, id):
             "total": total,
             "fecha": timezone.now(),
         }
-    )    
-
+    )
+    
+#=============================
+# Enviar comprobante por email
+#=============================
 @login_required
 def enviar_comprobante_email(request, id):
     
@@ -656,6 +675,9 @@ def enviar_comprobante_email(request, id):
         id=pedido.id
     )
 
+#=======================
+# Generar pdf preliminar
+#=======================
 @login_required
 def generar_pdf_preliminar(request, id):
 

@@ -18,6 +18,9 @@ from django.db.models import Q
 from .models import Material, Grupos
 from django.shortcuts import render
 
+#================
+# Busqueda manual
+#================
 @login_required
 def buscar_manual(request):
     """
@@ -99,7 +102,9 @@ def buscar_manual(request):
         contexto
     )
 
-
+#=========================
+# Busqueda repuesto por id
+#=========================
 @login_required
 def repuesto_por_id(request, id_mate):
     try:
@@ -120,7 +125,9 @@ def repuesto_por_id(request, id_mate):
     })
 
 
-
+#=============================
+# api_grupos (acceso a remota)
+#=============================
 @login_required
 def api_grupos(request):
     grupos = (

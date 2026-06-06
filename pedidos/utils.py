@@ -45,7 +45,7 @@ def build_pdf_preliminar(pedido):
             [
                 logo,
                 Paragraph(
-                    f"COMPROBANTE PRELIMINAR - Pedido #{pedido.id}",
+                    f"COMPROBANTE PRELIMINAR - Pedido Nº{pedido.id}",
                     styles["Heading1"]
                 )
             ]
@@ -61,7 +61,7 @@ def build_pdf_preliminar(pedido):
 
         elements.append(
             Paragraph(
-                f"COMPROBANTE PRELIMINAR - Pedido #{pedido.id}",
+                f"COMPROBANTE PRELIMINAR - Pedido Nº{pedido.id}",
                 styles["Heading1"]
             )
         )

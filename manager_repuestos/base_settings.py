@@ -233,7 +233,7 @@ EMPRESA_LOGO = BASE_DIR / "static" / "images" / "favicon.png"
 # ============================================================
 # LIMITES PAGINADORES
 # ============================================================
-PAGINACION_PC = 25
+PAGINACION_PC = 6
 PAGINACION_MOVIL = 10
 
 

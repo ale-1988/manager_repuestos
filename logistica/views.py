@@ -15,11 +15,12 @@ from django.core.paginator import Paginator
 from pedidos.utils import es_movil
 
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 
-
 #*****************************
 #*****************************
 #*****************************
+@login_required
 def listar_preparacion(request):
 
     orden = request.GET.get("orden", "fecha")
@@ -89,6 +90,7 @@ def listar_preparacion(request):
 #*****************************
 #*****************************
 #*****************************
+@login_required
 def detalle_preparacion(request, id):
 
     pedido = get_object_or_404(Pedido, pk=id)
@@ -124,6 +126,7 @@ def detalle_preparacion(request, id):
 #*****************************
 #*****************************
 #*****************************
+@login_required
 def comenzar_preparacion(request, id):
 
     pedido = get_object_or_404(Pedido, pk=id)
@@ -145,6 +148,7 @@ def comenzar_preparacion(request, id):
 #*****************************
 #*****************************
 #*****************************
+@login_required
 def consolidar_pedido(request, id):
 
     pedido = get_object_or_404(Pedido, pk=id)
@@ -169,6 +173,7 @@ def consolidar_pedido(request, id):
 #*****************************
 #*****************************
 #*****************************
+@login_required
 def enviar_pedido(request, id):
 
     pedido = get_object_or_404(Pedido, pk=id)
@@ -190,6 +195,7 @@ def enviar_pedido(request, id):
 #*****************************
 #*****************************
 #*****************************
+@login_required
 def confirmar_entrega(request, id):
 
     pedido = get_object_or_404(Pedido, pk=id)
@@ -211,6 +217,7 @@ def confirmar_entrega(request, id):
 #*****************************
 #*****************************
 #*****************************
+@login_required
 def guardar_preparacion(request, id):
 
     pedido = get_object_or_404(Pedido, pk=id)
@@ -233,6 +240,7 @@ def guardar_preparacion(request, id):
 #*****************************
 #*****************************
 #*****************************
+@login_required
 def actualizar_preparado(request, id):
 
     item = get_object_or_404(DetallePedido, pk=id)
@@ -254,6 +262,7 @@ def actualizar_preparado(request, id):
 #*****************************
 #*****************************
 #*****************************
+@login_required
 def detalle_entregas(request, id):
 
     pedido = get_object_or_404(Pedido, pk=id)
@@ -285,6 +294,7 @@ def detalle_entregas(request, id):
 #*****************************
 #*****************************
 #*****************************
+@login_required
 def enviar_pedido(request, id):
     pedido = get_object_or_404(Pedido, pk=id)
     if not pedido.cod_transportista:
@@ -305,6 +315,7 @@ def enviar_pedido(request, id):
 #*****************************
 #*****************************
 #*****************************
+@login_required
 def confirmar_entrega(request, id):
 
     pedido = get_object_or_404(Pedido, pk=id)
@@ -320,6 +331,7 @@ def confirmar_entrega(request, id):
 #*****************************
 #*****************************
 #*****************************
+@login_required
 def listar_entregas(request):
 
     filtro = request.GET.get("entregados", "ninguno")
