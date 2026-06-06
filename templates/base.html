@@ -28,9 +28,9 @@
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
 
-        <a class="navbar-brand d-flex align-items-center" href="{% url 'sesiones:inicio' %}">
-        <img src="{% static 'images/favicon.png' %}" alt="Logo" height="30" class="me-2">
-            Manager de Repuestos
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'pedidos:listar' %}">
+        <img src="{% static 'images/favicon.png' %}" alt="Logo" height="30" class="me-2"
+            title="Manager de Repuestos">
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -141,8 +141,8 @@
 
 <div class="toast-container position-fixed top-0 end-0 p-3">
     <div id="toastExito"
-         class="toast toast-cec"
-         role="alert">
+        class="toast toast-cec"
+        role="alert">
         <div class="toast-body" id="toastTexto">
         </div>
     </div>
