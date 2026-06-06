@@ -17,3 +17,5 @@ if ENTORNO == "PROD":
 else:
     from .dev_settings import *
 
+#print("ENTORNO=",ENTORNO)
+#print("DEBUG=",DEBUG)

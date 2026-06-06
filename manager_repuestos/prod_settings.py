@@ -35,8 +35,8 @@ CSRF_TRUSTED_ORIGINS = [
 # ==================================================
 # Cabeceras de seguridad
 # ==================================================
-SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = "DENY"
+#SECURE_CONTENT_TYPE_NOSNIFF = True
+#X_FRAME_OPTIONS = "DENY"
 
 # ==================================================
 # Si todo funciona por https
@@ -53,4 +53,23 @@ SECURE_REFERRER_POLICY = "same-origin"
 # ==================================================
 # Logging
 # ==================================================
-# LOGGING = 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "handlers": {
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": "/tmp/django.log",
+        },
+    },
+
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+} 
