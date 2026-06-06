@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-6">
+
+            <div class="card shadow-sm text-center border-danger">
+
+                <div class="card-body p-5">
+
+                    <i class="bi bi-exclamation-triangle-fill display-1 text-danger"></i>
+
+                    <h1 class="mt-3">
+                        Error interno del sistema
+                    </h1>
+
+                    <p class="lead">
+                        Se produjo un error inesperado.
+                    </p>
+
+                    <p class="text-muted">
+                        Intente nuevamente dentro de unos minutos.
+                    </p>
+
+                    <hr>
+
+                    <a href="{% url 'pedidos:listar' %}"
+                       class="btn btn-primary">
+                        <i class="bi bi-house-door me-2"></i>
+                        Volver al inicio
+                    </a>
+
+                </div>
+
+                <div class="card-footer text-muted">
+                    Manager de Repuestos v{{ APP_VERSION }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
