@@ -1,0 +1,236 @@
+.
+├── arbol
+├── clientes
+│   ├── admin.py
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── __pycache__
+│   │   ├── admin.cpython-314.pyc
+│   │   ├── apps.cpython-314.pyc
+│   │   ├── __init__.cpython-314.pyc
+│   │   ├── models.cpython-314.pyc
+│   │   ├── urls.cpython-314.pyc
+│   │   └── views.cpython-314.pyc
+│   ├── README.md
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── core
+│   ├── admin.py
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── README.md
+│   ├── templatetags
+│   │   ├── __init__.py
+│   │   └── querystring.py
+│   ├── tests.py
+│   └── views.py
+├── facturacion
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   ├── 0002_alter_factura_options_factura_factura_referencia_and_more.py
+│   │   ├── 0003_alter_factura_numero.py
+│   │   ├── 0004_remove_factura_cliente_factura_cod_cliente.py
+│   │   ├── 0005_aplicacioncredito.py
+│   │   ├── 0006_factura_consumida_alter_factura_factura_referencia_and_more.py
+│   │   ├── 0007_alter_factura_estado.py
+│   │   ├── 0008_remove_factura_consumida.py
+│   │   ├── 0009_factura_fecha_ultimo_email.py
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── README.md
+│   ├── tests.py
+│   ├── urls.py
+│   ├── utils.py
+│   └── views.py
+├── logistica
+│   ├── admin.py
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── README.md
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── manage.py
+├── manager_repuestos
+│   ├── asgi.py
+│   ├── base_settings.py
+│   ├── context_processors.py
+│   ├── dev_settings.py
+│   ├── __init__.py
+│   ├── prod_settings.py
+│   ├── settings.py
+│   ├── urls.py
+│   ├── views.py
+│   └── wsgi.py
+├── pedidos
+│   ├── admin.py
+│   ├── api.py
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   ├── 0002_initial.py
+│   │   ├── 0003_detallepedido_numero_serie.py
+│   │   ├── 0004_alter_detallepedido_numero_serie.py
+│   │   ├── 0005_alter_detallepedido_cantidad_and_more.py
+│   │   ├── 0006_historialestadopedido.py
+│   │   ├── 0007_detallepedido_preparado.py
+│   │   ├── 0008_remove_detallepedido_preparado_and_more.py
+│   │   ├── 0009_pedido_fecha_envio.py
+│   │   ├── 0010_pedido_fecha_entrega.py
+│   │   ├── 0011_historialestadopedido_pedido_relacionado.py
+│   │   ├── 0012_pedido_fecha_ultimo_email.py
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── README.md
+│   ├── signals.py
+│   ├── test_pedidos.py
+│   ├── urls.py
+│   ├── utils.py
+│   └── views.py
+├── pytest.ini
+├── README.md
+├── reportes
+│   ├── admin.py
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── models.py
+│   ├── README.md
+│   ├── tests.py
+│   └── views.py
+├── repuestos
+│   ├── admin.py
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── README.md
+│   ├── templatetags
+│   │   ├── dictools.py
+│   │   └── __init__.py
+│   ├── tests.py
+│   ├── urls.py
+│   ├── utils.py
+│   └── views.py
+├── requirements.txt
+├── sesiones
+│   ├── admin.py
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── README.md
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── static
+│   ├── css
+│   │   ├── base.css
+│   │   ├── comprobante_preliminar.css
+│   │   ├── comun.css
+│   │   ├── lista_materiales_equipo.css
+│   │   ├── login.css
+│   │   └── repuestos.css
+│   ├── images
+│   │   ├── favicon.ico
+│   │   └── favicon.png
+│   ├── js
+│   │   ├── base.js
+│   │   ├── cantidad_control.js
+│   │   ├── chequeo_email.js
+│   │   ├── editar_pedido.js
+│   │   ├── generar_pdf.js
+│   │   ├── pedidos_agregar_item.js
+│   │   ├── repuestos_busqueda.js
+│   │   └── usuarios.js
+│   └── README.md
+├── stock
+│   ├── admin.py
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── migrations
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── README.md
+│   ├── tests.py
+│   └── views.py
+├── templates
+│   ├── 404.html
+│   ├── 500.html
+│   ├── base.html
+│   ├── facturacion
+│   │   ├── detalle_factura.html
+│   │   ├── editar_factura.html
+│   │   └── listar_facturas.html
+│   ├── includes
+│   │   ├── cabecera_ordenable.html
+│   │   └── pie_paginacion.html
+│   ├── inicio.html
+│   ├── logistica
+│   │   ├── detalle_entregas.html
+│   │   ├── detalle_preparacion.html
+│   │   ├── listar_entregas.html
+│   │   └── listar_preparacion.html
+│   ├── pedidos
+│   │   ├── agregar_items.html
+│   │   ├── comprobante_preliminar.html
+│   │   ├── confirmar_division.html
+│   │   ├── editar_pedido.html
+│   │   ├── historial.html
+│   │   ├── listar_pedidos.html
+│   │   └── nuevo_pedido_cliente.html
+│   ├── README.md
+│   ├── registration
+│   │   ├── password_reset_complete.html
+│   │   ├── password_reset_confirm.html
+│   │   ├── password_reset_done.html
+│   │   ├── password_reset_email.html
+│   │   └── password_reset_form.html
+│   ├── repuestos
+│   │   ├── buscar.html
+│   │   ├── buscar_manual.html
+│   │   ├── lista_materiales_equipo.html
+│   │   ├── lista_materiales.html
+│   │   ├── partials
+│   │   │   └── resultados_busqueda.html
+│   │   ├── repuesto_por_id.html
+│   │   └── seleccionar_equipo.html
+│   ├── sesiones
+│   │   ├── bloqueado.html
+│   │   └── login.html
+│   └── usuarios
+│       ├── form.html
+│       └── listar.html
+└── usuarios
+    ├── admin.py
+    ├── apps.py
+    ├── forms.py
+    ├── __init__.py
+    ├── migrations
+    │   ├── 0001_initial.py
+    │   └── __init__.py
+    ├── models.py
+    ├── README.md
+    ├── services.py
+    ├── tests.py
+    ├── urls.py
+    └── views.py
