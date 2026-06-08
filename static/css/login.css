@@ -6,12 +6,14 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
+    padding: 15px;
 }
 
 .login-card {
     background: white;
     padding: 30px;
-    width: 320px;
+    width: 90%;
+    max-width: min(90vw,300px);
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0,0,0,0.2);
 }
@@ -24,7 +26,7 @@ h2 {
 input[type=text],
 input[type=password] {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     margin: 6px 0 12px;
     border: 1px solid #bbb;
     border-radius: 4px;

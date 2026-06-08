@@ -1,6 +1,6 @@
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost','192.168.100.20','127.0.0.1']
+ALLOWED_HOSTS = ['localhost','192.168.100.20','192.168.1.50','127.0.0.1']
 
 # ==================================================
 # Limites de sesion
