@@ -67,15 +67,15 @@
     <table class="table table-hover table-bordered table-sm align-middle">
         <thead class="table-info">
             <tr>
-                {% include "includes/cabecera_ordenable.html" with campo="numero" titulo="Nº" th_class="text-center" %}
-                {% include "includes/cabecera_ordenable.html" with campo="tipo" titulo="Tipo" th_class="text-center" %}
-                <th class="text-center">Pedido</th>
-                {% include "includes/cabecera_ordenable.html" with campo="cliente" titulo="Cliente" %}
-                {% include "includes/cabecera_ordenable.html" with campo="estado" titulo="Estado" th_class="text-center" %}
-                <th class="text-end">Total</th>
-                <th class="text-end">Pagado</th>
-                <th class="text-end">Saldo</th>
-                {% include "includes/cabecera_ordenable.html" with campo="fecha" titulo="Fecha" th_class="text-center" %}
+                {% include "includes/cabecera_ordenable.html" with campo="numero" titulo="Nº" th_class="text-center align-middle" %}
+                {% include "includes/cabecera_ordenable.html" with campo="tipo" titulo="Tipo" th_class="text-center align-middle" %}
+                <th class="text-center align-middle">Pedido</th>
+                {% include "includes/cabecera_ordenable.html" with campo="cliente" titulo="Cliente" th_class="align-middle" %}
+                {% include "includes/cabecera_ordenable.html" with campo="estado" titulo="Estado" th_class="text-center align-middle" %}
+                <th class="text-end align-middle">Total</th>
+                <th class="text-end align-middle">Pagado</th>
+                <th class="text-end align-middle">Saldo</th>
+                {% include "includes/cabecera_ordenable.html" with campo="fecha" titulo="Fecha" th_class="text-center align-middle" %}
             </tr>
         </thead>
         <tbody>

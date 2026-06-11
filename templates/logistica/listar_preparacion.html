@@ -10,13 +10,13 @@ Cantidad de pedidos: {{ cantidad_pedidos }}
     <table class="table table-sm table-striped table-bordered table-hover">
         <thead class="table-info">
             <tr>
-                {% include "includes/cabecera_ordenable.html" with campo="id" titulo="Nº" th_class="text-center" %}
-                <th>Cliente</th>
-                <th class="text-center">Preparación</th>
-                <th class="text-center">Items</th>
-                <th class="text-center">Cant.</th>
-                {% include "includes/cabecera_ordenable.html" with campo="estado" titulo="Estado" th_class="text-center" %}
-                {% include "includes/cabecera_ordenable.html" with campo="fecha" titulo="Fecha" th_class="text-center" %}
+                {% include "includes/cabecera_ordenable.html" with campo="id" titulo="Nº" th_class="text-center align-middle" %}
+                <th class="align-middle">Cliente</th>
+                <th class="text-center align-middle">Preparación</th>
+                <th class="text-center align-middle">Items</th>
+                <th class="text-center align-middle">Cant.</th>
+                {% include "includes/cabecera_ordenable.html" with campo="estado" titulo="Estado" th_class="text-center align-middle" %}
+                {% include "includes/cabecera_ordenable.html" with campo="fecha" titulo="Fecha" th_class="text-center align-middle" %}
                 <th></th>
             </tr>
         </thead>
@@ -26,11 +26,11 @@ Cantidad de pedidos: {{ cantidad_pedidos }}
 
             <tr>
 
-                <td class="text-center">{{ pedido.id }}</td>
+                <td class="text-center align-middle">{{ pedido.id }}</td>
 
-                <td>{{ pedido.cliente }}</td>
+                <td class="align-middle">{{ pedido.cliente }}</td>
 
-                <td style="width:220px" class="text-center">
+                <td style="width:220px" class="text-center align-middle">
                     <div class="progress">
                         <div class="progress-bar" role="progressbar" style="width: {{ pedido.progreso_preparacion }}%;">
                             {{ pedido.progreso_preparacion }}%
@@ -38,10 +38,10 @@ Cantidad de pedidos: {{ cantidad_pedidos }}
                     </div>
                 </td>
 
-                <td class="text-center">{{ pedido.total_items }}</td>
-                <td class="text-center">{{ pedido.total_cantidad|floatformat:"-2" }}</td>
-                <td class="text-center">{{ pedido.estado }}</td>
-                <td class="text-center">{{ pedido.fecha|localtime|date:"d M Y H:i" }}</td>
+                <td class="text-center align-middle">{{ pedido.total_items }}</td>
+                <td class="text-center align-middle">{{ pedido.total_cantidad|floatformat:"-2" }}</td>
+                <td class="text-center align-middle">{{ pedido.estado }}</td>
+                <td class="text-center align-middle">{{ pedido.fecha|localtime|date:"d M Y H:i" }}</td>
                 <td class="text-end">
 
                     <a class="btn btn-sm btn-primary btn-touch"

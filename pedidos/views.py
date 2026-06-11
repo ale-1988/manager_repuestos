@@ -347,7 +347,6 @@ def actualizar_estado(request, id):
 # ===========================
 #   Cambio de estado a CREADO
 # ===========================
-@login_required
 def _pedido_editable(pedido: Pedido) -> bool:
     return pedido.estado == "CREADO"
 

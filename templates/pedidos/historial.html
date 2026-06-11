@@ -47,14 +47,14 @@
     <table class="table table-sm table-striped table-bordered table-hover">
     <thead class="table-info">
         <tr>
-            {% include "includes/cabecera_ordenable.html" with campo="fecha" titulo="Fecha" th_class="text-center" %}
+            {% include "includes/cabecera_ordenable.html" with campo="fecha" titulo="Fecha" th_class="text-center align-middle" %}
             {% if not pedido_actual %}
-                {% include "includes/cabecera_ordenable.html" with campo="pedido" titulo="Pedido" th_class="text-center" %}
+                {% include "includes/cabecera_ordenable.html" with campo="pedido" titulo="Pedido" th_class="text-center align-middle" %}
             {% endif %}
-            {% include "includes/cabecera_ordenable.html" with campo="usuario" titulo="Usuario" th_class="text-center" %}
-            {% include "includes/cabecera_ordenable.html" with campo="estado_anterior" titulo="Estado anterior" th_class="text-center" %}
-            {% include "includes/cabecera_ordenable.html" with campo="estado_nuevo" titulo="Estado nuevo" th_class="text-center" %}
-            <th>Observación</th>
+            {% include "includes/cabecera_ordenable.html" with campo="usuario" titulo="Usuario" th_class="text-center align-middle" %}
+            {% include "includes/cabecera_ordenable.html" with campo="estado_anterior" titulo="Estado anterior" th_class="text-center align-middle" %}
+            {% include "includes/cabecera_ordenable.html" with campo="estado_nuevo" titulo="Estado nuevo" th_class="text-center align-middle" %}
+            <th class="align-middle">Observación</th>
         </tr>
     </thead>
     <tbody>

@@ -270,14 +270,14 @@
             <thead class="table-info">
                 <tr>
                     {% if modo_dividir %}
-                        <th class="text-center">Selec.</th>
+                        <th class="text-center align-middle">Selec.</th>
                     {% endif %}
-                    <th class="text-center">ID</th>
-                    <th class="text-center">En Stock</th>
-                    <th class="text-center">Cant</th>
-                    <th>Nombre</th>
-                    <th>Grupo</th>
-                    <th class="text-center">NS</th>
+                    <th class="text-center align-middle">ID</th>
+                    <th class="text-center align-middle">En Stock</th>
+                    <th class="text-center align-middle">Cant</th>
+                    <th class="align-middle">Nombre</th>
+                    <th class="align-middle">Grupo</th>
+                    <th class="text-center align-middle">NS</th>
                 </tr>
             </thead>
             <tbody>
@@ -353,7 +353,7 @@
 
 
 
-                    <td>
+                    <td class="align-middle">
                         <div class="d-flex justify-content-between align-items-center">
 
                             <span>{{ item.material.valor }}</span>
@@ -373,13 +373,13 @@
                     <td class="align-middle">{{ item.material.grupo_nombre }}</td>
 
                     {% if item.info_equipo.equipo_nombre %}
-                        <td class="text-center" 
+                        <td class="text-center align-middle" 
                             style="background-color: {{ item.info_equipo.color_garantia }}"
                             title="Fecha liberación: {{ item.info_equipo.fecha_liberacion|localtime|date:"d M Y H:i" }}">
 
                         <div><strong>{{ item.info_equipo.equipo_nombre }}</strong></div>
                     {% else %}
-                        <td class="text-center">
+                        <td class="text-center align-middle">
                     {% endif %}
                     
                     {% if item.info_equipo.numero_serie %}

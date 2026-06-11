@@ -37,13 +37,13 @@
 
 <tr>
 
-<td class="text-center">{{ item.repuesto.id_mate}}</td>
-<td class="text-center">{{ item.repuesto.lugar}}</td>
+<td class="text-center align-middle">{{ item.repuesto.id_mate}}</td>
+<td class="text-center align-middle">{{ item.repuesto.lugar}}</td>
 <td>{{item.repuesto.valor}}</td>
 
-<td class="text-center">{{ item.cantidad|floatformat:'-2' }}</td>
+<td class="text-center align-middle">{{ item.cantidad|floatformat:'-2' }}</td>
 
-<td class="text-center">
+<td class="text-center align-middle">
 {% if pedido.estado == "PREPARANDO" %}
     <form method="post"
         action="{% url 'logistica:actualizar_preparado' item.id %}"
