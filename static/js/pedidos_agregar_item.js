@@ -457,7 +457,7 @@ function renderListaMateriales(materiales, titulo){
                     class="form-control text-center qty"
                     data-id="${m.id_mate}">            
             </td>
-            <td class="text-center">
+            <td class="text-center aligh-middle">
                 <button
                     type="button"
                     class="btn btn-success btn-sm agregar-link btn-touch"
