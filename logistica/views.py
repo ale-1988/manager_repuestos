@@ -4,8 +4,9 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.db.models import OuterRef, Subquery, Case, When, Value, IntegerField
 
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from pedidos.models import Pedido, DetallePedido, HistorialEstadoPedido
+from pedidos.utils import fmt_decimal
 from repuestos.models import Repuesto
 from usuarios.models import Usuario
 
@@ -229,13 +230,27 @@ def guardar_preparacion(request, id):
             campo = f"prep_{item.id}"
 
             if campo in request.POST:
+
                 valor = request.POST[campo]
 
-                if valor:
-                    item.cantidad_preparada = Decimal(valor)
-                    item.save(update_fields=["cantidad_preparada"])
+                if not valor:
+                    continue
+                try:
+                    item.actualizar_preparacion(valor)
+                except ValidationError as e:
 
-    return redirect("logistica:detalle_preparacion", id=pedido.id)
+                    messages.error(request,str(e))
+                    continue
+
+    return redirect(
+        "logistica:detalle_preparacion",
+        id=pedido.id
+    )
+
+    return redirect(
+        "logistica:detalle_preparacion",
+        id=pedido.id
+    )
 
 #*****************************
 #*****************************
@@ -246,15 +261,20 @@ def actualizar_preparado(request, id):
     item = get_object_or_404(DetallePedido, pk=id)
 
     if request.method == "POST":
-
         valor = request.POST.get("cantidad_preparada")
-
         if valor:
-            valor = valor.replace(",", ".")
-            item.cantidad_preparada = Decimal(valor)
-            item.save(update_fields=["cantidad_preparada"])
+            try:
+                item.actualizar_preparacion(valor)
+            except ValidationError as e:
+                messages.error(
+                    request,
+                    str(e)
+                )
 
-    return redirect("logistica:detalle_preparacion", id=item.cod_pedido.id)
+    return redirect(
+        "logistica:detalle_preparacion",
+        id=item.cod_pedido.id
+    )
 
 
 

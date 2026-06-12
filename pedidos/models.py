@@ -5,7 +5,7 @@ from django.core.validators import MinValueValidator
 from django.conf import settings
 from django.utils import timezone
 
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from usuarios.models import Usuario
 from repuestos.models import Material
 from clientes.models import Clientes
@@ -388,6 +388,33 @@ class DetallePedido(models.Model):
 
         super().delete(*args, **kwargs)
 
+# Valido entradas
+    def validar_preparacion(self, cantidad):
+        try:
+            cantidad = Decimal(str(cantidad).replace(",", "."))
+
+        except (InvalidOperation, TypeError):
+            raise ValidationError(
+                "Debe ingresar un número válido."
+            )
+
+        if cantidad < 0:
+            raise ValidationError(
+                "La cantidad preparada no puede ser negativa."
+            )
+
+        if cantidad > self.cantidad:
+            raise ValidationError(
+                "La cantidad preparada supera la solicitada."
+            )
+
+        return cantidad
+    
+    def actualizar_preparacion(self, cantidad):
+        cantidad = self.validar_preparacion(cantidad)
+        self.cantidad_preparada = cantidad
+        self.save(update_fields=["cantidad_preparada"])
+    
     class Meta:
         constraints = [
             models.UniqueConstraint(

@@ -18,106 +18,106 @@
 
 <h4>Items del pedido</h4>
 
-<table class="table table-striped">
 
-<thead class="table-light">
-<tr>
-    <th class="text-center">ID</th>
-    <th class="text-center">Lugar</th>
-    <th>Repuesto</th>
-    <th class="text-center">Cantidad</th>
-    <th class="text-center">Preparado</th>
-    <th class="text-center">Estado</th>
-</tr>
-</thead>
+<div class="table-responsive">
+    <table class="table table-sm table-striped table-bordered table-hover">
+        <thead class="table-info">
+        <tr>
+            <th class="text-center">ID</th>
+            <th class="text-center">Lugar</th>
+            <th class="align-middle">Repuesto</th>
+            <th class="text-center">Cantidad</th>
+            <th class="text-center">Preparado</th>
+            <th class="text-center">Estado</th>
+        </tr>
+        </thead>
 
-<tbody>
+        <tbody>
 
-{% for item in detalles %}
+        {% for item in detalles %}
 
-<tr>
+        <tr>
 
-<td class="text-center align-middle">{{ item.repuesto.id_mate}}</td>
-<td class="text-center align-middle">{{ item.repuesto.lugar}}</td>
-<td>{{item.repuesto.valor}}</td>
+        <td class="text-center align-middle">{{ item.repuesto.id_mate}}</td>
+        <td class="text-center align-middle">{{ item.repuesto.lugar}}</td>
+        <td class="align-middle">{{item.repuesto.valor}}</td>
 
-<td class="text-center align-middle">{{ item.cantidad|floatformat:'-2' }}</td>
+        <td class="text-center align-middle">{{ item.cantidad|floatformat:'-2' }}</td>
 
-<td class="text-center align-middle">
-{% if pedido.estado == "PREPARANDO" %}
-    <form method="post"
-        action="{% url 'logistica:actualizar_preparado' item.id %}"
-        style="display:flex; gap:5px; justify-content:center;">
+        <td class="text-center align-middle">
+        {% if pedido.estado == "PREPARANDO" %}
+            <form method="post"
+                action="{% url 'logistica:actualizar_preparado' item.id %}"
+                style="display:flex; gap:5px; justify-content:center;">
 
-        {% csrf_token %}
+                {% csrf_token %}
 
-        <div class="cantidad-control d-flex justify-content-center">
-            <button
-                type="button"
-                class="btn btn-outline-danger btn-touch cantidad-menos">
-                <i class="bi bi-dash-lg fs-5"></i>
-            </button>
+                <div class="cantidad-control d-flex justify-content-center">
+                    <button
+                        type="button"
+                        class="btn btn-outline-danger btn-touch cantidad-menos">
+                        <i class="bi bi-dash-lg fs-5"></i>
+                    </button>
 
-            <input
-                type="text"
-                class="form-control text-center cantidad-input"
-                name="cantidad_preparada"
-                value="{{ item.cantidad_preparada|floatformat:'-2' }}"
-                data-max="{{ item.cantidad }}"
-                style="max-width: 100px;">
+                    <input
+                        type="text"
+                        class="form-control text-center cantidad-input"
+                        name="cantidad_preparada"
+                        value="{{ item.cantidad_preparada|floatformat:'-2' }}"
+                        data-max="{{ item.cantidad }}"
+                        style="max-width: 100px;">
 
-            <button
-                type="button"
-                class="btn btn-outline-success btn-touch cantidad-mas">
-                <i class="bi bi-plus-lg fs-5"></i>
-            </button>
-        </div>
+                    <button
+                        type="button"
+                        class="btn btn-outline-success btn-touch cantidad-mas">
+                        <i class="bi bi-plus-lg fs-5"></i>
+                    </button>
+                </div>
 
-        <button class="btn btn-sm btn-success btn-touch" title="Actualizar">
-            <i class="bi bi-floppy fs-5"></i>
-        </button>
+                <button class="btn btn-sm btn-success btn-touch" title="Actualizar">
+                    <i class="bi bi-floppy fs-5"></i>
+                </button>
 
-    </form>
-{% else %}
-    {{ item.cantidad_preparada |floatformat:"-2"}}
-{% endif %}
-</td>
+            </form>
+        {% else %}
+            {{ item.cantidad_preparada |floatformat:"-2"}}
+        {% endif %}
+        </td>
 
-<td class="text-center">
+        <td class="text-center align-middle">
 
-{% if item.cantidad_preparada >= item.cantidad %}
-<span class="text-success">✔</span>
-{% else %}
-<span class="text-warning">Pendiente</span>
-{% endif %}
+        {% if item.cantidad_preparada >= item.cantidad %}
+        <span class="text-success">✔</span>
+        {% else %}
+        <span class="text-warning">Pendiente</span>
+        {% endif %}
 
-</td>
+        </td>
 
-</tr>
+        </tr>
 
-{% endfor %}
+        {% endfor %}
 
-</tbody>
-
-</table>
-
+        </tbody>
+    </table>
+</div>
 <hr>
 <a class="btn btn-secondary btn-touch"
-   href="{% url 'logistica:listar_preparacion' %}" title="Volver">
-   <i class="bi bi-arrow-left fs-5"></i>
+    href="{% url 'logistica:listar_preparacion' %}" title="Volver">
+    <i class="bi bi-arrow-left fs-5"></i>
 </a>
 
 {% if pedido.estado == "PAGADO" %}
 <a class="btn btn-warning btn-touch"
-   href="{% url 'logistica:comenzar_preparacion' pedido.id %}" title="Comenzar preparación">
-   <i class="bi bi-box-seam fs-5"></i> 
+    href="{% url 'logistica:comenzar_preparacion' pedido.id %}" title="Comenzar preparación">
+    <i class="bi bi-box-seam fs-5"></i> 
 </a>
 {% endif %}
 
 {% if pedido.estado == "PREPARANDO" and pedido_completo %}
 <a class="btn btn-success btn-touch"
-   href="{% url 'logistica:consolidar_pedido' pedido.id %}" title="Consolidar pedido">
-   <i class="bi bi-box-seam fs-5"></i>
+    href="{% url 'logistica:consolidar_pedido' pedido.id %}" title="Consolidar pedido">
+    <i class="bi bi-box-seam fs-5"></i>
 </a>
 {% endif %}
 <script src="{% static 'js/cantidad_control.js' %}"></script>

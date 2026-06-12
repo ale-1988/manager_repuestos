@@ -1,6 +1,7 @@
 from reportlab.platypus import Image
 import os
 from django.conf import settings
+from decimal import Decimal
 
 import io
 
@@ -183,3 +184,19 @@ def es_movil(request):
         "ipad",
         "mobile"
     ))
+    
+
+
+def fmt_decimal(valor):
+    """
+    Similar a floatformat:'-2'
+    5.00  -> 5
+    5.10  -> 5.1
+    5.12  -> 5.12
+    """
+    valor = Decimal(valor)
+
+    if valor == valor.to_integral():
+        return str(int(valor))
+
+    return f"{valor:.2f}".rstrip("0").rstrip(".")    
