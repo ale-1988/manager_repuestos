@@ -109,7 +109,7 @@ class Pedido(models.Model):
     def fechas_logisticas(self):
         """
         Devuelve un diccionario con las fechas clave del flujo logístico
-        obtenidas desde HisAutenticación. torialEstadoPedido.
+        obtenidas desde HistorialEstadoPedido.
         """
         from .models import HistorialEstadoPedido
 
