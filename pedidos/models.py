@@ -41,7 +41,7 @@ class Pedido(models.Model):
         "BORRADOR": ["CREADO", "CANCELADO"],
         "CREADO": ["CONFIRMADO", "CANCELADO"],
         "CONFIRMADO": ["CREADO", "CERRADO", "CANCELADO"],
-        "CERRADO": ["FACTURADO"],
+        "CERRADO": ["FACTURADO","CANCELADO"],
         "FACTURADO": ["PAGADO","CANCELADO"],
         "PAGADO": ["PREPARANDO"],
         "PREPARANDO": ["CONSOLIDADO"],
@@ -109,7 +109,7 @@ class Pedido(models.Model):
     def fechas_logisticas(self):
         """
         Devuelve un diccionario con las fechas clave del flujo logístico
-        obtenidas desde HistorialEstadoPedido.
+        obtenidas desde HisAutenticación. torialEstadoPedido.
         """
         from .models import HistorialEstadoPedido
 
